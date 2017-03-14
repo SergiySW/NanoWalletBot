@@ -193,7 +193,7 @@ def help(bot, update):
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
 				'\nTrading: @RaiBlocksTrade, more options coming soon!..'
 				'\n\nAny suggestions or bugs? Contact me @SergSW'
-				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = xrb\_account', 
+				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
 				parse_mode=ParseMode.MARKDOWN,
 				disable_web_page_preview=True)
 
@@ -1004,12 +1004,6 @@ if __name__ == '__main__':
 	except(urllib3.exceptions.HTTPError):
 		logging.info('urllib3.exceptions.HTTPError')
 		print('urllib3.exceptions.HTTPError')
-	except(ReadTimeoutError):
-		logging.info('ReadTimeoutError')
-		print('ReadTimeoutError')
 	except(socket.timeout):
 		logging.info('socket.timeout')
 		print('socket.timeout')
-	except(timeout):
-		logging.info('timeout')
-		print('timeout')
