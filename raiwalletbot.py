@@ -256,7 +256,7 @@ def broadcast(bot, update):
 			mysql_set_blacklist(account[0])
 			print(account[0])
 			push_simple(bot, account[0], update.message.text.replace('/broadcast ', ''))
-			sleep(0.15)
+			sleep(0.2)
 			mysql_delete_blacklist(account[0]) # if someone deleted chat, broadcast will fail and he wilk remain be blacklisted
 	
 

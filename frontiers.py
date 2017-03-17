@@ -41,7 +41,6 @@ logger = logging.getLogger(__name__)
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 faucet_url = 'https://raiblockscommunity.net/faucet/mobile.php?a='
-qr_url = 'https://chart.googleapis.com/chart?chs=250x250&cht=qr&choe=UTF-8&chl='
 
 # MySQL requests
 from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price
@@ -122,6 +121,7 @@ def frontiers():
 						#print('*{0} Mrai (XRB)* received{5}. Transaction hash: [{3}]({4}{3})\nYour current balance: *{1} Mrai (XRB)*. Send limit: {2} Mrai (XRB)'.format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
 						push(bot, account[0], '*{0} Mrai (XRB)* received{5}. Transaction hash: [{3}]({4}{3})\nYour current balance: *{1} Mrai (XRB)*. Send limit: {2} Mrai (XRB)'.format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
 					time.sleep(0.1)
+		# no frontier. No transactions
 		except KeyError:
 			# doesn't exist
 			x = 0 # do something

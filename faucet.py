@@ -51,6 +51,9 @@ def faucet():
 	url = 'https://raiblockscommunity.net/faucet/paylist.php?json=1'
 	response = http.request('GET', url)
 	json_paylist = json.loads(response.data)
+	#save it
+	with open('paylist.json', 'w') as outfile:  
+		json.dump(json_paylist, outfile)
 	json_array = json_paylist['pending']
 	#print(json_array)
 	
