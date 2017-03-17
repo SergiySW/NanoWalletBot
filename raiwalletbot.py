@@ -58,6 +58,7 @@ logger = logging.getLogger(__name__)
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 faucet_url = 'https://raiblockscommunity.net/faucet/mobile.php?a='
+summary_url = 'https://raiblockscommunity.net/page/summary.php?json=1'
 
 # MySQL requests
 from common_mysql import *
@@ -238,6 +239,14 @@ def block_count(bot, update):
 	count = rpc({"action": "block_count"}, 'count')
 	update.message.reply_text("{:,}".format(int(count)))
 #	default_keyboard(bot, update.message.chat_id, r)
+	# Admin block count check from raiblockscommunity.net
+	if (user_id in admin_list):
+		http = urllib3.PoolManager()
+		response = http.request('GET', summary_url)
+		json_data = json.loads(response.data)
+		community_count = json_data['blocks']
+		if (math.fabs(int(community_count) - int(count)) > 10):
+			update.message.reply_text('Community: {0}'.format("{:,}".format(int(community_count))))
 
 
 
@@ -908,7 +917,8 @@ def ping(bot, update):
 def stats(bot, update):
 	logging.info(update.message)
 	bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
-	stats = mysql_stats()
+	fee_balance = account_balance(fee_account)
+	stats = '{0}\nFees balance: {1} Mrai (XRB)'.format(mysql_stats(), "{:,}".format(int(fee_balance)))
 	default_keyboard(bot, update.message.chat_id, stats)
 
 
