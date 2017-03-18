@@ -267,7 +267,15 @@ def broadcast(bot, update):
 			push_simple(bot, account[0], update.message.text.replace('/broadcast ', ''))
 			sleep(0.2)
 			mysql_delete_blacklist(account[0]) # if someone deleted chat, broadcast will fail and he wilk remain be blacklisted
-	
+
+
+# bootstrap
+@restricted
+def bootstrap(bot, update):
+	logging.info(update.message)
+	rpc({"action": "bootstrap", "address": "::ffff:138.201.94.249", "port": "7075"}, 'success')
+	bot.sendMessage(update.message.chat_id, "Bootstraping...")
+
 
 import os
 #import time
@@ -983,6 +991,7 @@ def main():
 	
 	# admin commands
 	dp.add_handler(CommandHandler("broadcast", broadcast))
+	dp.add_handler(CommandHandler("bootstrap", bootstrap))
 	dp.add_handler(CommandHandler("restart", restart))
 	dp.add_handler(CommandHandler("stats", stats))
 
