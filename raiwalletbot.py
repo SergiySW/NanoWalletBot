@@ -157,7 +157,7 @@ def start_text(bot, update):
 	sleep(0.1)
 	bot.sendMessage(chat_id=update.message.chat_id, 
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: @RaiBlocksTrade, more options coming soon!..'
+				'\nTrading: [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
 				'\n\n1 user = 1 xrb\_account'
 				'\nTHE BOT IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS BOT. YOU ASSUME THE RESPONSIBILITY FOR YOUR ACTIONS, AND NO REFUNDS WILL BE ISSUED', 
 				parse_mode=ParseMode.MARKDOWN,
@@ -192,7 +192,7 @@ def help(bot, update):
 	sleep(0.1)
 	bot.sendMessage(chat_id=update.message.chat_id, 
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: @RaiBlocksTrade, more options coming soon!..'
+				'\nTrading: [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
 				'\n\nAny suggestions or bugs? Contact me @SergSW'
 				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
 				parse_mode=ParseMode.MARKDOWN,
@@ -211,7 +211,7 @@ def help_text(bot, update):
 	sleep(0.1)
 	bot.sendMessage(chat_id=update.message.chat_id, 
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: @RaiBlocksTrade, more options coming soon!..'
+				'\nTrading: [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
 				'\n\nAny suggestions or bugs? Contact me @SergSW'
 				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
 				parse_mode=ParseMode.MARKDOWN,
@@ -465,7 +465,7 @@ def send(bot, update, args):
 						bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
 						#unlock(wallet, password)
 						send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
-						if ('000000000000000000' not in send_hash):
+						if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 							# FEELESS
 							if (final_fee_amount > 0):
 								fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
@@ -635,7 +635,7 @@ def send_finish(bot, update):
 		hide_keyboard(bot, chat_id, 'Working on your transaction...')
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
 		send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
-		if ('000000000000000000' not in send_hash):
+		if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 			# FEELESS
 			if (final_fee_amount > 0):
 				fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
