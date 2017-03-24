@@ -155,6 +155,16 @@ def mysql_update_send_clean(account):
 	cnx.close()
 
 
+def mysql_update_send_clean_all():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "UPDATE rai_bot SET send_destination = NULL, send_amount = 0"
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
 def mysql_account_by_username(username):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)
