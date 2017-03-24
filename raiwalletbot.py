@@ -330,19 +330,18 @@ def account_text(bot, update):
 		else:
 			#update.message.reply_text('Your balance: {0} Mrai (XRB). Send limit (Mrai):'.format("{:,}".format(balance)))
 			#update.message.reply_text("{:,}".format(max_send))
-			'''last_price = float(mysql_select_price()[0])
+			last_price = float(mysql_select_price()[0])
 			btc_price = last_price / (10 ** 8)
-			#print(btc_price)
 			btc_balance = ('%.8f' % (btc_price * balance))
 			bot.sendMessage(chat_id=update.message.chat_id, 
 					 text=('Your balance: *{0} Mrai (XRB)*'
 							'\n~ {1} BTC'.format("{:,}".format(balance), btc_balance)), 
 					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)'''
-		bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='Your balance: *{0} Mrai (XRB)*'.format("{:,}".format(balance)), 
-					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
+		#bot.sendMessage(chat_id=update.message.chat_id, 
+		#			 text='Your balance: *{0} Mrai (XRB)*'.format("{:,}".format(balance)), 
+		#			 parse_mode=ParseMode.MARKDOWN,
+		#			 disable_web_page_preview=True)
 		sleep(0.1)
 		update.message.reply_text('Your RaiBlocks account')
 		sleep(0.1)
@@ -674,7 +673,7 @@ def send_finish(bot, update):
 	return None
 
 
-'''
+
 @run_async
 def price(bot, update):
 	user_id = update.message.from_user.id
@@ -709,7 +708,7 @@ def price_text(bot, update):
 		'\n24 hours High: *{3} BTC*'
 		'\n24 hours Low: *{4} BTC*'.format(last_price, ask_price, bid_price, high_price, low_price, "{:,}".format(volume)))
 	default_keyboard(bot, update.message.chat_id, text)
-'''
+
 
 
 @run_async
@@ -779,9 +778,9 @@ def text_result(text, bot, update):
 	if ('hello' in text):
 		start_text(bot, update)
 		return None
-	#if ('price' in text):
-	#	price_text(bot, update)
-	#	return None
+	if ('price' in text):
+		price_text(bot, update)
+		return None
 	else:
 		#default_keyboard(bot, update.message.chat_id, 'Command not found')
 		unknown(bot, update)
@@ -985,8 +984,8 @@ def main():
 	dp.add_handler(CommandHandler("secret", password, pass_args=True)) # symlink
 	dp.add_handler(CommandHandler("password_delete", password_delete, pass_args=True))
 	dp.add_handler(CommandHandler("secret_delete", password_delete, pass_args=True)) # symlink
-	#dp.add_handler(CommandHandler("price", price))
-	#dp.add_handler(CommandHandler("market", price)) # symlink
+	dp.add_handler(CommandHandler("price", price))
+	dp.add_handler(CommandHandler("market", price)) # symlink
 
 	
 	# admin commands

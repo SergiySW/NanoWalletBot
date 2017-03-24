@@ -134,8 +134,8 @@ def frontiers():
 
 
 '''
-#def cryptopia():
-#	http = urllib3.PoolManager()
+def cryptopia():
+	http = urllib3.PoolManager()
 	url = 'https://www.cryptopia.co.nz/api/GetMarket/4874'
 	response = http.request('GET', url)
 	json_cryptopia = json.loads(response.data)
@@ -149,6 +149,23 @@ def frontiers():
 	
 	mysql_set_price(last_price, high_price, low_price, ask_price, bid_price, volume)
 '''
+
+
+def mercatox():
+	http = urllib3.PoolManager()
+	url = 'https://mercatox.com/public/json24'
+	response = http.request('GET', url)
+	json_mercatox = json.loads(response.data)
+	json_array = json_mercatox['pairs']['XRB_BTC']
+	last_price = int(float(json_array['last']) * (10 ** 8))
+	high_price = int(float(json_array['high24hr']) * (10 ** 8))
+	low_price = int(float(json_array['low24hr']) * (10 ** 8))
+	ask_price = int(float(json_array['lowestAsk']) * (10 ** 8))
+	bid_price = int(float(json_array['highestBid']) * (10 ** 8))
+	volume = int(float(json_array['baseVolume']))
+	
+	mysql_set_price(last_price, high_price, low_price, ask_price, bid_price, volume)
+
 
 
 run_time = frontiers()
@@ -170,3 +187,4 @@ elif (run_time <= 30):
 #if (timer > 60):
 #	cryptopia()
 #cryptopia()
+mercatox()
