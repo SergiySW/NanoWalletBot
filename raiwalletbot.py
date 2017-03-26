@@ -335,7 +335,8 @@ def account_text(bot, update):
 			btc_balance = ('%.8f' % (btc_price * balance))
 			bot.sendMessage(chat_id=update.message.chat_id, 
 					 text=('Your balance: *{0} Mrai (XRB)*'
-							'\n~ {1} BTC'.format("{:,}".format(balance), btc_balance)), 
+							'\n~ {1} BTC'
+							'Send limit: {2} Mrai (XRB)'.format("{:,}".format(balance), btc_balance, "{:,}".format(max_send))), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
 		#bot.sendMessage(chat_id=update.message.chat_id, 
