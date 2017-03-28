@@ -184,7 +184,7 @@ def help(bot, update):
 		'\n /send amount xrb\_account optional\_pass — send Mrai (XRB) to other xrb\_account'
 		'\n /password HereYourPass  — protect account with password'
 		'\n /password\_delete HereYourPass — delete existing password'
-		#'\n /price — show Mrai (XRB) market price'
+		'\n /price — show Mrai (XRB) market price'
 		'\n\nCurrent fee for outcoming transaction: *{0} Mrai (XRB)*'
 		'{2}Current minimum to receive: *1 Mrai (XRB)*'
 		'\nCurrent minimum to send: *{1} Mrai (XRB) + fee*'.format(fee_amount, min_send, incoming_fee_text))
@@ -361,29 +361,32 @@ def account_text(bot, update):
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
 		qr_by_account(r)
 		chat_id=update.message.chat_id
-		insert_data = {
-		  'user_id': user_id,
-		  'account': r,
-		  'chat_id': chat_id,
-		  'username': username,
-		}
-		mysql_insert(insert_data)
-		update.message.reply_text('We create new RaiBlocks account for you! Your account')
-		sleep(0.1)
-		bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='*{0}*'.format(r), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
-		sleep(0.1)
-		bot.sendMessage(chat_id=chat_id, 
-					 text='[account in explorer]({1}{0})'.format(r, account_url), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
-		sleep(0.1)
-		bot.sendMessage(chat_id=chat_id, 
-					 text='Your start balance is 0 Mrai (XRB). "This account doesn\'t exist on the blockchain yet" means that you didn\'t receive any Mrai (XRB) yet.\nSend some Mrai (XRB) to your account or claim with daily [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
+		if ('xrb_' in r): # check for errors
+			insert_data = {
+			  'user_id': user_id,
+			  'account': r,
+			  'chat_id': chat_id,
+			  'username': username,
+			}
+			mysql_insert(insert_data)
+			update.message.reply_text('We create new RaiBlocks account for you! Your account')
+			sleep(0.1)
+			bot.sendMessage(chat_id=update.message.chat_id, 
+						 text='*{0}*'.format(r), 
+						 parse_mode=ParseMode.MARKDOWN,
+						 disable_web_page_preview=True)
+			sleep(0.1)
+			bot.sendMessage(chat_id=chat_id, 
+						 text='[account in explorer]({1}{0})'.format(r, account_url), 
+						 parse_mode=ParseMode.MARKDOWN,
+						 disable_web_page_preview=True)
+			sleep(0.1)
+			bot.sendMessage(chat_id=chat_id, 
+						 text='Your start balance is 0 Mrai (XRB). "This account doesn\'t exist on the blockchain yet" means that you didn\'t receive any Mrai (XRB) yet.\nSend some Mrai (XRB) to your account or claim with daily [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
+						 parse_mode=ParseMode.MARKDOWN,
+						 disable_web_page_preview=True)
+		else:
+			update.message.reply_text('Error creating account. Try again later')
 
 #@restricted
 @run_async
