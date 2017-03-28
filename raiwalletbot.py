@@ -133,7 +133,7 @@ def start(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	start_text(bot, update)
 
@@ -174,7 +174,7 @@ def help(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	text = ('For basic commands press \"Help\" button'
 		'\nHere are some advanced commands to control your wallet '
@@ -234,7 +234,7 @@ def block_count(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	count = rpc({"action": "block_count"}, 'count')
 	update.message.reply_text("{:,}".format(int(count)))
@@ -298,7 +298,7 @@ def account(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	account_text(bot, update)
 
@@ -686,7 +686,7 @@ def price(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	price_text(bot, update)
 
@@ -736,54 +736,41 @@ def text_result(text, bot, update):
 			send_finish(bot, update)
 			#print(check)
 			#print(hex)
-			return None
 		elif ((m[5] is not None) and (m[6] != 0) and (not (check == hex)) and (check is not False)):
 			update.message.reply_text('Password you entered is incorrent. Type your password to confirm transaction')
 			#print(check)
 			#print(hex)
 			logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
-			return None
 		elif ((m[5] is not None) and (m[6] != 0) and (check is False) and (('yes' in text.lower()) or ('confirm' in text.lower()))):
 			send_finish(bot, update)
-			return None
 		elif ((m[5] is not None) and (m[6] != 0)):
 			mysql_update_send_clean(m[2])
 			default_keyboard(bot, update.message.chat_id, 'Payment cancelled')
-			return None
 	# Get the text the user sent
 	text = text.lower()
 	if ('help' in text):
 		help_text(bot, update)
-		return None
-	if (('account' in text) or ('balance' in text)):
+	elif (('account' in text) or ('balance' in text)):
 		account_text(bot, update)
-		return None
-	if ('send' in text):
+	elif ('send' in text):
 		send_text(bot, update)
-		return None
-	if (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').isdigit()):
+	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').isdigit()):
 		# check if digit is correct
 		digit_split = text.replace(' ', '').replace('mrai', '').split(',')
 		if (text.startswith('0,') or ('.' in text) or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
 			default_keyboard(bot, update.message.chat_id, 'For numbers we support only integer input')
 		else:
 			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', ''))
-		return None
-	if ('xrb_' in text):
+	elif ('xrb_' in text):
 		send_destination(bot, update, text)
-		return None
-	if (text.startswith('@') and (len(text) > 3 )):
+	elif (text.startswith('@') and (len(text) > 3 )):
 		send_destination_username(bot, update, text)
-		return None
-	if (('block count' in text) or ('block_count' in text)):
+	elif (('block count' in text) or ('block_count' in text)):
 		block_count(bot, update)
-		return None
-	if ('hello' in text):
+	elif ('hello' in text):
 		start_text(bot, update)
-		return None
-	if ('price' in text):
+	elif ('price' in text):
 		price_text(bot, update)
-		return None
 	else:
 		#default_keyboard(bot, update.message.chat_id, 'Command not found')
 		unknown(bot, update)
@@ -800,7 +787,7 @@ def text_filter(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	try:
 		# Run result function
@@ -819,7 +806,7 @@ def photo_filter(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	try:
 		image = update.message.photo[-1]
@@ -852,7 +839,7 @@ def password(bot, update, args):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	if (len(args) > 0):
 		check = mysql_check_password(user_id)
@@ -890,7 +877,7 @@ def password_delete(bot, update, args):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	if (len(args) > 0):
 		check = mysql_check_password(user_id)
@@ -950,7 +937,7 @@ def unknown_ddos(bot, update):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too far request by user {0}'.format(user_id))
+		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	default_keyboard(bot, update.message.chat_id, 'Command not found'
 						'\nPress "Help" to show available commands'
