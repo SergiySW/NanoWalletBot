@@ -30,6 +30,7 @@ config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 url = config.get('main', 'url')
 log_file = config.get('main', 'log_file')
+log_file_messages = config.get('main', 'log_file_messages')
 domain = config.get('main', 'domain')
 listen_port = config.get('main', 'listen_port')
 qr_folder_path = config.get('main', 'qr_folder_path')
@@ -459,13 +460,17 @@ def send(bot, update, args):
 					dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
 					hex = binascii.hexlify(dk)
 				else:
-				   hex = False
+					hex = False
+				bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
 				# Check password protection
-				if ((destination_check == '1')  and (check == hex)):
+				#  and frontier existance at website (temp)
+				frontier = m[3] # temp
+				http = urllib3.PoolManager() # temp
+				response = http.request('GET', '{0}{1}&json=1'.format(hash_url, frontier)) # temp
+				json_data = json.loads(response.data) # temp
+				if ((destination_check == '1') and (check == hex) and ('error' not in json_data)):
 					# Sending
 					try:
-						bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
-						#unlock(wallet, password)
 						send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
 						if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 							# FEELESS
@@ -486,6 +491,7 @@ def send(bot, update, args):
 										 text='[hash in block explorer]({1}{0})'.format(send_hash, hash_url), 
 										 parse_mode=ParseMode.MARKDOWN,
 										 disable_web_page_preview=True)
+							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, send_amount, send_hash))
 							# update username
 							old_username = m[8]
 							username=update.message.from_user.username
@@ -506,6 +512,9 @@ def send(bot, update, args):
 				elif (not (check == hex)):
 					update.message.reply_text('Password you entered is incorrent. Try again')
 					logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
+				elif ('error' in json_data): # temp
+					update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later') # temp
+					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id)) # temp
 				else:
 					update.message.reply_text('Destination xrb_address in invalid')
 		except (ValueError):
@@ -636,44 +645,53 @@ def send_finish(bot, update):
 	try:
 		hide_keyboard(bot, chat_id, 'Working on your transaction...')
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
-		send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
-		if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
-			# FEELESS
-			if (final_fee_amount > 0):
-				fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
+		# Check frontier existance at website (temp)
+		frontier = m[3] # temp
+		http = urllib3.PoolManager() # temp
+		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, frontier)) # temp
+		json_data = json.loads(response.data) # temp
+		if ('error' not in json_data):
+			send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
+			if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
+				# FEELESS
+				if (final_fee_amount > 0):
+					fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
+				else:
+					fee = send_hash
+				# FEELESS
+				new_balance = account_balance(account)
+				mysql_update_balance(account, new_balance)
+				mysql_update_frontier(account, fee)
+				sleep(0.4)
+				default_keyboard(bot, chat_id, 'Transaction completed. Fee: {0} Mrai (XRB). Your current balance: *{1} Mrai (XRB)*. Transaction hash'.format(final_fee_amount, "{:,}".format(new_balance)))
+				sleep(0.2)
+				update.message.reply_text(send_hash)
+				sleep(0.2)
+				bot.sendMessage(chat_id=chat_id, 
+						text='[hash in block explorer]({1}{0})'.format(send_hash, hash_url), 
+						parse_mode=ParseMode.MARKDOWN,
+						disable_web_page_preview=True)
+				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, send_amount, send_hash))
+				# update username
+				old_username = m[8]
+				username=update.message.from_user.username
+				if (username is None):
+					username = ''
+				if (not (username == old_username)):
+					username_text = 'Username updated: @{0} --> @{1}'.format(old_username, username)
+					mysql_update_username(user_id, username)
+					print(username_text)
+					logging.info(username_text)
+				# update username
 			else:
-				fee = send_hash
-			# FEELESS
-			new_balance = account_balance(account)
-			mysql_update_balance(account, new_balance)
-			mysql_update_frontier(account, fee)
-			sleep(0.4)
-			default_keyboard(bot, chat_id, 'Transaction completed. Fee: {0} Mrai (XRB). Your current balance: *{1} Mrai (XRB)*. Transaction hash'.format(final_fee_amount, "{:,}".format(new_balance)))
-			sleep(0.2)
-			update.message.reply_text(send_hash)
-			sleep(0.2)
-			bot.sendMessage(chat_id=chat_id, 
-					text='[hash in block explorer]({1}{0})'.format(send_hash, hash_url), 
-					parse_mode=ParseMode.MARKDOWN,
-					disable_web_page_preview=True)
-			# update username
-			old_username = m[8]
-			username=update.message.from_user.username
-			if (username is None):
-				username = ''
-			if (not (username == old_username)):
-				username_text = 'Username updated: @{0} --> @{1}'.format(old_username, username)
-				mysql_update_username(user_id, username)
-				print(username_text)
-				logging.info(username_text)
-			# update username
+				logging.info('Transaction FAILURE! Account {0}'.format(account))
+				new_balance = account_balance(account)
+				default_keyboard(bot, chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
 		else:
-			logging.info('Transaction FAILURE! Account {0}'.format(account))
-			new_balance = account_balance(account)
-			default_keyboard(bot, chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
+			update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later') # temp
+			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id)) # temp
 	except (GeneratorExit):
 		default_keyboard(bot, chat_id, 'Failed to send')
-	return None
 
 
 
@@ -771,10 +789,9 @@ def text_result(text, bot, update):
 		start_text(bot, update)
 	elif ('price' in text):
 		price_text(bot, update)
-	else:
+	elif ('yes' not in text):
 		#default_keyboard(bot, update.message.chat_id, 'Command not found')
 		unknown(bot, update)
-		return None
 
 
 @run_async

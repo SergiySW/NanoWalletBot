@@ -108,6 +108,7 @@ def frontiers():
 									sender = ' from one of our users'
 					#print (sender)
 					logging.info(sender)
+					logging.info(block_account)
 					# receive fee protection
 					mysql_update_balance(account[1], int(balance))
 					logging.info('{0} Mrai (XRB) received by {1}, hash: {2}'.format(received_amount, account[0], frontier))
