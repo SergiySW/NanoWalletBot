@@ -768,7 +768,7 @@ def text_result(text, bot, update):
 	text = text.lower()
 	if ('help' in text):
 		help_text(bot, update)
-	elif (('account' in text) or ('balance' in text)):
+	elif (('account' in text) or ('balance' in text) or ('register' in text)):
 		account_text(bot, update)
 	elif ('send' in text):
 		send_text(bot, update)
@@ -985,6 +985,7 @@ def main():
 	dp.add_handler(CommandHandler("account", account))
 	dp.add_handler(CommandHandler("Account", account)) # symlink
 	dp.add_handler(CommandHandler("balance", account)) # symlink
+	dp.add_handler(CommandHandler("register", account)) # symlink
 	dp.add_handler(CommandHandler("send", send, pass_args=True))
 	dp.add_handler(CommandHandler("password", password, pass_args=True))
 	dp.add_handler(CommandHandler("Password", password, pass_args=True)) # symlink
