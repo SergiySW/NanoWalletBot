@@ -49,6 +49,7 @@ ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
 admin_list = json.loads(config.get('main', 'admin_list'))
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 salt = config.get('password', 'salt')
+block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -246,7 +247,7 @@ def block_count(bot, update):
 		response = http.request('GET', summary_url)
 		json_data = json.loads(response.data)
 		community_count = json_data['blocks']
-		if (math.fabs(int(community_count) - int(count)) > 10):
+		if (math.fabs(int(community_count) - int(count)) > block_count_difference_threshold):
 			update.message.reply_text('Community: {0}'.format("{:,}".format(int(community_count))))
 
 
