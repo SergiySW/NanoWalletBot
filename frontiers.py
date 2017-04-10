@@ -18,6 +18,7 @@ from telegram import Bot, ParseMode
 import logging
 import urllib3, socket, json
 import time, math
+import os, sys
 
 # Parse config
 import ConfigParser
@@ -168,24 +169,48 @@ def mercatox():
 	mysql_set_price(last_price, high_price, low_price, ask_price, bid_price, volume)
 
 
-
-run_time = frontiers()
-if (run_time < 15):
-	time.sleep(15-run_time)
+def frontiers_usual():
 	run_time = frontiers()
 	if (run_time < 15):
 		time.sleep(15-run_time)
 		run_time = frontiers()
 		if (run_time < 15):
 			time.sleep(15-run_time)
-			frontiers()
-elif (run_time <= 30):
-	time.sleep(30-run_time)
-	frontiers()
+			run_time = frontiers()
+			if (run_time < 15):
+				time.sleep(15-run_time)
+				frontiers()
+	elif (run_time <= 30):
+		time.sleep(30-run_time)
+		frontiers()
 
-# every 2 minutes
-#timer = time.time() % 120
-#if (timer > 60):
-#	cryptopia()
-#cryptopia()
-mercatox()
+	# every 2 minutes
+	#timer = time.time() % 120
+	#if (timer > 60):
+	#	cryptopia()
+	#cryptopia()
+	mercatox()
+
+
+# check if already running
+def frontiers_proc_check():
+	for dirname in os.listdir('/proc'):
+		if dirname == 'curproc':
+			continue
+
+		try:
+			with open('/proc/{}/cmdline'.format(dirname), mode='rb') as fd:
+				content = fd.read().decode().split('\x00')
+		except Exception:
+			continue
+
+		cont3 = ''
+		if (len(content) == 3):
+			cont3 = content[2]
+		if (('python' in content[0]) or ('python' in cont3)):
+			if (((content[1] in sys.argv[0]) or (sys.argv[0] in cont3)) and ('self' not in dirname)):
+				frontiers_usual()
+
+
+#frontiers_proc_check()
+frontiers_usual()
