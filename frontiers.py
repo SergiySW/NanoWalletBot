@@ -63,9 +63,8 @@ def frontiers():
 	bot = Bot(api_key)
 	# list from MySQL
 	accounts_list = mysql_select_accounts_list()
-	# list from node. Replace with wallet_frontiers once released
-	frontiers = rpc({"action":"frontiers","account":"xrb_1111111111111111111111111111111111111111111111111117353trpda","count":65536}, 'frontiers')
-	#print(len(frontiers))
+	# list from node
+	frontiers = rpc({"action":"frontier_list","wallet":wallet}, 'frontiers')
 	
 	faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 	
@@ -183,11 +182,7 @@ def frontiers_usual():
 	elif (run_time <= 30):
 		time.sleep(30-run_time)
 		frontiers()
-
-	# every 2 minutes
-	#timer = time.time() % 120
-	#if (timer > 60):
-	#	cryptopia()
+	
 	#cryptopia()
 	mercatox()
 
