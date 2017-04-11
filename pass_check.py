@@ -18,7 +18,6 @@ salt = config.get('password', 'salt')
 
 import sys
 import hashlib, binascii
-import sha3
 def hash():
 	password = raw_input('Enter a password: ')
 	dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)

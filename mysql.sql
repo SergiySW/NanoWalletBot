@@ -79,6 +79,21 @@ CREATE TABLE `rai_bot_access` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rai_bot_send`
+--
+
+DROP TABLE IF EXISTS `rai_bot_send`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_bot_send` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `datetime` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_bot_passwords`
 --
 
