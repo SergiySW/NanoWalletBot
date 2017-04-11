@@ -501,7 +501,9 @@ def send_callback(bot, update, args):
 							new_balance = account_balance(account)
 							default_keyboard(bot, update.message.chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
 					except (GeneratorExit):
-						update.message.reply_text('Failed to send')
+						update.message.reply_text('Failed to send. Try again later')
+					except (ValueError):
+						default_keyboard(bot, chat_id, 'Failed to send. Try again later')
 				elif (not (check == hex)):
 					update.message.reply_text('Password you entered is incorrent. Try again')
 					logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
@@ -683,7 +685,9 @@ def send_finish(bot, update):
 			update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later') # temp
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id)) # temp
 	except (GeneratorExit):
-		default_keyboard(bot, chat_id, 'Failed to send')
+		default_keyboard(bot, chat_id, 'Failed to send. Try again later')
+	except (ValueError):
+		default_keyboard(bot, chat_id, 'Failed to send. Try again later')
 
 
 
@@ -908,7 +912,7 @@ def unknown(bot, update):
 	logging.info(update.message)
 	user_id = update.message.from_user.id
 	default_keyboard(bot, update.message.chat_id, 'Command not found'
-						'\nPress "Help" to show available commands'
+						'\nPress \"Help\" to show available commands'
 						'\nType /help for advanced usage')
 
 @run_async
@@ -924,7 +928,7 @@ def unknown_ddos(bot, update):
 		raise Exception('Too fast request by user {0}'.format(user_id))
 	## DDoS ##
 	default_keyboard(bot, update.message.chat_id, 'Command not found'
-						'\nPress "Help" to show available commands'
+						'\nPress \"Help\" to show available commands'
 						'\nType /help for advanced usage')
 
 def error(bot, update, error):
