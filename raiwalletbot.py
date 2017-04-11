@@ -457,13 +457,10 @@ def send_callback(bot, update, args):
 				else:
 					hex = False
 				bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
-				# Check password protection
-				#  and frontier existance at website (temp)
-				frontier = m[3] # temp
-				http = urllib3.PoolManager() # temp
-				response = http.request('GET', '{0}{1}&json=1'.format(hash_url, frontier)) # temp
-				json_data = json.loads(response.data) # temp
-				if ((destination_check == '1') and (check == hex) and ('error' not in json_data)):
+				# Check password protection and frontier existance
+				frontier = m[3]
+				check_frontier = check_block(frontier)
+				if ((destination_check == '1') and (check == hex) and (check_frontier)):
 					# Sending
 					try:
 						send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
@@ -509,9 +506,9 @@ def send_callback(bot, update, args):
 				elif (not (check == hex)):
 					update.message.reply_text('Password you entered is incorrent. Try again')
 					logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
-				elif ('error' in json_data): # temp
-					update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later') # temp
-					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id)) # temp
+				elif (not (check_frontier)):
+					update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later')
+					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 				else:
 					update.message.reply_text('Destination xrb_address in invalid')
 		except (ValueError):
@@ -641,12 +638,10 @@ def send_finish(bot, update):
 	try:
 		hide_keyboard(bot, chat_id, 'Working on your transaction...')
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
-		# Check frontier existance at website (temp)
-		frontier = m[3] # temp
-		http = urllib3.PoolManager() # temp
-		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, frontier)) # temp
-		json_data = json.loads(response.data) # temp
-		if ('error' not in json_data):
+		# Check frontier existance
+		frontier = m[3]
+		check_frontier = check_block(frontier)
+		if (check_frontier):
 			send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
 			if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 				# FEELESS
@@ -684,8 +679,8 @@ def send_finish(bot, update):
 				new_balance = account_balance(account)
 				default_keyboard(bot, chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
 		else:
-			update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later') # temp
-			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id)) # temp
+			update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later')
+			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 	except (GeneratorExit):
 		default_keyboard(bot, chat_id, 'Failed to send. Try again later')
 	except (ValueError):

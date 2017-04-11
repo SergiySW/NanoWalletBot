@@ -55,13 +55,10 @@ def monitoring_peers():
 	# set bot
 	bot = Bot(api_key)
 	# list of available peers
-	peers = rpc({"action":"peers"}, 'peers')
-	# only IP of peers
-	for (i, item) in enumerate(peers):
-		peers[i] = item.split("]:")[0].replace("[", "").replace("::ffff:", "")
+	rpc_peers = peers_ip()
 	# check in the list of available peers
 	for peer in peer_list:
-		if (peer not in peers):
+		if (peer not in rpc_peers):
 			# check peers from raiblockscommunity.net
 			http = urllib3.PoolManager()
 			response = http.request('GET', peers_url)
