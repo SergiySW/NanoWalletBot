@@ -92,11 +92,11 @@ def monitoring_block_count():
 	response = http.request('GET', summary_url)
 	json_data = json.loads(response.data)
 	community_count = json_data['blocks']
-	difference = math.fabs(int(community_count) - int(count))
+	difference = int(math.fabs(int(community_count) - int(count)))
 	if (difference > block_count_difference_threshold):
 		# Warning to admins
 		for user_id in admin_list:
-			push(bot, user_id, 'Block count: {0}/nCommunity: {1}/nDifference: *{2}*'.format(count, community_count, difference))
+			push(bot, user_id, 'Block count: {0}/nCommunity: {1}\nDifference: *{2}*'.format(count, community_count, difference))
 
 monitoring_peers()
 monitoring_block_count()

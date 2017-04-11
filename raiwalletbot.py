@@ -22,6 +22,7 @@ import logging
 import urllib3, socket, json
 import hashlib, binascii, string, math
 from time import sleep
+import os, sys
 
 # Parse config
 import ConfigParser
@@ -126,23 +127,38 @@ def hide_keyboard(bot, chat_id, text):
 
 
 @run_async
-def start(bot, update):
-	logging.info(update.message)
+def ddos_protection(bot, update, callback):
 	user_id = update.message.from_user.id
-	## DDoS ##
 	ddos = mysql_ddos_protector(user_id)
 	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
+		logging.warn('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
-	start_text(bot, update)
+		logging.warn('Too fast request by user {0}'.format(user_id))
+	else:
+		callback(bot, update)
+
+@run_async
+def ddos_protection_args(bot, update, args, callback):
+	user_id = update.message.from_user.id
+	ddos = mysql_ddos_protector(user_id)
+	if (ddos == True):
+		logging.warn('DDoS by user {0}'.format(user_id))
+	elif (ddos == False):
+		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
+		logging.warn('Too fast request by user {0}'.format(user_id))
+	else:
+		callback(bot, update, args)
+
+
+@run_async
+def start(bot, update):
+	logging.info(update.message)
+	ddos_protection(bot, update, start_text)
 
 
 @run_async
 def start_text(bot, update):
-	logging.info(update.message)
 	user_id = update.message.from_user.id
 #	hide_keyboard(bot, update.message.chat_id, text)
 	update.message.reply_text('Hello!'
@@ -169,15 +185,11 @@ def start_text(bot, update):
 @run_async
 def help(bot, update):
 	logging.info(update.message)
+	ddos_protection(bot, update, help_callback)
+
+@run_async
+def help_callback(bot, update):
 	user_id = update.message.from_user.id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
 	text = ('For basic commands press \"Help\" button'
 		'\nHere are some advanced commands to control your wallet '
 		'\n /help — receive list of available commands'
@@ -203,6 +215,7 @@ def help(bot, update):
 
 @run_async
 def help_text(bot, update):
+	user_id = update.message.from_user.id
 	text = ('Press \"Account\" to show account & check balance'
 		'\nPress \"Send\" to start sending'
 		'\n\nCurrent fee for outcoming transaction: *{0} Mrai (XRB)*'
@@ -225,19 +238,15 @@ def user_id(bot, update):
 	user_id = update.message.from_user.id
 	update.message.reply_text(user_id)
 
-#@restricted
+
 @run_async
 def block_count(bot, update):
 	logging.info(update.message)
+	ddos_protection(bot, update, block_count_callback)
+
+@run_async
+def block_count_callback(bot, update):
 	user_id = update.message.from_user.id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
 	count = rpc({"action": "block_count"}, 'count')
 	update.message.reply_text("{:,}".format(int(count)))
 #	default_keyboard(bot, update.message.chat_id, r)
@@ -279,9 +288,7 @@ def bootstrap(bot, update):
 	bot.sendMessage(update.message.chat_id, "Bootstraping...")
 
 
-import os
-#import time
-import sys
+
 @restricted
 def restart(bot, update):
 	bot.sendMessage(update.message.chat_id, "Bot is restarting...")
@@ -293,16 +300,7 @@ def restart(bot, update):
 @run_async
 def account(bot, update):
 	logging.info(update.message)
-	user_id = update.message.from_user.id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
-	account_text(bot, update)
+	ddos_protection(bot, update, account_text)
 
 
 @run_async
@@ -340,10 +338,6 @@ def account_text(bot, update):
 							'\nSend limit: {2} Mrai (XRB)'.format("{:,}".format(balance), btc_balance, "{:,}".format(max_send))), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
-		#bot.sendMessage(chat_id=update.message.chat_id, 
-		#			 text='Your balance: *{0} Mrai (XRB)*'.format("{:,}".format(balance)), 
-		#			 parse_mode=ParseMode.MARKDOWN,
-		#			 disable_web_page_preview=True)
 		sleep(0.1)
 		update.message.reply_text('Your RaiBlocks account')
 		sleep(0.1)
@@ -390,20 +384,18 @@ def account_text(bot, update):
 		else:
 			update.message.reply_text('Error creating account. Try again later')
 
-#@restricted
+
+
 @run_async
 def send(bot, update, args):
 	logging.info(update.message)
+	ddos_protection_args(bot, update, args, send_callback)
+
+@run_async
+def send_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
+
 	# Check user existance in database
 	m = mysql_select_user(user_id)
 	
@@ -527,7 +519,6 @@ def send(bot, update, args):
 		update.message.reply_text('Use command /send [amount] [xrb_account]'
 								  '\nExample: /send {0} {1}'
 								  '\n\nor simple press "Send" button'.format(min_send, m[2]))
-	
 
 
 @run_async
@@ -698,17 +689,8 @@ def send_finish(bot, update):
 
 @run_async
 def price(bot, update):
-	user_id = update.message.from_user.id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
-	price_text(bot, update)
-
+	logging.info(update.message)
+	ddos_protection(bot, update, price_text)
 
 @run_async
 def price_text(bot, update):
@@ -785,8 +767,8 @@ def text_result(text, bot, update):
 	elif (text.startswith('@') and (len(text) > 3 )):
 		send_destination_username(bot, update, text)
 	elif (('block count' in text) or ('block_count' in text)):
-		block_count(bot, update)
-	elif ('hello' in text):
+		block_count_callback(bot, update)
+	elif (('hello' in text) or ('start' in text)):
 		start_text(bot, update)
 	elif ('price' in text):
 		price_text(bot, update)
@@ -798,15 +780,11 @@ def text_result(text, bot, update):
 @run_async
 def text_filter(bot, update):
 	logging.info(update.message)
+	ddos_protection(bot, update, text_filter_callback)
+
+@run_async
+def text_filter_callback(bot, update):
 	user_id = update.message.from_user.id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
 	try:
 		# Run result function
 		text = update.message.text
@@ -814,18 +792,15 @@ def text_filter(bot, update):
 	except UnicodeEncodeError:
 		default_keyboard(bot, update.message.chat_id, 'Sorry, but I can\'t read your text')
 
+
 @run_async
 def photo_filter(bot, update):
 	logging.info(update.message)
+	ddos_protection(bot, update, photo_filter_callback)
+
+@run_async
+def photo_filter_callback(bot, update):
 	user_id = update.message.from_user.id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
 	try:
 		image = update.message.photo[-1]
 		path = '{1}download/{0}.jpg'.format(image.file_id, qr_folder_path)
@@ -849,16 +824,12 @@ def photo_filter(bot, update):
 
 @run_async
 def password(bot, update, args):
+	ddos_protection_args(bot, update, args, password_callback)
+
+@run_async
+def password_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
 	if (len(args) > 0):
 		check = mysql_check_password(user_id)
 		if (check is False):
@@ -885,18 +856,13 @@ def password(bot, update, args):
 	else:
 		update.message.reply_text('Use command\n/password HereYourPass')
 
-@run_async
 def password_delete(bot, update, args):
+	ddos_protection_args(bot, update, args, password_delete_callback)
+
+@run_async
+def password_delete_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
-	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
-	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
-	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
 	if (len(args) > 0):
 		check = mysql_check_password(user_id)
 		password = args[0]
@@ -915,7 +881,7 @@ def password_delete(bot, update, args):
 		update.message.reply_text('Use command\n/password_delete HereYourPass')
 
 
-
+@run_async
 def echo(bot, update):
 	logging.info(update.message)
 	update.message.reply_text(update.message.text)
