@@ -47,7 +47,6 @@ if (incoming_fee >= 1):
 	incoming_fee_text = '\nCurrent fee for INCOMING transaction (DDoS protection): *{0} Mrai (XRB)*\n'.format(incoming_fee)
 min_send = int(config.get('main', 'min_send'))
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
-send_protect_seconds = config.get('main', 'send_protect_seconds')
 admin_list = json.loads(config.get('main', 'admin_list'))
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 salt = config.get('password', 'salt')
@@ -130,9 +129,10 @@ def hide_keyboard(bot, chat_id, text):
 @run_async
 def ddos_protection(bot, update, callback):
 	user_id = update.message.from_user.id
-	ddos = mysql_ddos_protector(user_id)
+	message_id = int(update.message.message_id)
+	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
-		logging.warn('DDoS by user {0}'.format(user_id))
+		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
 		logging.warn('Too fast request by user {0}'.format(user_id))
@@ -142,9 +142,10 @@ def ddos_protection(bot, update, callback):
 @run_async
 def ddos_protection_args(bot, update, args, callback):
 	user_id = update.message.from_user.id
-	ddos = mysql_ddos_protector(user_id)
+	message_id = int(update.message.message_id)
+	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
-		logging.warn('DDoS by user {0}'.format(user_id))
+		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
 		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
 		logging.warn('Too fast request by user {0}'.format(user_id))
@@ -390,13 +391,7 @@ def account_text(bot, update):
 @run_async
 def send(bot, update, args):
 	logging.info(update.message)
-	user_id = update.message.from_user.id
-	time_protection = mysql_send_protector(user_id)
-	if (time_protection):
-		ddos_protection_args(bot, update, args, send_callback)
-	else:
-		update.message.reply_text('Your cannot send Mrai (XRB) from wallet faster than once in {0} seconds'.format(send_protect_seconds))
-		logging.warn('Too fast sending by user {0}'.format(user_id))
+	ddos_protection_args(bot, update, args, send_callback)
 
 @run_async
 def send_callback(bot, update, args):
@@ -651,8 +646,7 @@ def send_finish(bot, update):
 		http = urllib3.PoolManager() # temp
 		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, frontier)) # temp
 		json_data = json.loads(response.data) # temp
-		time_protection = mysql_send_protector(user_id)
-		if (('error' not in json_data) and (time_protection)):
+		if ('error' not in json_data):
 			send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
 			if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 				# FEELESS
@@ -689,12 +683,9 @@ def send_finish(bot, update):
 				logging.info('Transaction FAILURE! Account {0}'.format(account))
 				new_balance = account_balance(account)
 				default_keyboard(bot, chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
-		elif ('error' in json_data):
+		else:
 			update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later') # temp
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id)) # temp
-		else:
-			update.message.reply_text('Your cannot send Mrai (XRB) from wallet faster than once in {0} seconds'.format(send_protect_seconds))
-			logging.warn('Too fast sending by user {0}'.format(user_id))
 	except (GeneratorExit):
 		default_keyboard(bot, chat_id, 'Failed to send. Try again later')
 	except (ValueError):

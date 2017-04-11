@@ -20,7 +20,6 @@ mysql_database = config.get('mysql', 'mysql_database')
 mysql_user = config.get('mysql', 'mysql_user')
 mysql_pass = config.get('mysql', 'mysql_pass')
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
-send_protect_seconds = config.get('main', 'send_protect_seconds')
 
 # MySQL requests
 
@@ -301,50 +300,27 @@ def mysql_delete_blacklist(user_id):
 #@run_async
 from datetime import datetime
 import time
-def mysql_ddos_protector(user_id):
+def mysql_ddos_protector(user_id, message_id):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
 	
 	returned = None
 	timestamp = int(time.time())
 
-	query = "SELECT datetime FROM rai_bot_access WHERE user_id = {0}".format(user_id)
+	query = "SELECT datetime, message_id FROM rai_bot_access WHERE user_id = {0}".format(user_id)
 	cursor.execute(query)
 	date_time = cursor.fetchone()
 	if (date_time is not None):
 		ddos_protect = 1 + int(date_time[0])
 		date_protect = int(ddos_protect_seconds) + int(date_time[0])
-		if (ddos_protect > timestamp):
+		double_message_protect = int(date_time[1])
+		if ((ddos_protect > timestamp) or (message_id == double_message_protect)):
 			returned = True
 		elif (date_protect > timestamp):
 			returned = False
 		else:
 			returned = None
-	add_user = "REPLACE INTO rai_bot_access SET user_id = {0}, datetime = {1}".format(user_id, timestamp)
-	cursor.execute(add_user)
-	cnx.commit()
-	cursor.close()
-	cnx.close()
-	return returned
-
-
-def mysql_send_protector(user_id):
-	cnx = mysql.connector.connect(**mysql_config)
-	cursor = cnx.cursor()
-	
-	returned = True
-	timestamp = int(time.time())
-
-	query = "SELECT datetime FROM rai_bot_send WHERE user_id = {0}".format(user_id)
-	cursor.execute(query)
-	date_time = cursor.fetchone()
-	if (date_time is not None):
-		send_protect = int(send_protect_seconds) + int(date_time[0])
-		if (send_protect > timestamp):
-			returned = False
-		else:
-			returned = True
-	add_user = "REPLACE INTO rai_bot_send SET user_id = {0}, datetime = {1}".format(user_id, timestamp)
+	add_user = "REPLACE INTO rai_bot_access SET user_id = {0}, datetime = {1}, message_id = {2}".format(user_id, timestamp, message_id)
 	cursor.execute(add_user)
 	cnx.commit()
 	cursor.close()
