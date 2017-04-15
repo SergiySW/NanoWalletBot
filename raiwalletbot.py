@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
-faucet_url = 'https://raiblockscommunity.net/faucet/mobile.php?a='
+faucet_url = 'https://raiblockscommunity.net/faucet/form.php?a='
 summary_url = 'https://raiblockscommunity.net/page/summary.php?json=1'
 
 # MySQL requests
@@ -320,12 +320,12 @@ def account_text(bot, update):
 		max_send = balance - fee_amount
 		if (balance == 0):
 			bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='Your balance is *0 Mrai (XRB)*. Send some Mrai (XRB) to your account or claim with daily [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
+					 text='Your balance is *0 Mrai (XRB)*. Send some Mrai (XRB) to your account or claim with hourly [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
 		elif (max_send < min_send):
 			bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='Your balance: *{2} Mrai (XRB)*. It is less than current fee {3} Mrai (XRB) + minimal send {4} Mrai (XRB). Send some Mrai (XRB) to your account or claim with daily [RaiBlocks faucet]({0}{1})'.format(faucet_url, r, "{:,}".format(balance), fee_amount, min_send), 
+					 text='Your balance: *{2} Mrai (XRB)*. It is less than current fee {3} Mrai (XRB) + minimal send {4} Mrai (XRB). Send some Mrai (XRB) to your account or claim with hourly [RaiBlocks faucet]({0}{1})'.format(faucet_url, r, "{:,}".format(balance), fee_amount, min_send), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
 		else:
@@ -349,7 +349,8 @@ def account_text(bot, update):
 					 disable_web_page_preview=True)
 		sleep(0.1)
 		bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='[account in explorer — history]({1}{0})'.format(r, account_url), 
+					 text=('[account in explorer — history]({1}{0})'
+							'\n~[distribution — earn with hourly faucet]({2}{0})'.format(r, account_url, faucet_url)), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
 		#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
@@ -380,7 +381,7 @@ def account_text(bot, update):
 						 disable_web_page_preview=True)
 			sleep(0.1)
 			bot.sendMessage(chat_id=chat_id, 
-						 text='Your start balance is 0 Mrai (XRB). "This account doesn\'t exist on the blockchain yet" means that you didn\'t receive any Mrai (XRB) yet.\nSend some Mrai (XRB) to your account or claim with daily [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
+						 text='Your start balance is 0 Mrai (XRB). "This account doesn\'t exist on the blockchain yet" means that you didn\'t receive any Mrai (XRB) yet.\nSend some Mrai (XRB) to your account or claim with hourly [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
 						 parse_mode=ParseMode.MARKDOWN,
 						 disable_web_page_preview=True)
 		else:
