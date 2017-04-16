@@ -64,7 +64,7 @@ def frontiers():
 	# list from MySQL
 	accounts_list = mysql_select_accounts_list()
 	# list from node
-	frontiers = rpc({"action":"frontier_list","wallet":wallet}, 'frontiers')
+	frontiers = rpc({"action":"wallet_frontiers","wallet":wallet}, 'frontiers')
 	
 	faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 	
