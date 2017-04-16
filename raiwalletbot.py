@@ -110,12 +110,21 @@ def restricted(func):
 
 @run_async
 def custom_keyboard(bot, chat_id, buttons, text):
-	reply_markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
-	bot.sendMessage(chat_id=chat_id, 
+	try:
+		reply_markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
+		bot.sendMessage(chat_id=chat_id, 
 					 text=text, 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True,
 					 reply_markup=reply_markup)
+	except ProtocolError:
+		sleep(0.3)
+		bot.sendMessage(chat_id=chat_id, 
+					 text=text, 
+					 parse_mode=ParseMode.MARKDOWN,
+					 disable_web_page_preview=True,
+					 reply_markup=reply_markup)
+
 @run_async
 def default_keyboard(bot, chat_id, text):
 	custom_keyboard(bot, chat_id, [['Account', 'Send'], ['Help']], text)
@@ -123,7 +132,19 @@ def default_keyboard(bot, chat_id, text):
 @run_async
 def hide_keyboard(bot, chat_id, text):
 	reply_markup = ReplyKeyboardRemove()
-	bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
+	try:
+		bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
+	except ProtocolError:
+		sleep(0.3)
+		bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
+
+@run_async
+def typing_illusion(bot, chat_id):
+	try:
+		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
+	except ProtocolError:
+		sleep(0.3)
+		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
 
 
 @run_async
@@ -350,7 +371,7 @@ def account_text(bot, update):
 		sleep(0.1)
 		bot.sendMessage(chat_id=update.message.chat_id, 
 					 text=('[account in explorer — history]({1}{0})'
-							'\n~[distribution — earn with hourly faucet]({2}{0})'.format(r, account_url, faucet_url)), 
+							'\n[distribution — earn with hourly faucet]({2}{0})'.format(r, account_url, faucet_url)), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True)
 		#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
@@ -457,7 +478,7 @@ def send_callback(bot, update, args):
 					hex = binascii.hexlify(dk)
 				else:
 					hex = False
-				bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
+				typing_illusion(bot, update.message.chat_id) # typing illusion
 				# Check password protection and frontier existance
 				frontier = m[3]
 				check_frontier = check_block(frontier)
@@ -638,7 +659,7 @@ def send_finish(bot, update):
 	# FEELESS
 	try:
 		hide_keyboard(bot, chat_id, 'Working on your transaction...')
-		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
+		typing_illusion(bot, chat_id)  # typing illusion
 		# Check frontier existance
 		frontier = m[3]
 		check_frontier = check_block(frontier)
@@ -751,7 +772,7 @@ def text_result(text, bot, update):
 			default_keyboard(bot, update.message.chat_id, 'Payment cancelled')
 	# Get the text the user sent
 	text = text.lower()
-	if ('help' in text):
+	if (('help' in text) or ('support' in text)):
 		help_text(bot, update)
 	elif (('account' in text) or ('balance' in text) or ('register' in text)):
 		account_text(bot, update)
@@ -892,14 +913,14 @@ def echo(bot, update):
 @run_async
 def ping(bot, update):
 	logging.info(update.message)
-	bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
+	typing_illusion(bot, update.message.chat_id) # typing illusion
 	sleep(2)
 	default_keyboard(bot, update.message.chat_id, '@RaiWalletBot reporting')
 
 @restricted
 def stats(bot, update):
 	logging.info(update.message)
-	bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING) # typing illusion
+	typing_illusion(bot, update.message.chat_id) # typing illusion
 	fee_balance = account_balance(fee_account)
 	stats = '{0}\nFees balance: {1} Mrai (XRB)'.format(mysql_stats(), "{:,}".format(int(fee_balance)))
 	default_keyboard(bot, update.message.chat_id, stats)
@@ -917,8 +938,9 @@ def unknown(bot, update):
 def unknown_ddos(bot, update):
 	logging.info(update.message)
 	user_id = update.message.from_user.id
+	message_id = int(update.message.message_id)
 	## DDoS ##
-	ddos = mysql_ddos_protector(user_id)
+	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
 		raise Exception('DDoS by user {0}'.format(user_id))
 	elif (ddos == False):
@@ -945,6 +967,7 @@ def main():
 	dp.add_handler(CommandHandler("Start", start)) # symlink
 	dp.add_handler(CommandHandler("help", help))
 	dp.add_handler(CommandHandler("Help", help)) # symlink
+	dp.add_handler(CommandHandler("support", help)) # symlink
 	dp.add_handler(CommandHandler("info", start))
 
 	# my custom commands
