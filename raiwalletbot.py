@@ -942,14 +942,11 @@ def unknown_ddos(bot, update):
 	logging.info(update.message)
 	user_id = update.message.from_user.id
 	message_id = int(update.message.message_id)
-	## DDoS ##
 	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
-		raise Exception('DDoS by user {0}'.format(user_id))
+		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
-		raise Exception('Too fast request by user {0}'.format(user_id))
-	## DDoS ##
+		logging.warn('Too fast request by user {0}'.format(user_id))
 	default_keyboard(bot, update.message.chat_id, 'Command not found'
 						'\nPress \"Help\" to show available commands'
 						'\nType /help for advanced usage')

@@ -184,7 +184,11 @@ def frontiers_usual():
 		frontiers()
 	
 	#cryptopia()
-	mercatox()
+	try:
+		mercatox()
+	except:
+		time.sleep(5)
+		mercatox()
 
 
 # check if already running
