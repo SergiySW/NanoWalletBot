@@ -36,6 +36,18 @@ def account_balance(account):
 	return(balance)
 
 
+def raw_account_pending(account):
+	r = rpc({"action": "account_balance", "account": account}, 'pending')
+	pending = int(r)
+	return(pending)
+
+
+def account_pending(account):
+	raw_pending = raw_account_pending(account)
+	pending = int(math.floor(raw_pending / (10 ** 30)))
+	return(pending)
+
+
 def unlock(wallet, password):
 	r = rpc({"action": "password_enter", "wallet": wallet, "password": password}, 'valid')
 

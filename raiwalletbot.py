@@ -924,6 +924,9 @@ def stats(bot, update):
 	fee_balance = account_balance(fee_account)
 	stats = '{0}\nFees balance: {1} Mrai (XRB)'.format(mysql_stats(), "{:,}".format(int(fee_balance)))
 	default_keyboard(bot, update.message.chat_id, stats)
+	fee_pending = account_pending(fee_account)
+	if (fee_pending > 0):
+		default_keyboard(bot, update.message.chat_id, 'Pending balance: {0} Mrai (XRB)'.format("{:,}".format(int(fee_pending)))
 
 
 @run_async
