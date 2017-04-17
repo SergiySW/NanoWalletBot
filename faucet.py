@@ -10,8 +10,8 @@
 # Released under the BSD 3-Clause License
 # 
 # 
-# Run by cron every hour, 1-2 minutes before distribution
-# With new rules it can't be accurate. Disabled in production
+# Run by cron every hour, 1-2 minutes after distribution starts
+# With new rules it can be inaccurate
 # 
 
 
@@ -56,8 +56,8 @@ def faucet():
 	with open('paylist.json', 'w') as outfile:  
 		json.dump(json_paylist, outfile)
 	json_array = json_paylist['pending']
-	# Top list = 800 Mrai
-	#top_tier = 800
+	# Top list = 300 Mrai
+	top_tier = 300
 	
 	bot = Bot(api_key)
 	# list from MySQL
@@ -67,14 +67,14 @@ def faucet():
 	for account in accounts_list:
 		for paylist in json_array:
 			if ((paylist['account'] == account[1]) and (account[0] not in BLACK_LIST)):
-				estimated_rai = int(paylist['estimated-pay'])
+				estimated_rai = int(paylist['expected-pay'])
 				estimated_mrai = int(math.floor(estimated_rai / (10 ** 6)))
 				claims = int(paylist['pending'])
-				#
-				#if (estimated_mrai > top_tier):
-				#	text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nCongratulations, you are one of the Top claimers! You will receive your Mrai (XRB) in 1 hour or less'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
+				
+				if (estimated_mrai > top_tier):
+					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nCongratulations, you are one of the Top claimers! You will receive your Mrai (XRB) in the next few minutes'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
 				if (estimated_mrai > 0):
-					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nYou will receive your Mrai (XRB) in the next few minutes'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
+					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nYou will receive your Mrai (XRB) in the next 12 minutes'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
 				else:
 					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward less than 1 Mrai (XRB)\nYou have to send or claim more Mrai (XRB) to your account {0}'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
 				#print(paylist['account'])
