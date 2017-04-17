@@ -117,7 +117,7 @@ def custom_keyboard(bot, chat_id, buttons, text):
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True,
 					 reply_markup=reply_markup)
-	except ProtocolError:
+	except:
 		sleep(0.3)
 		bot.sendMessage(chat_id=chat_id, 
 					 text=text, 
@@ -134,7 +134,7 @@ def hide_keyboard(bot, chat_id, text):
 	reply_markup = ReplyKeyboardRemove()
 	try:
 		bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
-	except ProtocolError:
+	except:
 		sleep(0.3)
 		bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
 
@@ -142,7 +142,7 @@ def hide_keyboard(bot, chat_id, text):
 def typing_illusion(bot, chat_id):
 	try:
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
-	except ProtocolError:
+	except:
 		sleep(0.3)
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
 
