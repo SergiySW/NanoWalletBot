@@ -127,7 +127,7 @@ def custom_keyboard(bot, chat_id, buttons, text):
 
 @run_async
 def default_keyboard(bot, chat_id, text):
-	custom_keyboard(bot, chat_id, [['Account', 'Send'], ['Help']], text)
+	custom_keyboard(bot, chat_id, [['Account', 'Send'], ['Price', 'Help']], text)
 
 @run_async
 def hide_keyboard(bot, chat_id, text):
@@ -198,7 +198,7 @@ def start_text(bot, update):
 	sleep(0.1)
 	bot.sendMessage(chat_id=update.message.chat_id, 
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
+				'\nTrading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
 				'\n\n1 user = 1 xrb\_account'
 				'\nTHE BOT IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS BOT. YOU ASSUME THE RESPONSIBILITY FOR YOUR ACTIONS, AND NO REFUNDS WILL BE ISSUED', 
 				parse_mode=ParseMode.MARKDOWN,
@@ -229,7 +229,7 @@ def help_callback(bot, update):
 	sleep(0.1)
 	bot.sendMessage(chat_id=update.message.chat_id, 
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
+				'\nTrading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
 				'\n\nAny suggestions or bugs? Contact me @SergSW'
 				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
 				parse_mode=ParseMode.MARKDOWN,
@@ -249,7 +249,7 @@ def help_text(bot, update):
 	sleep(0.1)
 	bot.sendMessage(chat_id=update.message.chat_id, 
 				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
+				'\nTrading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
 				'\n\nAny suggestions or bugs? Contact me @SergSW'
 				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
 				parse_mode=ParseMode.MARKDOWN,
@@ -735,7 +735,23 @@ def price_text(bot, update):
 		'\n24 hours High: *{3} BTC*'
 		'\n24 hours Low: *{4} BTC*'.format(last_price, ask_price, bid_price, high_price, low_price, "{:,}".format(volume)))
 	default_keyboard(bot, update.message.chat_id, text)
+	sleep(0.1)
+	bot.sendMessage(chat_id=update.message.chat_id, 
+				text='Trading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..', 
+				parse_mode=ParseMode.MARKDOWN,
+				disable_web_page_preview=True)
 
+
+@run_async
+def version(bot, update):
+	logging.info(update.message)
+	ddos_protection(bot, update, version_text)
+
+@run_async
+def version_text(bot, update):
+	user_id = update.message.from_user.id
+	version = rpc({"action": "version"}, 'node_vendor')
+	update.message.reply_text(version)
 
 
 @run_async
@@ -793,8 +809,10 @@ def text_result(text, bot, update):
 		block_count_callback(bot, update)
 	elif (('hello' in text) or ('start' in text)):
 		start_text(bot, update)
-	elif ('price' in text):
+	elif (('price' in text) or ('market' in text)):
 		price_text(bot, update)
+	elif ('version' in text):
+		version_text(bot, update)
 	elif ('yes' not in text):
 		#default_keyboard(bot, update.message.chat_id, 'Command not found')
 		unknown(bot, update)
@@ -986,6 +1004,7 @@ def main():
 	dp.add_handler(CommandHandler("secret_delete", password_delete, pass_args=True)) # symlink
 	dp.add_handler(CommandHandler("price", price))
 	dp.add_handler(CommandHandler("market", price)) # symlink
+	dp.add_handler(CommandHandler("version", version))
 
 	
 	# admin commands
