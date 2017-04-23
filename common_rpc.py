@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Request to node
-import requests, json, urllib3
+import requests, json, urllib3, certifi
 import math
 import ConfigParser
 
@@ -61,7 +61,7 @@ def peers_ip():
 # Check frontier existance at remote node or website
 def check_block_community(block):
 	try:
-		http = urllib3.PoolManager()
+		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, block))
 		json_data = json.loads(response.data)
 		if ('error' not in json_data):

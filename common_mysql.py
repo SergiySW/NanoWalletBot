@@ -254,10 +254,10 @@ def mysql_select_price():
 	return(price)
 
 #@run_async
-def mysql_set_price(last_price, high_price, low_price, ask_price, bid_price, volume):
+def mysql_set_price(id, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
-	add_price = "REPLACE INTO rai_price SET id = 1, last_price = '{0}', high_price = '{1}', low_price = '{2}', ask_price = '{3}', bid_price = '{4}', volume = '{5}'".format(last_price, high_price, low_price, ask_price, bid_price, volume)
+	add_price = "REPLACE INTO rai_price SET id = '{0}', last_price = '{1}', high_price = '{2}', low_price = '{3}', ask_price = '{4}', bid_price = '{5}', volume = '{6}', btc_volume = '{7}'".format(id, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 	cursor.execute(add_price)
 	cnx.commit()
 	cursor.close()

@@ -109,6 +109,8 @@ CREATE TABLE `rai_price` (
   `ask_price` int(8) unsigned NOT NULL DEFAULT '0',
   `bid_price` int(8) unsigned NOT NULL DEFAULT '0',
   `volume` int(11) unsigned NOT NULL DEFAULT '0',
+  `btc_volume` int(12) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

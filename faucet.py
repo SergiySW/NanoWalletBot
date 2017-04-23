@@ -18,7 +18,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
 import logging
-import urllib3, socket, json
+import urllib3, certifi, socket, json
 import time, math
 
 # Parse config
@@ -48,7 +48,7 @@ from common import push_simple
 
 # Faucet
 def faucet():
-	http = urllib3.PoolManager()
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	url = 'https://raiblockscommunity.net/faucet/paylist.php?json=1'
 	response = http.request('GET', url)
 	json_paylist = json.loads(response.data)

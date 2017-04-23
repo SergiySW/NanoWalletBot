@@ -16,7 +16,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
 import logging
-import urllib3, socket, json
+import urllib3, certifi, socket, json
 import time, math
 import os, sys
 
@@ -153,7 +153,7 @@ def cryptopia():
 
 
 def mercatox():
-	http = urllib3.PoolManager()
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	url = 'https://mercatox.com/public/json24'
 	response = http.request('GET', url)
 	json_mercatox = json.loads(response.data)
@@ -164,8 +164,26 @@ def mercatox():
 	ask_price = int(float(json_array['lowestAsk']) * (10 ** 8))
 	bid_price = int(float(json_array['highestBid']) * (10 ** 8))
 	volume = int(float(json_array['baseVolume']))
+	btc_volume = int(float(json_array['quoteVolume']) * (10 ** 8))
 	
-	mysql_set_price(last_price, high_price, low_price, ask_price, bid_price, volume)
+	mysql_set_price(1, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
+
+
+def bitgrail():
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+	url = 'https://bitgrail.com/api/v1/BTC-XRB/ticker'
+	response = http.request('GET', url)
+	json_bitgrail = json.loads(response.data)
+	json_array = json_bitgrail['response']
+	last_price = int(float(json_array['last']) * (10 ** 8))
+	high_price = int(float(json_array['high']) * (10 ** 8))
+	low_price = int(float(json_array['low']) * (10 ** 8))
+	ask_price = int(float(json_array['ask']) * (10 ** 8))
+	bid_price = int(float(json_array['bid']) * (10 ** 8))
+	volume = 0
+	btc_volume = int(float(json_array['volume']) * (10 ** 8))
+	
+	mysql_set_price(2, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 
 
 def frontiers_usual():

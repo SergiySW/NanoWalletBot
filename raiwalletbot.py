@@ -19,7 +19,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram import Bot, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatAction
 import logging
-import urllib3, socket, json
+import urllib3, certifi, socket, json
 import hashlib, binascii, string, math
 from time import sleep
 import os, sys
@@ -275,7 +275,7 @@ def block_count_callback(bot, update):
 #	default_keyboard(bot, update.message.chat_id, r)
 	# Admin block count check from raiblockscommunity.net
 	if (user_id in admin_list):
-		http = urllib3.PoolManager()
+		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 		response = http.request('GET', summary_url)
 		json_data = json.loads(response.data)
 		community_count = json_data['blocks']
