@@ -5,6 +5,7 @@
 import requests, json, urllib3, certifi
 import math
 import ConfigParser
+from time import sleep
 
 config = ConfigParser.ConfigParser()
 config.read('bot.cfg')
@@ -16,12 +17,21 @@ reference_url = config.get('main', 'reference_url')
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 
 def rpc(json, key):
-	r = requests.post(url, json=json).json()
-	if 'error' not in r:
-		return(r[key])
-	else:
-		print(r['error'])
-		return(r['error'])
+	try:
+		r = requests.post(url, json=json).json()
+		if 'error' not in r:
+			return(r[key])
+		else:
+			print(r['error'])
+			return(r['error'])
+	except:
+		sleep(0.5)
+		r = requests.post(url, json=json).json()
+		if 'error' not in r:
+			return(r[key])
+		else:
+			print(r['error'])
+			return(r['error'])
 
 
 def raw_account_balance(account):
