@@ -36,3 +36,17 @@ def push_simple(bot, chat_id, message):
 		bot.sendMessage(chat_id=chat_id, text=message)
 
 
+def message_markdown(bot, chat_id, message):
+	try:
+		bot.sendMessage(chat_id=chat_id, 
+					text=message,
+					parse_mode=ParseMode.MARKDOWN,
+					disable_web_page_preview=True)
+	except:
+		sleep(1)
+		bot.sendMessage(chat_id=chat_id, 
+					text=message,
+					parse_mode=ParseMode.MARKDOWN,
+					disable_web_page_preview=True)
+
+

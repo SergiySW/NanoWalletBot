@@ -80,6 +80,20 @@ CREATE TABLE `rai_bot_access` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rai_bot_access`
+--
+
+DROP TABLE IF EXISTS `rai_bot_language`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_bot_language` (
+  `user_id` int(10) unsigned NOT NULL,
+  `language` varchar(2) NOT NULL DEFAULT 'en',
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_bot_passwords`
 --
 

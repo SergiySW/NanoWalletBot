@@ -38,13 +38,22 @@ logger = logging.getLogger(__name__)
 
 
 # MySQL requests
-from common_mysql import mysql_select_accounts_list, mysql_select_blacklist
+from common_mysql import mysql_select_accounts_list, mysql_select_blacklist, mysql_select_language
 
 
 # Common functions
 from common import push_simple
 
 
+# Translation
+with open('language.json') as lang_file:    
+	language = json.load(lang_file)
+def lang(user_id, text_id):
+	lang_id = mysql_select_language(user_id)
+	try:
+		return language[lang_id][text_id]
+	except KeyError:
+		return language['en'][text_id]
 
 # Faucet
 def faucet():
@@ -72,11 +81,11 @@ def faucet():
 				claims = int(paylist['pending'])
 				
 				if (estimated_mrai > top_tier):
-					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nCongratulations, you are one of the Top claimers! You will receive your Mrai (XRB) in the next few minutes'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
+					text = lang(account[0], 'faucet_top').format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
 				if (estimated_mrai > 0):
-					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nYou will receive your Mrai (XRB) in the next 12 minutes'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
+					text = lang(account[0], 'faucet_usual').format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
 				else:
-					text = 'Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward less than 1 Mrai (XRB)\nYou have to send or claim more Mrai (XRB) to your account {0}'.format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
+					text = lang(account[0], 'faucet_low').format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
 				#print(paylist['account'])
 				push_simple(bot, account[0], text)
 				#print(text)

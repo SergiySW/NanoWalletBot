@@ -108,6 +108,21 @@ def restricted(func):
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 
+with open('language.json') as lang_file:    
+	language = json.load(lang_file)
+def lang(user_id, text_id):
+	lang_id = mysql_select_language(user_id)
+	try:
+		return language[lang_id][text_id]
+	except KeyError:
+		return language['en'][text_id]
+
+def lang_text(text_id, lang_id):
+	try:
+		return language[lang_id][text_id]
+	except KeyError:
+		return language['en'][text_id]
+
 @run_async
 def custom_keyboard(bot, chat_id, buttons, text):
 	try:
@@ -127,7 +142,11 @@ def custom_keyboard(bot, chat_id, buttons, text):
 
 @run_async
 def default_keyboard(bot, chat_id, text):
-	custom_keyboard(bot, chat_id, [['Account', 'Send'], ['Price', 'Help']], text)
+	custom_keyboard(bot, chat_id, lang(chat_id, 'menu'), text)
+
+@run_async
+def lang_keyboard(lang_id, bot, chat_id, text):
+	custom_keyboard(bot, chat_id, lang_text('menu', lang_id), text)
 
 @run_async
 def hide_keyboard(bot, chat_id, text):
@@ -155,7 +174,7 @@ def ddos_protection(bot, update, callback):
 	if (ddos == True):
 		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
+		update.message.reply_text(lang(user_id, 'ddos_error').format(ddos_protect_seconds))
 		logging.warn('Too fast request by user {0}'.format(user_id))
 	else:
 		callback(bot, update)
@@ -168,10 +187,34 @@ def ddos_protection_args(bot, update, args, callback):
 	if (ddos == True):
 		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
-		update.message.reply_text('You cannot send commands faster than once in {0} seconds'.format(ddos_protect_seconds))
+		update.message.reply_text(lang(user_id, 'ddos_error').format(ddos_protect_seconds))
 		logging.warn('Too fast request by user {0}'.format(user_id))
 	else:
 		callback(bot, update, args)
+
+
+@run_async
+def language_select(bot, update, args):
+	logging.info(update.message)
+	ddos_protection_args(bot, update, args, language_select_callback)
+
+@run_async
+def language_select_callback(bot, update, args):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	if (len(args) > 0):
+		lang_id = args[0].lower()
+		if (lang_id in language['common']['language_list']):
+			try:
+				mysql_set_language(user_id, lang_id)
+				start_text(bot, update)
+			except:
+				update.message.reply_text(lang(user_id, 'language_error'))
+		else:
+			update.message.reply_text(lang(user_id, 'language_error'))
+			logging.info('Language change failed for user {0}'.format(user_id))
+	else:
+		update.message.reply_text(lang(user_id, 'language_command'))
 
 
 @run_async
@@ -183,26 +226,14 @@ def start(bot, update):
 @run_async
 def start_text(bot, update):
 	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
 #	hide_keyboard(bot, update.message.chat_id, text)
-	update.message.reply_text('Hello!'
-		'\nI am @RaiWalletBot – your Telegram bot to manage RaiBlocks cryptocurrency')
+	update.message.reply_text(lang_text('start_introduce', lang_id))
 	sleep(0.1)
-	text = ('Here are some basic commands to control your wallet '
-		'\nPress "Account" to show account & check balance'
-		'\nPress "Send" to start sending'
-		'\n\nCurrent fee for outcoming transaction: *{0} Mrai (XRB)*'
-		'{2}Current minimum to receive: *1 Mrai (XRB)*'
-		'\nCurrent minimum to send: *{1} Mrai (XRB) + fee*'
-		'\n\nfor advanced commands type /help'.format(fee_amount, min_send, incoming_fee_text))
-	default_keyboard(bot, update.message.chat_id, text)
+	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(fee_amount, min_send, incoming_fee_text))
 	sleep(0.1)
-	bot.sendMessage(chat_id=update.message.chat_id, 
-				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
-				'\n\n1 user = 1 xrb\_account'
-				'\nTHE BOT IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS BOT. YOU ASSUME THE RESPONSIBILITY FOR YOUR ACTIONS, AND NO REFUNDS WILL BE ISSUED', 
-				parse_mode=ParseMode.MARKDOWN,
-				disable_web_page_preview=True)
+	message_markdown(bot, chat_id, lang_text('start_learn_more', lang_id))
 
 
 @run_async
@@ -213,47 +244,21 @@ def help(bot, update):
 @run_async
 def help_callback(bot, update):
 	user_id = update.message.from_user.id
-	text = ('For basic commands press \"Help\" button'
-		'\nHere are some advanced commands to control your wallet '
-		'\n /help — receive list of available commands'
-		'\n /account — create account, show account & check balance'
-		'\n /block\_count — check our wallet is up-to-date!'
-		'\n /send amount xrb\_account optional\_pass — send Mrai (XRB) to other xrb\_account'
-		'\n /password HereYourPass  — protect account with password'
-		'\n /password\_delete HereYourPass — delete existing password'
-		'\n /price — show Mrai (XRB) market price'
-		'\n\nCurrent fee for outcoming transaction: *{0} Mrai (XRB)*'
-		'{2}Current minimum to receive: *1 Mrai (XRB)*'
-		'\nCurrent minimum to send: *{1} Mrai (XRB) + fee*'.format(fee_amount, min_send, incoming_fee_text))
-	default_keyboard(bot, update.message.chat_id, text)
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	lang_keyboard(lang_id, bot, chat_id, lang_text('help_advanced_usage', lang_id).format(fee_amount, min_send, incoming_fee_text))
 	sleep(0.1)
-	bot.sendMessage(chat_id=update.message.chat_id, 
-				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
-				'\n\nAny suggestions or bugs? Contact me @SergSW'
-				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
-				parse_mode=ParseMode.MARKDOWN,
-				disable_web_page_preview=True)
+	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
 
 @run_async
 def help_text(bot, update):
 	user_id = update.message.from_user.id
-	text = ('Press \"Account\" to show account & check balance'
-		'\nPress \"Send\" to start sending'
-		'\n\nCurrent fee for outcoming transaction: *{0} Mrai (XRB)*'
-		'{2}Current minimum to receive: *1 Mrai (XRB)*'
-		'\nCurrent minimum to send: *{1} Mrai (XRB) + fee*'
-		'\n\nfor advanced commands type /help'.format(fee_amount, min_send, incoming_fee_text))
-	default_keyboard(bot, update.message.chat_id, text)
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(fee_amount, min_send, incoming_fee_text))
 	sleep(0.1)
-	bot.sendMessage(chat_id=update.message.chat_id, 
-				text='Learn more about RaiBlocks cryptocurrency & earn some free Mrai (XRB) at [raiblockscommunity.net](https://raiblockscommunity.net)!'
-				'\nTrading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..'
-				'\n\nAny suggestions or bugs? Contact me @SergSW'
-				'\nTHE BOT IS PROVIDED \"AS IS\". 1 user = 1 xrb\_account', 
-				parse_mode=ParseMode.MARKDOWN,
-				disable_web_page_preview=True)
+	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
 
 
@@ -329,6 +334,8 @@ def account(bot, update):
 @run_async
 def account_text(bot, update):
 	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
 	username=update.message.from_user.username
 	if (username is None):
 		username = ''
@@ -340,47 +347,28 @@ def account_text(bot, update):
 		balance = account_balance(r)
 		max_send = balance - fee_amount
 		if (balance == 0):
-			bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='Your balance is *0 Mrai (XRB)*. Send some Mrai (XRB) to your account or claim with hourly [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
+			message_markdown(bot, chat_id, lang_text('account_balance_zero', lang_id).format(faucet_url, r))
 		elif (max_send < min_send):
-			bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='Your balance: *{2} Mrai (XRB)*. It is less than current fee {3} Mrai (XRB) + minimal send {4} Mrai (XRB). Send some Mrai (XRB) to your account or claim with hourly [RaiBlocks faucet]({0}{1})'.format(faucet_url, r, "{:,}".format(balance), fee_amount, min_send), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
+			message_markdown(bot, chat_id, lang_text('account_balance_low', lang_id).format(faucet_url, r, "{:,}".format(balance), fee_amount, min_send))
 		else:
 			#update.message.reply_text('Your balance: {0} Mrai (XRB). Send limit (Mrai):'.format("{:,}".format(balance)))
 			#update.message.reply_text("{:,}".format(max_send))
-			last_price = float(mysql_select_price()[0])
+			last_price = float(mysql_select_price()[0][0])
 			btc_price = last_price / (10 ** 8)
 			btc_balance = ('%.8f' % (btc_price * balance))
-			bot.sendMessage(chat_id=update.message.chat_id, 
-					 text=('Your balance: *{0} Mrai (XRB)*'
-							'\n~ {1} BTC'
-							'\nSend limit: {2} Mrai (XRB)'.format("{:,}".format(balance), btc_balance, "{:,}".format(max_send))), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
+			message_markdown(bot, chat_id, lang_text('account_balance', lang_id).format("{:,}".format(balance), btc_balance, "{:,}".format(max_send)))
 		sleep(0.1)
-		update.message.reply_text('Your RaiBlocks account')
+		update.message.reply_text(lang_text('account_your', lang_id))
 		sleep(0.1)
-		bot.sendMessage(chat_id=update.message.chat_id, 
-					 text='*{0}*'.format(r), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
+		message_markdown(bot, chat_id, '*{0}*'.format(r))
 		sleep(0.1)
-		bot.sendMessage(chat_id=update.message.chat_id, 
-					 text=('[account in explorer — history]({1}{0})'
-							'\n[distribution — earn with hourly faucet]({2}{0})'.format(r, account_url, faucet_url)), 
-					 parse_mode=ParseMode.MARKDOWN,
-					 disable_web_page_preview=True)
+		message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url))
 		#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
 		bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
 		
 	except (TypeError):
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
 		qr_by_account(r)
-		chat_id=update.message.chat_id
 		if ('xrb_' in r): # check for errors
 			insert_data = {
 			  'user_id': user_id,
@@ -389,24 +377,15 @@ def account_text(bot, update):
 			  'username': username,
 			}
 			mysql_insert(insert_data)
-			update.message.reply_text('We create new RaiBlocks account for you! Your account')
+			update.message.reply_text(lang_text('account_created', lang_id))
 			sleep(0.1)
-			bot.sendMessage(chat_id=update.message.chat_id, 
-						 text='*{0}*'.format(r), 
-						 parse_mode=ParseMode.MARKDOWN,
-						 disable_web_page_preview=True)
+			message_markdown(bot, chat_id, '*{0}*'.format(r))
 			sleep(0.1)
-			bot.sendMessage(chat_id=chat_id, 
-						 text='[account in explorer]({1}{0})'.format(r, account_url), 
-						 parse_mode=ParseMode.MARKDOWN,
-						 disable_web_page_preview=True)
+			message_markdown(bot, chat_id, lang_text('account_explorer', lang_id).format(r, account_url))
 			sleep(0.1)
-			bot.sendMessage(chat_id=chat_id, 
-						 text='Your start balance is 0 Mrai (XRB). "This account doesn\'t exist on the blockchain yet" means that you didn\'t receive any Mrai (XRB) yet.\nSend some Mrai (XRB) to your account or claim with hourly [RaiBlocks faucet]({0}{1})'.format(faucet_url, r), 
-						 parse_mode=ParseMode.MARKDOWN,
-						 disable_web_page_preview=True)
+			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
 		else:
-			update.message.reply_text('Error creating account. Try again later')
+			update.message.reply_text(lang_text('account_error', lang_id))
 
 
 
@@ -419,7 +398,8 @@ def send(bot, update, args):
 def send_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
-
+	lang_id = mysql_select_language(user_id)
+	
 	# Check user existance in database
 	m = mysql_select_user(user_id)
 	
@@ -444,11 +424,12 @@ def send_callback(bot, update, args):
 			#print(send_amount)
 			#print(balance)
 			if (max_send < min_send):
-				update.message.reply_text('Your balance is too small to send. Current fee: {0} Mrai (XRB). Minimal send: {1} Mrai (XRB)'.format(final_fee_amount, min_send))
+				update.message.reply_text(lang_text('send_low_balance', lang_id).format(final_fee_amount, min_send))
 			elif (send_amount > max_send):
-				update.message.reply_text('You cannot send more than your balance – {0} Mrai (XRB) fee. Your current limit: {1} Mrai (XRB)'.format(final_fee_amount, "{:,}".format(max_send)))
+				update.message.reply_text(lang_text('send_limit_max', lang_id).format(final_fee_amount, "{:,}".format(max_send)))
 			elif (send_amount < min_send):
-				update.message.reply_text('You cannot send less than minimum {0} Mrai (XRB)'.format(min_send))
+				update.message.reply_text(lang_text('send_limit_min', lang_id).format(min_send))
+				
 			else:
 				# Check destination address
 				destination = args[1]
@@ -463,7 +444,7 @@ def send_callback(bot, update, args):
 						#send_destination(bot, update, account)
 						destination = dest_account
 					else:
-						update.message.reply_text('User {0} not found. Perhaps he doesn\'t have account in @RaiWalletBot. Invite him!'.format(destination))
+						update.message.reply_text(lang_text('send_user_not_found', lang_id).format(destination))
 				destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
 				#print(destination)
 				# Check password protection
@@ -497,14 +478,11 @@ def send_callback(bot, update, args):
 							mysql_update_balance(account, new_balance)
 							mysql_update_frontier(account, fee)
 							#update.message.reply_text('Transaction completed. Fee: {0} Mrai (XRB). Your current balance: {1} Mrai (XRB). Transaction hash'.format(final_fee_amount, "{:,}".format(new_balance)))
-							default_keyboard(bot, chat_id, 'Transaction completed. Fee: {0} Mrai (XRB). Your current balance: *{1} Mrai (XRB)*. Transaction hash'.format(final_fee_amount, "{:,}".format(new_balance)))
+							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(final_fee_amount, "{:,}".format(new_balance)))
 							sleep(0.1)
 							update.message.reply_text(send_hash)
 							sleep(0.1)
-							bot.sendMessage(chat_id=chat_id, 
-										 text='[hash in block explorer]({1}{0})'.format(send_hash, hash_url), 
-										 parse_mode=ParseMode.MARKDOWN,
-										 disable_web_page_preview=True)
+							message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
 							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, send_amount, send_hash))
 							# update username
 							old_username = m[8]
@@ -520,33 +498,30 @@ def send_callback(bot, update, args):
 						else:
 							logging.info('Transaction FAILURE! Account {0}'.format(account))
 							new_balance = account_balance(account)
-							default_keyboard(bot, update.message.chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
-					except (GeneratorExit):
-						update.message.reply_text('Failed to send. Try again later')
-					except (ValueError):
-						default_keyboard(bot, chat_id, 'Failed to send. Try again later')
+							lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format("{:,}".format(new_balance)))
+					except (GeneratorExit, ValueError):
+						lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
 				elif (not (check == hex)):
-					update.message.reply_text('Password you entered is incorrent. Try again')
+					update.message.reply_text(lang_text('password_error', lang_id))
 					logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
 				elif (not (check_frontier)):
-					update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later')
+					update.message.reply_text(lang_text('send_frontier', lang_id))
 					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
-				else:
-					update.message.reply_text('Destination xrb_address in invalid')
+				elif (not (destination.startswith('@'))):
+					message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 		except (ValueError):
-			update.message.reply_text('Send amount must contain digits ONLY')
+			update.message.reply_text(lang_text('send_digits', lang_id))
 		
 	except (TypeError):
-		update.message.reply_text('You don\'t have RaiBlocks account yet. Type /account to begin')
+		message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
 	except (IndexError):
-		update.message.reply_text('Use command /send [amount] [xrb_account]'
-								  '\nExample: /send {0} {1}'
-								  '\n\nor simple press "Send" button'.format(min_send, m[2]))
+		lang_keyboard(lang_id, chat_id, lang_text('send_wrong_command', lang_id).format(min_send, m[2]))
 
 
 @run_async
 def send_text(bot, update):
 	user_id = update.message.from_user.id
+	lang_id = mysql_select_language(user_id)
 	# FEELESS
 	if (user_id in LIST_OF_FEELESS):
 		final_fee_amount = 0
@@ -558,16 +533,18 @@ def send_text(bot, update):
 		account = m[2]
 		balance = account_balance(account)
 		if (balance >= (final_fee_amount + min_send)):
-			update.message.reply_text('Please specify amount of Mrai (XRB) you want to send. Current fee: {0} Mrai (XRB). Minimal send: {1} Mrai (XRB)'.format(final_fee_amount, min_send))
+			update.message.reply_text(lang_text('send_amount', lang_id).format(final_fee_amount, min_send))
 		else:
-			update.message.reply_text('Your balance is too small to send. Current fee: {0} Mrai (XRB). Minimal send: {1} Mrai (XRB)'.format(final_fee_amount, min_send))
+			update.message.reply_text(lang_text('send_low_balance', lang_id).format(final_fee_amount, min_send))
 	except (TypeError):
-		default_keyboard(bot, update.message.chat_id, 'You don\'t have RaiBlocks account yet. Press Account to begin')
+		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_no_account_text', lang_id))
 
 
 @run_async
 def send_destination(bot, update, text):
 	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
 	# FEELESS
 	if (user_id in LIST_OF_FEELESS):
 		final_fee_amount = 0
@@ -583,31 +560,33 @@ def send_destination(bot, update, text):
 		if (destination_check == '1'):
 			mysql_update_send_destination(account, destination)
 			if (m[6] != 0):
-				custom_keyboard(bot, update.message.chat_id, [['Yes', 'No']], 'Confirm you want to send *{0} Mrai (XRB)* to *{2}*\nIt will cost you *{1} Mrai (XRB)* with fees'.format("{:,}".format(m[6]), "{:,}".format(m[6]+final_fee_amount), destination))
+				custom_keyboard(bot, chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format("{:,}".format(m[6]), "{:,}".format(m[6]+final_fee_amount), destination))
 			else:
-				update.message.reply_text('Please specify amount of Mrai (XRB) you want to send. Current fee: {0} Mrai (XRB). Minimal send: {1} Mrai (XRB)'.format(final_fee_amount, min_send))
+				update.message.reply_text(lang_text('send_amount', lang_id).format(final_fee_amount, min_send))
 		else:
-			update.message.reply_text('Destination address in invalid')
+			message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 	except (TypeError):
-		default_keyboard(bot, update.message.chat_id, 'You don\'t have RaiBlocks account yet. Press Account to begin')
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_no_account_text', lang_id))
 
 
 @run_async
 def send_destination_username(bot, update, text):
+	user_id = update.message.from_user.id
 	username = text.replace('@', '')
 	#print(username)
 	account = mysql_account_by_username(username)
 	#print(account)
 	if (account is not False):
-		update.message.reply_text('User {0} found. His account: {1}'.format(text, account))
+		update.message.reply_text(lang(user_id, 'send_user').format(text, account))
 		send_destination(bot, update, account)
 	else:
-		update.message.reply_text('User {0} not found. Perhaps he doesn\'t have account in @RaiWalletBot. Invite him!'.format(text))
+		update.message.reply_text(lang(user_id, 'send_user_not_found').format(text))
 
 
 @run_async
 def send_amount(bot, update, text):
 	user_id = update.message.from_user.id
+	lang_id = mysql_select_language(user_id)
 	# FEELESS
 	if (user_id in LIST_OF_FEELESS):
 		final_fee_amount = 0
@@ -624,27 +603,28 @@ def send_amount(bot, update, text):
 			send_amount = int(text)
 			# if less, set 0
 			if (max_send < min_send):
-				update.message.reply_text('Your balance is too small to send. Current fee: {0} Mrai (XRB). Minimal send: {1} Mrai (XRB)'.format(final_fee_amount, min_send))
+				update.message.reply_text(lang_text('send_low_balance', lang_id).format(final_fee_amount, min_send))
 			elif (send_amount > max_send):
-				update.message.reply_text('You cannot send more than your balance – {0} Mrai (XRB) fee. Your current limit: {1} Mrai (XRB)'.format(final_fee_amount, "{:,}".format(max_send)))
+				update.message.reply_text(lang_text('send_limit_max', lang_id).format(final_fee_amount, "{:,}".format(max_send)))
 			elif (send_amount < min_send):
-				update.message.reply_text('You cannot send less than minimum {0} Mrai (XRB)'.format(min_send))
+				update.message.reply_text(lang_text('send_limit_min', lang_id).format(min_send))
 			else:
 				mysql_update_send_amount(account, send_amount)
 				if (m[5] is not None):
-					custom_keyboard(bot, update.message.chat_id, [['Yes', 'No']], 'Confirm you want to send *{0} Mrai (XRB)* to *{2}*\nIt will cost you *{1} Mrai (XRB)* with fees'.format("{:,}".format(send_amount), "{:,}".format(send_amount+final_fee_amount), m[5]))
+					custom_keyboard(bot, update.message.chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format("{:,}".format(send_amount), "{:,}".format(send_amount+final_fee_amount), m[5]))
 				else:
-					update.message.reply_text('Please specify destitation xrb_account or @UserName (starts with @ sign) or upload QR code (clean, best quality image)')
+					lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_destination', lang_id))
 		except (ValueError):
-			update.message.reply_text('Send amount must contain Integer ONLY')
+			update.message.reply_text(lang_text('send_digits', lang_id))
 	except (TypeError):
-		default_keyboard(bot, update.message.chat_id, 'You don\'t have RaiBlocks account yet. Press Account to begin')
+		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_no_account_text', lang_id))
 
 
 @run_async
 def send_finish(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
 	m = mysql_select_user(user_id)
 	account = m[2]
 	send_amount = int(m[6])
@@ -658,14 +638,14 @@ def send_finish(bot, update):
 		final_fee_amount = fee_amount
 	# FEELESS
 	try:
-		hide_keyboard(bot, chat_id, 'Working on your transaction...')
+		hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
 		typing_illusion(bot, chat_id)  # typing illusion
 		# Check frontier existance
 		frontier = m[3]
 		check_frontier = check_block(frontier)
 		if (check_frontier):
 			send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
-			if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
+			if ('00000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 				# FEELESS
 				if (final_fee_amount > 0):
 					fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
@@ -676,14 +656,11 @@ def send_finish(bot, update):
 				mysql_update_balance(account, new_balance)
 				mysql_update_frontier(account, fee)
 				sleep(0.4)
-				default_keyboard(bot, chat_id, 'Transaction completed. Fee: {0} Mrai (XRB). Your current balance: *{1} Mrai (XRB)*. Transaction hash'.format(final_fee_amount, "{:,}".format(new_balance)))
+				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(final_fee_amount, "{:,}".format(new_balance)))
 				sleep(0.2)
 				update.message.reply_text(send_hash)
 				sleep(0.2)
-				bot.sendMessage(chat_id=chat_id, 
-						text='[hash in block explorer]({1}{0})'.format(send_hash, hash_url), 
-						parse_mode=ParseMode.MARKDOWN,
-						disable_web_page_preview=True)
+				message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
 				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, send_amount, send_hash))
 				# update username
 				old_username = m[8]
@@ -699,14 +676,12 @@ def send_finish(bot, update):
 			else:
 				logging.info('Transaction FAILURE! Account {0}'.format(account))
 				new_balance = account_balance(account)
-				default_keyboard(bot, chat_id, 'Transaction failed. Try again later. Your current balance: *{0} Mrai (XRB)*'.format("{:,}".format(new_balance)))
+				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format("{:,}".format(new_balance)))
 		else:
-			update.message.reply_text('As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block wasn\'t found at website yet. Try send later')
+			update.message.reply_text(lang_text('send_frontier', lang_id))
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
-	except (GeneratorExit):
-		default_keyboard(bot, chat_id, 'Failed to send. Try again later')
-	except (ValueError):
-		default_keyboard(bot, chat_id, 'Failed to send. Try again later')
+	except (GeneratorExit, ValueError):
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
 
 
 
@@ -719,27 +694,23 @@ def price(bot, update):
 def price_text(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
 	price = mysql_select_price()
-	last_price = ('%.8f' % (float(price[0]) / (10 ** 8)))
-	ask_price = ('%.8f' % (float(price[3]) / (10 ** 8)))
-	bid_price = ('%.8f' % (float(price[4]) / (10 ** 8)))
-	high_price = ('%.8f' % (float(price[1]) / (10 ** 8)))
-	low_price = ('%.8f' % (float(price[2]) / (10 ** 8)))
-	volume = int(price[5])
-	#volume_btc = ('%.8f' % (volume * float(price[0]) / (10 ** 8))).rstrip('0').rstrip('.')
-	text = ('Last RaiBlocks (XRB) price: *{0} BTC*'
-		'\nAsk price: *{1} BTC*'
-		'\nBid price: *{2} BTC*'
-		'\n\n24 hours Volume: *{5} Mrai (XRB)*'
-		#'\nVolume BTC: *{6}*'
-		'\n24 hours High: *{3} BTC*'
-		'\n24 hours Low: *{4} BTC*'.format(last_price, ask_price, bid_price, high_price, low_price, "{:,}".format(volume)))
-	default_keyboard(bot, update.message.chat_id, text)
+	last_price_merc = ('%.8f' % (float(price[0][0]) / (10 ** 8)))
+	ask_price_merc = ('%.8f' % (float(price[0][3]) / (10 ** 8)))
+	bid_price_merc = ('%.8f' % (float(price[0][4]) / (10 ** 8)))
+	last_price_grail = ('%.8f' % (float(price[1][0]) / (10 ** 8)))
+	ask_price_grail = ('%.8f' % (float(price[1][3]) / (10 ** 8)))
+	bid_price_grail = ('%.8f' % (float(price[1][4]) / (10 ** 8)))
+	
+	high_price = ('%.8f' % (max(float(price[0][1]), float(price[1][2])) / (10 ** 8)))
+	low_price = ('%.8f' % (min(float(price[0][2]), float(price[1][2])) / (10 ** 8)))
+	volume = int(price[0][5]) + int(price[1][5])
+	volume_btc = ('%.2f' % ((float(price[0][6]) + float(price[1][6])) / (10 ** 8)))
+	text = lang_text('price', lang_id).format(last_price_merc, ask_price_merc, bid_price_merc, last_price_grail, ask_price_grail, bid_price_grail, high_price, low_price, "{:,}".format(volume), volume_btc)
+	lang_keyboard(lang_id, bot, chat_id, text)
 	sleep(0.1)
-	bot.sendMessage(chat_id=update.message.chat_id, 
-				text='Trading: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, more options coming soon!..', 
-				parse_mode=ParseMode.MARKDOWN,
-				disable_web_page_preview=True)
+	message_markdown(bot, chat_id, lang_text('price_options', lang_id))
 
 
 @run_async
@@ -757,6 +728,7 @@ def version_text(bot, update):
 @run_async
 def text_result(text, bot, update):
 	user_id = update.message.from_user.id
+	lang_id = mysql_select_language(user_id)
 	# Check user existance in database
 	exist = mysql_user_existance(user_id)
 	# Check if ready to pay
@@ -777,43 +749,52 @@ def text_result(text, bot, update):
 			#print(check)
 			#print(hex)
 		elif ((m[5] is not None) and (m[6] != 0) and (not (check == hex)) and (check is not False)):
-			update.message.reply_text('Password you entered is incorrent. Type your password to confirm transaction')
+			update.message.reply_text(lang_text('send_password', lang_id))
 			#print(check)
 			#print(hex)
 			logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
-		elif ((m[5] is not None) and (m[6] != 0) and (check is False) and (('yes' in text.lower()) or ('confirm' in text.lower()))):
+		elif ((m[5] is not None) and (m[6] != 0) and (check is False) and (text.lower() in language['commands']['yes'])):
 			send_finish(bot, update)
 		elif ((m[5] is not None) and (m[6] != 0)):
 			mysql_update_send_clean(m[2])
-			default_keyboard(bot, update.message.chat_id, 'Payment cancelled')
+			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_cancelled', lang_id))
 	# Get the text the user sent
 	text = text.lower()
-	if (('help' in text) or ('support' in text)):
+	if (text in language['commands']['help']):
 		help_text(bot, update)
-	elif (('account' in text) or ('balance' in text) or ('register' in text)):
+	elif (text in language['commands']['account']):
 		account_text(bot, update)
-	elif ('send' in text):
+	elif (text in language['commands']['send']):
 		send_text(bot, update)
 	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').isdigit()):
 		# check if digit is correct
 		digit_split = text.replace(' ', '').replace('mrai', '').split(',')
 		if (text.startswith('0,') or ('.' in text) or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
-			default_keyboard(bot, update.message.chat_id, 'For numbers we support only integer input')
+			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
 			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', ''))
 	elif ('xrb_' in text):
 		send_destination(bot, update, text)
 	elif (text.startswith('@') and (len(text) > 3 )):
 		send_destination_username(bot, update, text)
-	elif (('block count' in text) or ('block_count' in text)):
+	elif (text in language['commands']['block_count']):
 		block_count_callback(bot, update)
-	elif (('hello' in text) or ('start' in text)):
+	elif (text in language['commands']['start']):
 		start_text(bot, update)
-	elif (('price' in text) or ('market' in text)):
+	elif (text in language['commands']['price']):
 		price_text(bot, update)
 	elif ('version' in text):
 		version_text(bot, update)
-	elif ('yes' not in text):
+	# back
+	elif ('back' in text):
+		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('ping', lang_id))
+	# language selection
+	elif (text.split(' ')[0] in language['common']['language_list']):
+		language_select_callback(bot, update, text.split(' '))
+	# language selection
+	elif (text.split(' ')[0] in language['common']['lang']):
+		custom_keyboard(bot, update.message.chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
+	elif ((text not in language['commands']['yes']) and (text not in language['commands']['not'])):
 		#default_keyboard(bot, update.message.chat_id, 'Command not found')
 		unknown(bot, update)
 
@@ -826,12 +807,13 @@ def text_filter(bot, update):
 @run_async
 def text_filter_callback(bot, update):
 	user_id = update.message.from_user.id
+	lang_id = mysql_select_language(user_id)
 	try:
 		# Run result function
 		text = update.message.text
 		text_result(text, bot, update)
 	except UnicodeEncodeError:
-		default_keyboard(bot, update.message.chat_id, 'Sorry, but I can\'t read your text')
+		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('text_decode_error', lang_id))
 
 
 @run_async
@@ -842,6 +824,7 @@ def photo_filter(bot, update):
 @run_async
 def photo_filter_callback(bot, update):
 	user_id = update.message.from_user.id
+	lang_id = mysql_select_language(user_id)
 	try:
 		image = update.message.photo[-1]
 		path = '{1}download/{0}.jpg'.format(image.file_id, qr_folder_path)
@@ -851,16 +834,16 @@ def photo_filter_callback(bot, update):
 		account = account_by_qr(path)
 		print(account)
 		if ('xrb_' in account):
-			default_keyboard(bot, update.message.chat_id, 'Send to account *{0}*'.format(account))
+			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_send', lang_id).format(account))
 			send_destination(bot, update, account)
 		elif (('NULL' in account) or (account is None) or (account is False)):
-			default_keyboard(bot, update.message.chat_id, 'Sorry, but I can\'t recognize your QR code')
+			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_recognize_error', lang_id))
 		else:
-			default_keyboard(bot, update.message.chat_id, 'Sorry, but I can\'t find xrb\_account in your QR code')
+			lang_keyboard(bot, update.message.chat_id, lang_text('qr_account_error', lang_id))
 		#print(account)
 		logging.info('QR by file: {0}'.format(account))
 	except UnicodeEncodeError:
-		default_keyboard(bot, update.message.chat_id, 'Sorry, but I can\'t read your text')
+		lang_keyboard(bot, update.message.chat_id, lang_text('text_decode_error', lang_id))
 
 
 @run_async
@@ -881,20 +864,18 @@ def password_callback(bot, update, args):
 					hex = binascii.hexlify(dk)
 					print(hex)
 					mysql_set_password(user_id, hex)
-					bot.sendMessage(chat_id=chat_id, 
-						text='Now your account is protected with password!\n*Dont\'t forget password, we cannot help you, if you lose it!\nDelete all messages with password so no one can retrieve pass from history!*', 
-						parse_mode=ParseMode.MARKDOWN,
-						disable_web_page_preview=True)
+					message_markdown(bot, chat_id, lang(user_id, 'password_success'))
 				else:
-					update.message.reply_text('Password must include uppercase letters, lowercase letters and digits')
+					update.message.reply_text(lang(user_id, 'password_uppercase'))
 					logging.info('Password set failed for user {0}. Reason: uppercase-lowercase-digits'.format(user_id))
 			else:
-				update.message.reply_text('Your password is too short, please enter a longer password and try again. Password must be at least 8 characters including uppercase letters, lowercase letters and digits')
+				update.message.reply_text(lang(user_id, 'password_short'))
 				logging.info('Password set failed for user {0}. Reason: Too short'.format(user_id))
 		else:
-			update.message.reply_text('You should delete old password before set new. Use command:\n/password_delete HereYourPass')
+			update.message.reply_text(lang(user_id, 'password_not_empty'))
 			logging.info('Password set failed for user {0}. Reason: Already protected'.format(user_id))
 	else:
+		update.message.reply_text(lang(user_id, 'password_command'))
 		update.message.reply_text('Use command\n/password HereYourPass')
 
 def password_delete(bot, update, args):
@@ -913,13 +894,13 @@ def password_delete_callback(bot, update, args):
 		#print(check)
 		if (check == hex):
 			mysql_delete_password(user_id)
-			update.message.reply_text('Your old password was successfully deleted. Use this command to set new password:\n/password HereYourPass')
+			update.message.reply_text(lang(user_id, 'password_delete_success'))
 			logging.info('Password deletion for user {0}'.format(user_id))
 		else:
-			update.message.reply_text('Password you entered is incorrent. Try again')
+			update.message.reply_text(lang(user_id, 'password_error'))
 			logging.info('Password deletion failed for user {0}. Reason: Wrong password'.format(user_id))
 	else:
-		update.message.reply_text('Use command\n/password_delete HereYourPass')
+		update.message.reply_text(lang(user_id, 'password_delete_command'))
 
 
 @run_async
@@ -933,7 +914,7 @@ def ping(bot, update):
 	logging.info(update.message)
 	typing_illusion(bot, update.message.chat_id) # typing illusion
 	sleep(2)
-	default_keyboard(bot, update.message.chat_id, '@RaiWalletBot reporting')
+	default_keyboard(bot, update.message.chat_id, lang(update.message.from_user.id, 'ping'))
 
 @restricted
 def stats(bot, update):
@@ -949,11 +930,9 @@ def stats(bot, update):
 
 @run_async
 def unknown(bot, update):
-	logging.info(update.message)
 	user_id = update.message.from_user.id
-	default_keyboard(bot, update.message.chat_id, 'Command not found'
-						'\nPress \"Help\" to show available commands'
-						'\nType /help for advanced usage')
+	lang_id = mysql_select_language(user_id)
+	lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('command_not_found', lang_id))
 
 @run_async
 def unknown_ddos(bot, update):
@@ -965,9 +944,8 @@ def unknown_ddos(bot, update):
 		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
 		logging.warn('Too fast request by user {0}'.format(user_id))
-	default_keyboard(bot, update.message.chat_id, 'Command not found'
-						'\nPress \"Help\" to show available commands'
-						'\nType /help for advanced usage')
+	lang_id = mysql_select_language(user_id)
+	lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('command_not_found', lang_id))
 
 def error(bot, update, error):
 	logger.warn('Update "%s" caused error "%s"' % (update, error))
@@ -1005,6 +983,7 @@ def main():
 	dp.add_handler(CommandHandler("price", price))
 	dp.add_handler(CommandHandler("market", price)) # symlink
 	dp.add_handler(CommandHandler("version", version))
+	dp.add_handler(CommandHandler("language", language_select, pass_args=True))
 
 	
 	# admin commands

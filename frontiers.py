@@ -44,7 +44,7 @@ hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 faucet_url = 'https://raiblockscommunity.net/faucet/mobile.php?a='
 
 # MySQL requests
-from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price
+from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language
 
 
 # Request to node
@@ -54,6 +54,15 @@ from common_rpc import *
 # Common functions
 from common import push
 
+
+# Translation
+with open('language.json') as lang_file:    
+	language = json.load(lang_file)
+def lang_text(text_id, lang_id):
+	try:
+		return language[lang_id][text_id]
+	except KeyError:
+		return language['en'][text_id]
 
 
 # frontiers check
@@ -93,19 +102,20 @@ def frontiers():
 					block_account = rpc({"action":"block_account","hash":send_source}, 'account')
 					#print (block_account)
 					sender = ''
+					lang_id = mysql_select_language(account[0])
 					if (block_account == faucet_account):
-						sender = ' from Faucet/Landing'
+						sender = lang_text('frontiers_sender_faucet', lang_id)
 					elif (block_account == fee_account):
-						sender = ' from @RaiWalletBot itself'
+						sender = lang_text('frontiers_sender_bot', lang_id)
 					elif (block_account == account[1]):
-						sender = ' from you'
+						sender = lang_text('frontiers_sender_self', lang_id)
 					else:
 						for sender_account in accounts_list:
 							if (sender_account[1] == block_account):
 								if ((sender_account[4] is not None) and (sender_account[4])):
-									sender = ' from @{0}'.format(sender_account[4])
+									sender = lang_text('frontiers_sender_username', lang_id).format(sender_account[4])
 								else:
-									sender = ' from one of our users'
+									sender = lang_text('frontiers_sender_users', lang_id)
 					#print (sender)
 					logging.info(sender)
 					logging.info(block_account)
@@ -119,8 +129,8 @@ def frontiers():
 						logging.info('Incoming fee deducted')
 					else:
 						#print(account[0])
-						#print('*{0} Mrai (XRB)* received{5}. Transaction hash: [{3}]({4}{3})\nYour current balance: *{1} Mrai (XRB)*. Send limit: {2} Mrai (XRB)'.format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
-						push(bot, account[0], '*{0} Mrai (XRB)* received{5}. Transaction hash: [{3}]({4}{3})\nYour current balance: *{1} Mrai (XRB)*. Send limit: {2} Mrai (XRB)'.format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
+						#print(lang_text('frontiers_receive', lang_id).format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
+						push(bot, account[0], lang_text('frontiers_receive', lang_id).format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
 					time.sleep(0.1)
 		# no frontier. No transactions
 		except KeyError:
@@ -180,7 +190,7 @@ def bitgrail():
 	low_price = int(float(json_array['low']) * (10 ** 8))
 	ask_price = int(float(json_array['ask']) * (10 ** 8))
 	bid_price = int(float(json_array['bid']) * (10 ** 8))
-	volume = 0
+	volume = int(float(json_array['coinVolume']))
 	btc_volume = int(float(json_array['volume']) * (10 ** 8))
 	
 	mysql_set_price(2, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
@@ -207,6 +217,11 @@ def frontiers_usual():
 	except:
 		time.sleep(5)
 		mercatox()
+	try:
+		bitgrail()
+	except:
+		time.sleep(5)
+		bitgrail()
 
 
 # check if already running

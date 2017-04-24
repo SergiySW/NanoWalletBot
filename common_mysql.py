@@ -246,9 +246,9 @@ def mysql_delete_password(user_id):
 def mysql_select_price():
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)
-	query = "SELECT last_price, high_price, low_price, ask_price, bid_price, volume FROM rai_price WHERE id = 1"
+	query = "SELECT last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume FROM rai_price"
 	cursor.execute(query)
-	price = cursor.fetchone()
+	price = cursor.fetchall()
 	cursor.close()
 	cnx.close()
 	return(price)
@@ -294,6 +294,30 @@ def mysql_delete_blacklist(user_id):
 	cnx.commit()
 	cursor.close()
 	cnx.close()
+
+
+def mysql_set_language(user_id, language):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "REPLACE INTO rai_bot_language SET user_id = {0}, language = '{1}'".format(user_id, language)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+def mysql_select_language(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT language FROM rai_bot_language WHERE user_id = {0}".format(user_id)
+	try:
+		cursor.execute(query)
+		language = cursor.fetchone()[0]
+	except TypeError:
+		mysql_set_language(user_id, 'en')
+		language = 'en'
+	cursor.close()
+	cnx.close()
+	return(language)
 
 
 
