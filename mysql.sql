@@ -80,7 +80,7 @@ CREATE TABLE `rai_bot_access` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `rai_bot_access`
+-- Table structure for table `rai_bot_language`
 --
 
 DROP TABLE IF EXISTS `rai_bot_language`;
