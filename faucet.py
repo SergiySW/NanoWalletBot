@@ -65,8 +65,6 @@ def faucet():
 	with open('paylist.json', 'w') as outfile:  
 		json.dump(json_paylist, outfile)
 	json_array = json_paylist['pending']
-	# Top list = 300 Mrai
-	top_tier = 300
 	
 	bot = Bot(api_key)
 	# list from MySQL
@@ -76,17 +74,8 @@ def faucet():
 	for account in accounts_list:
 		for paylist in json_array:
 			if ((paylist['account'] == account[1]) and (account[0] not in BLACK_LIST)):
-				estimated_rai = int(paylist['expected-pay'])
-				estimated_mrai = int(math.floor(estimated_rai / (10 ** 6)))
 				claims = int(paylist['pending'])
-				
-				if (estimated_mrai > top_tier):
-					text = lang(account[0], 'faucet_top').format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
-				if (estimated_mrai > 0):
-					text = lang(account[0], 'faucet_usual').format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
-				else:
-					text = lang(account[0], 'faucet_low').format(paylist['account'], "{:,}".format(claims), "{:,}".format(estimated_mrai))
-				#print(paylist['account'])
+				text = lang(account[0], 'faucet_claims').format("{:,}".format(claims))
 				push_simple(bot, account[0], text)
 				#print(text)
 				logging.info('{0}\n{1}'.format(account[0], text))

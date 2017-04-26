@@ -1,7 +1,7 @@
 {
 	"common": {
 		"language_list": ["en", "ru", "id"],
-		"lang": ["lang", "язык", "bahasa"],
+		"lang": ["lang", "language", "язык", "bahasa"],
 		"language_selection": "Please, select language\nПожалуйста, выберите язык\nHarap pilih bahasa\n",
 		"language_keyboard": [["EN 🇬🇧", "RU 🇷🇺"], ["ID 🇮🇩", "Back ↩"]]
 	},
@@ -9,9 +9,9 @@
 		"help": [ "help", "support", "помощь", "подержка", "bantuan", "dukungan" ],
 		"account": [ "account", "balance", "registration", "аккаунт", "баланс", "регистрация", "akun", "saldo", "pendaftaran" ],
 		"send": [ "send", "отправить", "послать", "kirim" ],
-		"block_count": [ "block count", "block_count", "блок", "blok terhitung", "blok"],
+		"block_count": [ "block count", "block_count", "блок", "blok terhitung", "blok" ],
 		"start": [ "start", "hello", "hi", "старт", "начать", "привет", "memulai" ],
-		"price": [ "price", "market", "цена", "рынок", "harga", "pasar" ],
+		"price": [ "price", "market", "trade", "цена", "рынок", "торговля", "harga", "pasar" ],
 		"yes": [ "yes", "confirm", "да", "подтвердить", "подтверждаю", "ya", "confirmasi" ],
 		"not": [ "no", "not", "cancel", "stop", "нет", "отмена", "отменить", "tidak", "batal", "berhenti" ]
 	},
@@ -77,6 +77,7 @@
 		"faucet_top": "Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nCongratulations, you are one of the Top claimers! You will receive your Mrai (XRB) in the next few minutes",
 		"faucet_usual": "Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward: {2} Mrai (XRB)\nYou will receive your Mrai (XRB) in the next 12 minutes",
 		"faucet_low": "Faucet claiming period is almost over. You made ~{1} claims this hour. Estimated reward less than 1 Mrai (XRB)\nYou have to send or claim more Mrai (XRB) to your account {0}",
+		"faucet_claims": "Faucet claiming period is almost over. You collect ~{0} claims this hour",
 		"frontiers_sender_faucet": " from Faucet/Landing",
 		"frontiers_sender_bot": " from @RaiWalletBot itself",
 		"frontiers_sender_self": " from you",
@@ -146,6 +147,7 @@
 		"faucet_top": "Период дистрибуции практически завершен. За этот час вы сделали ~{1} кликов. Ожидаемая награда: {2} Mrai (XRB)\nИскренние поздравления, вы один из лучших кликеров! Вы получите Mrai (XRB) в течение несколких минут",
 		"faucet_usual": "Период дистрибуции практически завершен. За этот час вы сделали ~{1} кликов. Ожидаемая награда: {2} Mrai (XRB)\nВы получите Mrai (XRB) в течение 12 минут",
 		"faucet_low": "Период дистрибуции практически завершен. За этот час вы сделали ~{1} кликов. Ожидаемая награда меньше 1 Mrai (XRB)\nпришлите на свой аккаунт {0} Mrai (XRB) или соберите больше кликов на распределительной капче",
+		"faucet_claims": "Период дистрибуции практически завершен. За этот час вы набрали ~{0} кликов",
 		"frontiers_sender_faucet": " от аккаунта Распределения/Капчи",
 		"frontiers_sender_bot": " от самого @RaiWalletBot!",
 		"frontiers_sender_self": " от себя",
@@ -215,6 +217,7 @@
 		"faucet_top": "Masa klaim faucet hampir berakhir. Anda membuat ~{1} klaim jam ini. Estimasi hadiah: {2} Mrai (XRB)\nCongratulations, Anda adalah salah satu klaim teratas! Anda akan menerima Mrai Anda (XRB) dalam beberapa menit ke depan",
 		"faucet_usual": "Masa klaim faucet hampir berakhir. Anda membuat ~{1} klaim jam ini. Estimasi hadiah: {2} Mrai (XRB)\nAnda akan menerima Mrai Anda (XRB) dalam waktu 12 menit",
 		"faucet_low": "Masa klaim faucet hampir berakhir. Anda membuat ~{1} klaim jam ini. Estimasi hadiah kurang dari 1 Mrai (XRB)\nKirimkan beberapa Mrai (XRB) ke akun anda {0}",
+		"faucet_claims": "Masa klaim faucet hampir berakhir. Anda membuat ~{0} klaim jam ini",
 		"frontiers_sender_faucet": " dari Faucet/Landing",
 		"frontiers_sender_bot": " dari @RaiWalletBot resmi sendiri",
 		"frontiers_sender_self": " dari anda",
