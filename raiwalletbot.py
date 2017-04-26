@@ -201,8 +201,20 @@ def ddos_protection_args(bot, update, args, callback):
 
 
 @run_async
+def info_log(update):
+	result = {}
+	result['text'] = update.message.text
+	result['user_id'] = update.message.from_user.id
+	result['username'] = update.message.from_user.username
+	result['first_name'] = update.message.from_user.first_name
+	result['last_name'] = update.message.from_user.last_name
+	result['timestamp'] = int(time.mktime(update.message.date.timetuple()))
+	result['message_id'] = update.message.message_id
+	logging.info(result)
+
+@run_async
 def language_select(bot, update, args):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection_args(bot, update, args, language_select_callback)
 
 @run_async
@@ -226,7 +238,7 @@ def language_select_callback(bot, update, args):
 
 @run_async
 def start(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, start_text)
 
 
@@ -245,7 +257,7 @@ def start_text(bot, update):
 
 @run_async
 def help(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, help_callback)
 
 @run_async
@@ -276,7 +288,7 @@ def user_id(bot, update):
 
 @run_async
 def block_count(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, block_count_callback)
 
 @run_async
@@ -299,7 +311,7 @@ def block_count_callback(bot, update):
 # broadcast
 @restricted
 def broadcast(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	bot = Bot(api_key)
 	# list users from MySQL
 	accounts_list = mysql_select_accounts_balances()
@@ -318,7 +330,7 @@ def broadcast(bot, update):
 # bootstrap
 @restricted
 def bootstrap(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	rpc({"action": "bootstrap", "address": "::ffff:138.201.94.249", "port": "7075"}, 'success')
 	bot.sendMessage(update.message.chat_id, "Bootstraping...")
 
@@ -334,7 +346,7 @@ def restart(bot, update):
 #@restricted
 @run_async
 def account(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, account_text)
 
 
@@ -398,7 +410,7 @@ def account_text(bot, update):
 
 @run_async
 def send(bot, update, args):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection_args(bot, update, args, send_callback)
 
 @run_async
@@ -694,7 +706,7 @@ def send_finish(bot, update):
 
 @run_async
 def price(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, price_text)
 
 @run_async
@@ -722,7 +734,7 @@ def price_text(bot, update):
 
 @run_async
 def version(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, version_text)
 
 @run_async
@@ -811,7 +823,7 @@ def text_result(text, bot, update):
 
 @run_async
 def text_filter(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, text_filter_callback)
 
 @run_async
@@ -828,7 +840,7 @@ def text_filter_callback(bot, update):
 
 @run_async
 def photo_filter(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	ddos_protection(bot, update, photo_filter_callback)
 
 @run_async
@@ -915,20 +927,20 @@ def password_delete_callback(bot, update, args):
 
 @run_async
 def echo(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	update.message.reply_text(update.message.text)
 
 
 @run_async
 def ping(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	typing_illusion(bot, update.message.chat_id) # typing illusion
 	sleep(2)
 	default_keyboard(bot, update.message.chat_id, lang(update.message.from_user.id, 'ping'))
 
 @restricted
 def stats(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	typing_illusion(bot, update.message.chat_id) # typing illusion
 	fee_balance = account_balance(fee_account)
 	stats = '{0}\nFees balance: {1} Mrai (XRB)'.format(mysql_stats(), "{:,}".format(fee_balance))
@@ -946,7 +958,7 @@ def unknown(bot, update):
 
 @run_async
 def unknown_ddos(bot, update):
-	logging.info(update.message)
+	info_log(update)
 	user_id = update.message.from_user.id
 	message_id = int(update.message.message_id)
 	ddos = mysql_ddos_protector(user_id, message_id)
