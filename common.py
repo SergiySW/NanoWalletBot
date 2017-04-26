@@ -12,12 +12,24 @@
 
 
 from telegram import Bot, ParseMode
+from telegram.error import BadRequest
 from time import sleep
+
+
+def replace_unsafe(text):
+	text = text.replace("xrb_1", "xrb\_1").replace("xrb_3", "xrb\_3")
+	return text
+
 
 def push(bot, chat_id, message):
 	try:
 		bot.sendMessage(chat_id=chat_id, 
 			text=message, 
+			parse_mode=ParseMode.MARKDOWN,
+			disable_web_page_preview=True)
+	except BadRequest:
+		bot.sendMessage(chat_id=chat_id, 
+			text=replace_unsafe(message), 
 			parse_mode=ParseMode.MARKDOWN,
 			disable_web_page_preview=True)
 	except:
@@ -31,6 +43,8 @@ def push(bot, chat_id, message):
 def push_simple(bot, chat_id, message):
 	try:
 		bot.sendMessage(chat_id=chat_id, text=message)
+	except BadRequest:
+		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
 	except:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, text=message)
@@ -40,6 +54,11 @@ def message_markdown(bot, chat_id, message):
 	try:
 		bot.sendMessage(chat_id=chat_id, 
 					text=message,
+					parse_mode=ParseMode.MARKDOWN,
+					disable_web_page_preview=True)
+	except BadRequest:
+		bot.sendMessage(chat_id=chat_id, 
+					text=replace_unsafe(message),
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
 	except:

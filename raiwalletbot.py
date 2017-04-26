@@ -18,6 +18,7 @@ bot.
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram import Bot, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatAction
+from telegram.error import BadRequest
 import logging
 import urllib3, certifi, socket, json
 import hashlib, binascii, string, math
@@ -125,10 +126,16 @@ def lang_text(text_id, lang_id):
 
 @run_async
 def custom_keyboard(bot, chat_id, buttons, text):
+	reply_markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
 	try:
-		reply_markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
 		bot.sendMessage(chat_id=chat_id, 
 					 text=text, 
+					 parse_mode=ParseMode.MARKDOWN,
+					 disable_web_page_preview=True,
+					 reply_markup=reply_markup)
+	except BadRequest:
+		bot.sendMessage(chat_id=chat_id, 
+					 text=replace_unsafe(text), 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True,
 					 reply_markup=reply_markup)
@@ -515,7 +522,7 @@ def send_callback(bot, update, args):
 	except (TypeError):
 		message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
 	except (IndexError):
-		lang_keyboard(lang_id, chat_id, lang_text('send_wrong_command', lang_id).format(min_send, m[2]))
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(min_send, m[2]))
 
 
 @run_async
@@ -738,8 +745,11 @@ def text_result(text, bot, update):
 		if (check is not False):
 			#print(text)
 			password = text
-			dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-			hex = binascii.hexlify(dk)
+			try:
+				dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
+				hex = binascii.hexlify(dk)
+			except UnicodeEncodeError:
+				hex = False
 		else:
 			hex = False
 		# Check password protection

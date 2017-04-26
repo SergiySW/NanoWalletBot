@@ -51,7 +51,7 @@
 		"send_digits": "Send amount must contain Integer ONLY",
 		"send_no_account": "You do not have RaiBlocks account yet. Type /account to begin",
 		"send_no_account_text": "You do not have RaiBlocks account yet. Press \"Account\" to begin",
-		"send_wrong_command": "Use command /send [amount] [xrb\\_account]\nExample: /send {0} {1}\n\nor simple press \"Send\" button",
+		"send_wrong_command": "Use command /send amount xrb\\_account\nExample: /send {0} {1}\n\nor simple press \"Send\" button",
 		"send_amount": "Please specify amount of Mrai (XRB) you want to send. Current fee: {0} Mrai (XRB). Minimal send: {1} Mrai (XRB)",
 		"send_destination": "Please specify destination xrb\\_account or @UserName (starts with @ sign) or upload QR code (clean, best quality image)",
 		"send_confirm": "Confirm you want to send *{0} Mrai (XRB)* to *{2}*\nIt will cost you *{1} Mrai (XRB)* with fees",
@@ -120,7 +120,7 @@
 		"send_digits": "Кол-во для отправки должно содержать ТОЛЬКО целые числа",
 		"send_no_account": "У вас еще нет аккаунта RaiBlocks. Чтобы создать его, введите /account",
 		"send_no_account_text": "У вас еще нет аккаунта RaiBlocks. Чтобы создать его, нажмите \"Аккаунт\" ",
-		"send_wrong_command": "Используйте команду /send [кол-во] [xrb\\_аккаунт]\nПример: /send {0} {1}\n\nили просто нажмите кнопку \"Отправить\" ",
+		"send_wrong_command": "Используйте команду /send кол-во xrb\\_аккаунт\nПример: /send {0} {1}\n\nили просто нажмите кнопку \"Отправить\" ",
 		"send_amount": "Укажите кол-во Mrai (XRB), которое вы хотите отправить. Комиссия: {0} Mrai (XRB). Минимум отправки: {1} Mrai (XRB)",
 		"send_destination": "Укажите, куда вы хотите отправить средства: xrb\\_аккаунт or @ИмяПользователя (начинается со знака @) или загрузите QR-код (требуется изображение хорошего качества)",
 		"send_confirm": "Подтвердите отправку *{0} Mrai (XRB)* на аккаунт *{2}*\nЭто будет стоить *{1} Mrai (XRB)* с учетом комиссии",
@@ -151,7 +151,7 @@
 		"frontiers_sender_self": " от себя",
 		"frontiers_sender_username": " от @{0}",
 		"frontiers_sender_users": " от одного из наших пользоваталей",
-		"frontiers_receive": "*{0} Mrai (XRB)* получено{5}. Хэш транзакции: [{3}]({4}{3})\nВаш баланс: *{1} Mrai (XRB)*. Ваш лимит отправки: {2} Mrai (XRB)"
+		"frontiers_receive": "*{0} Mrai (XRB)* получено{5}. Хэш транзакции: [{3}]({4}{3})\nВаш баланс: *{1} Mrai (XRB)*. Лимит отправки: {2} Mrai (XRB)"
 	},
 	"id": {
 		"menu": [["Akun", "Kirim"], ["Harga", "Bahasa 🇬🇧 🇷🇺 🇮🇩"], ["Bantuan"]],
@@ -189,7 +189,7 @@
 		"send_digits": "Jumlah kirim hanya boleh berisi bilangan bulat",
 		"send_no_account": "Anda belum memiliki akun RaiBlocks. Tulis /account untuk memulai",
 		"send_no_account_text": "Anda belum memiliki akun RaiBlocks. Tekan \"Akun\" untuk memulai",
-		"send_wrong_command": "Gunakan Perintah /send [jumlah] [xrb\\_akun]\nContoh: /send {0} {1}\n\nAtau tekan \"Kirim\" Untuk",
+		"send_wrong_command": "Gunakan Perintah /send jumlah xrb\\_akun\nContoh: /send {0} {1}\n\nAtau tekan \"Kirim\" Untuk",
 		"send_amount": "Harap tentukan jumlah Mrai (XRB) yang ingin Anda kirim. Biaya saat ini: {0} Mrai (XRB). Minimal kirim: {1} Mrai (XRB)",
 		"send_destination": "Harap tentukan tujuan xrb\\_akun atau @UserName (dimulai dengan tanda @) atau unggah kode QR (gambar kualitas bersih dan terbaik)",
 		"send_confirm": "Konfirmasikan bahwa Anda ingin mengirim *{0} Mrai (XRB)* to *{2}*\nIni akan dikenakan biaya *{1} Mrai (XRB)* dengan biaya",
