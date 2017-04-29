@@ -256,7 +256,7 @@ def start_text(bot, update):
 	# Check user existance in database
 	exist = mysql_user_existance(user_id)
 	# Select language if 1st time
-	if (exist is not False):
+	if (exist is False):
 		sleep(0.1)
 		custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 
