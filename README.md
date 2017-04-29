@@ -31,3 +31,8 @@ Edit bot.cfg with your preferences
 Start bot `python raiwalletbot.py`   
 Set cron job for python frontiers.py   
 
+# Thanks
+* [clemahieu](https://github.com/clemahieu) for RaiBlocks creation and development
+* [Mike Row](https://github.com/mikerow), [HostFat](https://github.com/hostfat),  [James Coxon](https://github.com/jamescoxon) for alpha testing and great advices
+* gotowerdown for Indonesian translation
+* reee for Italian translation
