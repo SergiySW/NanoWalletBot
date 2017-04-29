@@ -139,8 +139,8 @@ def frontiers():
 	time_end = int(time.time())
 	total_time = time_end - time_start 
 	#print(total_time)
-	if (total_time > 20):
-		logging.warning(('WARNING!!! \nMore than 20 seconds execution time!!!'))
+	if (total_time > 15):
+		logging.warning(('WARNING!!! \nMore than 15 seconds execution time!!!'))
 	return total_time
 
 
@@ -198,18 +198,9 @@ def bitgrail():
 
 def frontiers_usual():
 	run_time = frontiers()
-	if (run_time < 15):
-		time.sleep(15-run_time)
-		run_time = frontiers()
-		if (run_time < 15):
-			time.sleep(15-run_time)
-			run_time = frontiers()
-			if (run_time < 15):
-				time.sleep(15-run_time)
-				frontiers()
-	elif (run_time <= 30):
-		time.sleep(30-run_time)
-		frontiers()
+	while run_time < 55:
+		time.sleep(3)
+		run_time = run_time + 3 + frontiers()
 	
 	#cryptopia()
 	try:
