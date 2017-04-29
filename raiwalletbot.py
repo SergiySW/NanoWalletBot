@@ -409,6 +409,8 @@ def account_text(bot, update):
 			message_markdown(bot, chat_id, lang_text('account_explorer', lang_id).format(r, account_url))
 			sleep(0.1)
 			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
+			sleep(0.1)
+			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 		else:
 			update.message.reply_text(lang_text('account_error', lang_id))
 

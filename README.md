@@ -36,3 +36,4 @@ Set cron job for python frontiers.py
 * [Mike Row](https://github.com/mikerow), [HostFat](https://github.com/hostfat),  [James Coxon](https://github.com/jamescoxon) for alpha testing and great advices
 * gotowerdown for Indonesian translation
 * reee for Italian translation
+* Freddynic159 for Spanish translation
