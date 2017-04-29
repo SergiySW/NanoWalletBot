@@ -47,7 +47,7 @@
 		"send_error": "Failed to send. Try again later",
 		"send_password": "Password you entered is incorrent. Type your password to confirm transaction",
 		"send_frontier": "As additional level of protection we check your last transaction hash at raiblockscommunity.net. Your last block was not found at website yet. Try send later",
-		"send_invalid": "Destination xrb\\_account in invalid",
+		"send_invalid": "Destination xrb\\_account is invalid",
 		"send_digits": "Send amount must contain Integer ONLY",
 		"send_no_account": "You do not have RaiBlocks account yet. Type /account to begin",
 		"send_no_account_text": "You do not have RaiBlocks account yet. Press \"Account\" to begin",
@@ -288,11 +288,11 @@
 		"faucet_usual": "Il periodo di richiesta al faucet è quasi terminato. Hai fatto ~{1} richieste in quest'ora. Ricompensa stimata: {2} Mrai (XRB)\nRiceverai i tuoi Mrai (XRB) entro 12 minuti",
 		"faucet_low": "Il periodo di richiesta al faucet è quasi terminato. Hai fatto ~{1} richieste in quest'ora. Ricompensa stimata inferiore a 1 Mrai (XRB)\nDevi inviare o richiedere al faucet più Mrai (XRB) al tuo account {0}",
 		"faucet_claims": "Il periodo di richiesta al faucet è quasi terminato. Hai fatto ~{0} richieste in quest'ora",
-		"frontiers_sender_faucet": "da Faucet/Landing",
-		"frontiers_sender_bot": "da @RaiWalletBot stesso",
-		"frontiers_sender_self": "da te",
-		"frontiers_sender_username": "da @{0}",
-		"frontiers_sender_users": "da uno dei nostri utenti",
+		"frontiers_sender_faucet": " da Faucet/Landing",
+		"frontiers_sender_bot": " da @RaiWalletBot stesso",
+		"frontiers_sender_self": " da te",
+		"frontiers_sender_username": " da @{0}",
+		"frontiers_sender_users": " da uno dei nostri utenti",
 		"frontiers_receive": "*{0} Mrai (XRB)* ricevuti{5}. Hash della transazione: [{3}]({4}{3})\nIl tuo saldo attuale: *{1} Mrai (XRB)*. Limite di invio: {2} Mrai (XRB)"
 	}
 }

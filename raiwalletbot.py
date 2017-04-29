@@ -253,6 +253,12 @@ def start_text(bot, update):
 	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(fee_amount, min_send, incoming_fee_text))
 	sleep(0.1)
 	message_markdown(bot, chat_id, lang_text('start_learn_more', lang_id))
+	# Check user existance in database
+	exist = mysql_user_existance(user_id)
+	# Select language if 1st time
+	if (exist is not False):
+		sleep(0.1)
+		custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 
 
 @run_async
