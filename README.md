@@ -37,3 +37,4 @@ Set cron job for python frontiers.py
 * gotowerdown for Indonesian translation
 * reee for Italian translation
 * Freddynic159 for Spanish translation
+* zzSunShinezz for Vietnamese translation
