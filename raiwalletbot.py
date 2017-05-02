@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
-faucet_url = 'https://raiblockscommunity.net/faucet/form.php?a='
+faucet_url = 'https://faucet.raiblockscommunity.net/form.php?a='
 summary_url = 'https://raiblockscommunity.net/page/summary.php?json=1'
 
 # MySQL requests

@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
-faucet_url = 'https://raiblockscommunity.net/faucet/mobile.php?a='
+faucet_url = 'https://faucet.raiblockscommunity.net/form.php?a='
 
 # MySQL requests
 from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language

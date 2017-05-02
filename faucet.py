@@ -58,7 +58,7 @@ def lang(user_id, text_id):
 # Faucet
 def faucet():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	url = 'https://raiblockscommunity.net/faucet/paylist.php?json=1'
+	url = 'https://faucet.raiblockscommunity.net/paylist.php?json=1'
 	response = http.request('GET', url)
 	json_paylist = json.loads(response.data)
 	#save it
