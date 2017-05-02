@@ -320,6 +320,34 @@ def mysql_select_language(user_id):
 	return(language)
 
 
+def mysql_set_sendlist(user_id, text):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "INSERT INTO rai_send_list SET user_id = {0}, text = '{1}'".format(user_id, text)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+def mysql_delete_sendlist(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "DELETE FROM rai_send_list WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+def mysql_select_sendlist():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT user_id, text FROM rai_send_list "
+	cursor.execute(query)
+	price = cursor.fetchall()
+	cursor.close()
+	cnx.close()
+	return(price)
+
 
 #@run_async
 from datetime import datetime

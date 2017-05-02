@@ -44,7 +44,7 @@ hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php?a='
 
 # MySQL requests
-from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language
+from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language, mysql_set_sendlist, mysql_delete_sendlist, mysql_select_sendlist
 
 
 # Request to node
@@ -129,8 +129,11 @@ def frontiers():
 						logging.info('Incoming fee deducted')
 					else:
 						#print(account[0])
-						#print(lang_text('frontiers_receive', lang_id).format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
-						push(bot, account[0], lang_text('frontiers_receive', lang_id).format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender))
+						text = lang_text('frontiers_receive', lang_id).format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender)
+						mysql_set_sendlist(account[0], text)
+						#print(text)
+						push(bot, account[0], text)
+						mysql_delete_sendlist(account[0])
 					time.sleep(0.1)
 		# no frontier. No transactions
 		except KeyError:
@@ -143,6 +146,14 @@ def frontiers():
 		logging.warning(('WARNING!!! \nMore than 15 seconds execution time!!!'))
 	return total_time
 
+# send old data
+def frontiers_sendlist():
+	bot = Bot(api_key)
+	sendlist = mysql_select_sendlist()
+	for send in sendlist:
+		push(bot, send[0], send[1])
+		mysql_delete_sendlist(send[0])
+		logging.warning('From sendlist: {0} :: {1}'.format(send[0], send[1]))
 
 '''
 def cryptopia():
@@ -197,6 +208,7 @@ def bitgrail():
 
 
 def frontiers_usual():
+	frontiers_sendlist()
 	run_time = frontiers()
 	while run_time < 55:
 		time.sleep(3)
