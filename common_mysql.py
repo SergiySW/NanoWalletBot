@@ -29,6 +29,8 @@ mysql_config = {
   'host': mysql_server,
   'database': mysql_database,
   'raise_on_warnings': True,
+  'use_unicode': True,
+  'charset': 'utf8',
 }
 
 def mysql_insert(data):
