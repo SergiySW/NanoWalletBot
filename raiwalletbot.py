@@ -18,7 +18,7 @@ bot.
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram import Bot, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatAction
-from telegram.error import BadRequest
+from telegram.error import BadRequest, RetryAfter
 import logging
 import urllib3, certifi, socket, json
 import hashlib, binascii, string, math
@@ -136,6 +136,13 @@ def custom_keyboard(bot, chat_id, buttons, text):
 	except BadRequest:
 		bot.sendMessage(chat_id=chat_id, 
 					 text=replace_unsafe(text), 
+					 parse_mode=ParseMode.MARKDOWN,
+					 disable_web_page_preview=True,
+					 reply_markup=reply_markup)
+	except RetryAfter:
+		sleep(240)
+		bot.sendMessage(chat_id=chat_id, 
+					 text=text, 
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True,
 					 reply_markup=reply_markup)

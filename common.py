@@ -12,7 +12,7 @@
 
 
 from telegram import Bot, ParseMode
-from telegram.error import BadRequest
+from telegram.error import BadRequest, RetryAfter
 from time import sleep
 
 
@@ -28,6 +28,12 @@ def push(bot, chat_id, message):
 			parse_mode=ParseMode.MARKDOWN,
 			disable_web_page_preview=True)
 	except BadRequest:
+		bot.sendMessage(chat_id=chat_id, 
+			text=replace_unsafe(message), 
+			parse_mode=ParseMode.MARKDOWN,
+			disable_web_page_preview=True)
+	except RetryAfter:
+		sleep(240)
 		bot.sendMessage(chat_id=chat_id, 
 			text=replace_unsafe(message), 
 			parse_mode=ParseMode.MARKDOWN,
@@ -52,6 +58,9 @@ def push_simple(bot, chat_id, message):
 		bot.sendMessage(chat_id=chat_id, text=message)
 	except BadRequest:
 		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
+	except RetryAfter:
+		sleep(240)
+		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
 	except:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, text=message)
@@ -64,6 +73,11 @@ def message_markdown(bot, chat_id, message):
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
 	except BadRequest:
+		bot.sendMessage(chat_id=chat_id, 
+					text=replace_unsafe(message),
+					parse_mode=ParseMode.MARKDOWN,
+					disable_web_page_preview=True)
+	except RetryAfter:
 		bot.sendMessage(chat_id=chat_id, 
 					text=replace_unsafe(message),
 					parse_mode=ParseMode.MARKDOWN,
