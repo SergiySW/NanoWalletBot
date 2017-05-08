@@ -29,9 +29,9 @@ log_file_frontiers = config.get('main', 'log_file_frontiers')
 wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
-raw_fee_amount = fee_amount * (10 ** 30)
+raw_fee_amount = fee_amount * (10 ** 24)
 incoming_fee = int(config.get('main', 'incoming_fee'))
-raw_incoming_fee = incoming_fee * (10 ** 30)
+raw_incoming_fee = incoming_fee * (10 ** 24)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -52,7 +52,7 @@ from common_rpc import *
 
 
 # Common functions
-from common import push
+from common import push, mrai_text
 
 
 # Translation
@@ -87,11 +87,11 @@ def frontiers():
 				# check if balance changed
 				mysql_update_frontier(account[1], frontier)
 				#print('{0} --> {1}	{2}'.format(account[3], balance, frontier))
-				logging.info('{0} --> {1}	{2}'.format(account[3], balance, frontier))
+				logging.info('{0} --> {1}	{2}'.format(mrai_text(account[3]), mrai_text(balance), frontier))
 				#print(balance)
-				if (int(account[3]) < int(balance)):
-					received_amount = int(balance) - int(account[3])
-					max_send = int(balance) - int(fee_amount)
+				if (int(account[3]) < balance):
+					received_amount = balance - int(account[3])
+					max_send = balance - fee_amount
 					if (max_send < 0):
 						max_send = 0
 					# retrieve sender
@@ -120,17 +120,16 @@ def frontiers():
 					logging.info(sender)
 					logging.info(block_account)
 					# receive fee protection
-					mysql_update_balance(account[1], int(balance))
-					logging.info('{0} Mrai (XRB) received by {1}, hash: {2}'.format(received_amount, account[0], frontier))
+					mysql_update_balance(account[1], balance)
+					logging.info('{0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
 					if (incoming_fee >= 1):
 						fee = rpc({"action": "send", "wallet": wallet, "source": account[1], "destination": fee_account, "amount": raw_incoming_fee}, 'block')
 						balance = account_balance(account[1])
 						push(bot, account[0], '*{0} Mrai (XRB)* received{7}. Transaction hash: [{5}]({6}{5})\nIncoming fee: *{4} Mrai (XRB)*. Your current balance: {1} Mrai (XRB). Send limit: {2} Mrai (XRB)'.format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), incoming_fee, frontier, hash_url, sender))
 						logging.info('Incoming fee deducted')
 					else:
-						#print(account[0])
-						text = lang_text('frontiers_receive', lang_id).format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), frontier, hash_url, sender)
-						mysql_set_sendlist(account[0], text)
+						text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
+						mysql_set_sendlist(account[0], text.encode("utf8"))
 						#print(text)
 						push(bot, account[0], text)
 						mysql_delete_sendlist(account[0])

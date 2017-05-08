@@ -40,9 +40,9 @@ wallet = config.get('main', 'wallet')
 password = config.get('main', 'password')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
-raw_fee_amount = fee_amount * (10 ** 30)
+raw_fee_amount = fee_amount * (10 ** 24)
 incoming_fee = int(config.get('main', 'incoming_fee'))
-raw_incoming_fee = incoming_fee * (10 ** 30)
+raw_incoming_fee = incoming_fee * (10 ** 24)
 incoming_fee_text = '\n'
 if (incoming_fee >= 1):
 	incoming_fee_text = '\nCurrent fee for INCOMING transaction (DDoS protection): *{0} Mrai (XRB)*\n'.format(incoming_fee)
@@ -188,7 +188,7 @@ def ddos_protection(bot, update, callback):
 	if (ddos == True):
 		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
-		update.message.reply_text(lang(user_id, 'ddos_error').format(ddos_protect_seconds))
+		text_reply(update, lang(user_id, 'ddos_error').format(ddos_protect_seconds))
 		logging.warn('Too fast request by user {0}'.format(user_id))
 	else:
 		callback(bot, update)
@@ -201,7 +201,7 @@ def ddos_protection_args(bot, update, args, callback):
 	if (ddos == True):
 		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
-		update.message.reply_text(lang(user_id, 'ddos_error').format(ddos_protect_seconds))
+		text_reply(update, lang(user_id, 'ddos_error').format(ddos_protect_seconds))
 		logging.warn('Too fast request by user {0}'.format(user_id))
 	else:
 		callback(bot, update, args)
@@ -235,12 +235,12 @@ def language_select_callback(bot, update, args):
 				mysql_set_language(user_id, lang_id)
 				start_text(bot, update)
 			except:
-				update.message.reply_text(lang(user_id, 'language_error'))
+				text_reply(update, lang(user_id, 'language_error'))
 		else:
-			update.message.reply_text(lang(user_id, 'language_error'))
+			text_reply(update, lang(user_id, 'language_error'))
 			logging.info('Language change failed for user {0}'.format(user_id))
 	else:
-		update.message.reply_text(lang(user_id, 'language_command'))
+		text_reply(update, lang(user_id, 'language_command'))
 
 
 @run_async
@@ -255,7 +255,7 @@ def start_text(bot, update):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 #	hide_keyboard(bot, update.message.chat_id, text)
-	update.message.reply_text(lang_text('start_introduce', lang_id))
+	text_reply(update, lang_text('start_introduce', lang_id))
 	sleep(0.1)
 	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(fee_amount, min_send, incoming_fee_text))
 	sleep(0.1)
@@ -278,7 +278,7 @@ def help_callback(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
-	lang_keyboard(lang_id, bot, chat_id, lang_text('help_advanced_usage', lang_id).format(fee_amount, min_send, incoming_fee_text))
+	lang_keyboard(lang_id, bot, chat_id, lang_text('help_advanced_usage', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
 	sleep(0.1)
 	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
@@ -288,7 +288,7 @@ def help_text(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
-	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(fee_amount, min_send, incoming_fee_text))
+	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
 	sleep(0.1)
 	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
@@ -296,7 +296,7 @@ def help_text(bot, update):
 
 def user_id(bot, update):
 	user_id = update.message.from_user.id
-	update.message.reply_text(user_id)
+	text_reply(update, user_id)
 
 
 @run_async
@@ -308,7 +308,7 @@ def block_count(bot, update):
 def block_count_callback(bot, update):
 	user_id = update.message.from_user.id
 	count = rpc({"action": "block_count"}, 'count')
-	update.message.reply_text("{:,}".format(int(count)))
+	text_reply(update, "{:,}".format(int(count)))
 #	default_keyboard(bot, update.message.chat_id, r)
 	# Admin block count check from raiblockscommunity.net
 	if (user_id in admin_list):
@@ -317,7 +317,7 @@ def block_count_callback(bot, update):
 		json_data = json.loads(response.data)
 		community_count = json_data['blocks']
 		if (math.fabs(int(community_count) - int(count)) > block_count_difference_threshold):
-			update.message.reply_text('Community: {0}'.format("{:,}".format(int(community_count))))
+			text_reply(update, 'Community: {0}'.format("{:,}".format(int(community_count))))
 
 
 
@@ -381,16 +381,15 @@ def account_text(bot, update):
 		if (balance == 0):
 			message_markdown(bot, chat_id, lang_text('account_balance_zero', lang_id).format(faucet_url, r))
 		elif (max_send < min_send):
-			message_markdown(bot, chat_id, lang_text('account_balance_low', lang_id).format(faucet_url, r, "{:,}".format(balance), fee_amount, min_send))
+			message_markdown(bot, chat_id, lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), min_send))
 		else:
-			#update.message.reply_text('Your balance: {0} Mrai (XRB). Send limit (Mrai):'.format("{:,}".format(balance)))
-			#update.message.reply_text("{:,}".format(max_send))
-			last_price = float(mysql_select_price()[0][0])
-			btc_price = last_price / (10 ** 8)
+			price = mysql_select_price()
+			last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6]))) / (float(price[0][6]) + float(price[1][6]))
+			btc_price = last_price / (10 ** 14)
 			btc_balance = ('%.8f' % (btc_price * balance))
-			message_markdown(bot, chat_id, lang_text('account_balance', lang_id).format("{:,}".format(balance), btc_balance, "{:,}".format(max_send)))
+			message_markdown(bot, chat_id, lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send)))
 		sleep(0.1)
-		update.message.reply_text(lang_text('account_your', lang_id))
+		text_reply(update, lang_text('account_your', lang_id))
 		sleep(0.1)
 		message_markdown(bot, chat_id, '*{0}*'.format(r))
 		sleep(0.1)
@@ -409,7 +408,7 @@ def account_text(bot, update):
 			  'username': username,
 			}
 			mysql_insert(insert_data)
-			update.message.reply_text(lang_text('account_created', lang_id))
+			text_reply(update, lang_text('account_created', lang_id))
 			sleep(0.1)
 			message_markdown(bot, chat_id, '*{0}*'.format(r))
 			sleep(0.1)
@@ -419,7 +418,7 @@ def account_text(bot, update):
 			sleep(0.1)
 			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 		else:
-			update.message.reply_text(lang_text('account_error', lang_id))
+			text_reply(update, lang_text('account_error', lang_id))
 
 
 
@@ -453,16 +452,16 @@ def send_callback(bot, update, args):
 			#if ((args[0] == 'all') or (args[0] == 'everything')):
 			#	send_amount = int(balance - fee_amount)
 			#else:
-			send_amount = int(args[0])
-			raw_send_amount = send_amount * (10 ** 30)
+			send_amount = int(float(args[0]) * (10 ** 6))
+			raw_send_amount = send_amount * (10 ** 24)
 			#print(send_amount)
 			#print(balance)
 			if (max_send < min_send):
-				update.message.reply_text(lang_text('send_low_balance', lang_id).format(final_fee_amount, min_send))
+				text_reply(update, lang_text('send_low_balance', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 			elif (send_amount > max_send):
-				update.message.reply_text(lang_text('send_limit_max', lang_id).format(final_fee_amount, "{:,}".format(max_send)))
+				text_reply(update, lang_text('send_limit_max', lang_id).format(mrai_text(final_fee_amount), mrai_text(max_send)))
 			elif (send_amount < min_send):
-				update.message.reply_text(lang_text('send_limit_min', lang_id).format(min_send))
+				text_reply(update, lang_text('send_limit_min', lang_id).format(mrai_text(min_send)))
 				
 			else:
 				# Check destination address
@@ -474,11 +473,11 @@ def send_callback(bot, update, args):
 					username = destination.replace('@', '')
 					dest_account = mysql_account_by_username(username)
 					if (dest_account is not False):
-						#update.message.reply_text('User {0} found. His account: {1}'.format(text, account))
+						#text_reply(update, 'User {0} found. His account: {1}'.format(text, account))
 						#send_destination(bot, update, account)
 						destination = dest_account
 					else:
-						update.message.reply_text(lang_text('send_user_not_found', lang_id).format(destination))
+						text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
 				destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
 				#print(destination)
 				# Check password protection
@@ -511,13 +510,12 @@ def send_callback(bot, update, args):
 							new_balance = account_balance(account)
 							mysql_update_balance(account, new_balance)
 							mysql_update_frontier(account, fee)
-							#update.message.reply_text('Transaction completed. Fee: {0} Mrai (XRB). Your current balance: {1} Mrai (XRB). Transaction hash'.format(final_fee_amount, "{:,}".format(new_balance)))
-							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(final_fee_amount, "{:,}".format(new_balance)))
+							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
 							sleep(0.1)
-							update.message.reply_text(send_hash)
+							text_reply(update, send_hash)
 							sleep(0.1)
 							message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
-							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, send_amount, send_hash))
+							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
 							# update username
 							old_username = m[8]
 							username=update.message.from_user.username
@@ -532,24 +530,24 @@ def send_callback(bot, update, args):
 						else:
 							logging.info('Transaction FAILURE! Account {0}'.format(account))
 							new_balance = account_balance(account)
-							lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format("{:,}".format(new_balance)))
+							lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 					except (GeneratorExit, ValueError):
 						lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
 				elif (not (check == hex)):
-					update.message.reply_text(lang_text('password_error', lang_id))
+					text_reply(update, lang_text('password_error', lang_id))
 					logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
 				elif (not (check_frontier)):
-					update.message.reply_text(lang_text('send_frontier', lang_id))
+					text_reply(update, lang_text('send_frontier', lang_id))
 					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 				elif (not (destination.startswith('@'))):
 					message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 		except (ValueError):
-			update.message.reply_text(lang_text('send_digits', lang_id))
+			text_reply(update, lang_text('send_digits', lang_id))
 		
 	except (TypeError):
 		message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
 	except (IndexError):
-		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(min_send, m[2]))
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), m[2]))
 
 
 @run_async
@@ -567,9 +565,9 @@ def send_text(bot, update):
 		account = m[2]
 		balance = account_balance(account)
 		if (balance >= (final_fee_amount + min_send)):
-			update.message.reply_text(lang_text('send_amount', lang_id).format(final_fee_amount, min_send))
+			text_reply(update, lang_text('send_amount', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 		else:
-			update.message.reply_text(lang_text('send_low_balance', lang_id).format(final_fee_amount, min_send))
+			text_reply(update, lang_text('send_low_balance', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 	except (TypeError):
 		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_no_account_text', lang_id))
 
@@ -594,9 +592,9 @@ def send_destination(bot, update, text):
 		if (destination_check == '1'):
 			mysql_update_send_destination(account, destination)
 			if (m[6] != 0):
-				custom_keyboard(bot, chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format("{:,}".format(m[6]), "{:,}".format(m[6]+final_fee_amount), destination))
+				custom_keyboard(bot, chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format(mrai_text(m[6]), mrai_text(m[6]+final_fee_amount), destination))
 			else:
-				update.message.reply_text(lang_text('send_amount', lang_id).format(final_fee_amount, min_send))
+				text_reply(update, lang_text('send_amount', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 		else:
 			message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 	except (TypeError):
@@ -611,10 +609,10 @@ def send_destination_username(bot, update, text):
 	account = mysql_account_by_username(username)
 	#print(account)
 	if (account is not False):
-		update.message.reply_text(lang(user_id, 'send_user').format(text, account))
+		text_reply(update, lang(user_id, 'send_user').format(text, account))
 		send_destination(bot, update, account)
 	else:
-		update.message.reply_text(lang(user_id, 'send_user_not_found').format(text))
+		text_reply(update, lang(user_id, 'send_user_not_found').format(text))
 
 
 @run_async
@@ -634,22 +632,22 @@ def send_amount(bot, update, text):
 		try:
 			balance = account_balance(account)
 			max_send = balance - final_fee_amount
-			send_amount = int(text)
+			send_amount = int(float(text) * (10 ** 6))
 			# if less, set 0
 			if (max_send < min_send):
-				update.message.reply_text(lang_text('send_low_balance', lang_id).format(final_fee_amount, min_send))
+				text_reply(update, lang_text('send_low_balance', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 			elif (send_amount > max_send):
-				update.message.reply_text(lang_text('send_limit_max', lang_id).format(final_fee_amount, "{:,}".format(max_send)))
+				text_reply(update, lang_text('send_limit_max', lang_id).format(mrai_text(final_fee_amount), mrai_text(max_send)))
 			elif (send_amount < min_send):
-				update.message.reply_text(lang_text('send_limit_min', lang_id).format(min_send))
+				text_reply(update, lang_text('send_limit_min', lang_id).format(mrai_text(min_send)))
 			else:
 				mysql_update_send_amount(account, send_amount)
 				if (m[5] is not None):
-					custom_keyboard(bot, update.message.chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format("{:,}".format(send_amount), "{:,}".format(send_amount+final_fee_amount), m[5]))
+					custom_keyboard(bot, update.message.chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format(mrai_text(send_amount), mrai_text(send_amount+final_fee_amount), m[5]))
 				else:
 					lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_destination', lang_id))
 		except (ValueError):
-			update.message.reply_text(lang_text('send_digits', lang_id))
+			text_reply(update, lang_text('send_digits', lang_id))
 	except (TypeError):
 		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_no_account_text', lang_id))
 
@@ -662,7 +660,7 @@ def send_finish(bot, update):
 	m = mysql_select_user(user_id)
 	account = m[2]
 	send_amount = int(m[6])
-	raw_send_amount = send_amount * (10 ** 30)
+	raw_send_amount = send_amount * (10 ** 24)
 	destination = m[5]
 	mysql_update_send_clean(account)
 	# FEELESS
@@ -690,12 +688,12 @@ def send_finish(bot, update):
 				mysql_update_balance(account, new_balance)
 				mysql_update_frontier(account, fee)
 				sleep(0.4)
-				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(final_fee_amount, "{:,}".format(new_balance)))
+				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
 				sleep(0.2)
-				update.message.reply_text(send_hash)
+				text_reply(update, send_hash)
 				sleep(0.2)
 				message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
-				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, send_amount, send_hash))
+				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
 				# update username
 				old_username = m[8]
 				username=update.message.from_user.username
@@ -710,9 +708,9 @@ def send_finish(bot, update):
 			else:
 				logging.info('Transaction FAILURE! Account {0}'.format(account))
 				new_balance = account_balance(account)
-				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format("{:,}".format(new_balance)))
+				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 		else:
-			update.message.reply_text(lang_text('send_frontier', lang_id))
+			text_reply(update, lang_text('send_frontier', lang_id))
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 	except (GeneratorExit, ValueError):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
@@ -756,7 +754,7 @@ def version(bot, update):
 def version_text(bot, update):
 	user_id = update.message.from_user.id
 	version = rpc({"action": "version"}, 'node_vendor')
-	update.message.reply_text(version)
+	text_reply(update, version)
 
 
 @run_async
@@ -786,7 +784,7 @@ def text_result(text, bot, update):
 			#print(check)
 			#print(hex)
 		elif ((m[5] is not None) and (m[6] != 0) and (not (check == hex)) and (check is not False)):
-			update.message.reply_text(lang_text('send_password', lang_id))
+			text_reply(update, lang_text('send_password', lang_id))
 			#print(check)
 			#print(hex)
 			logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
@@ -806,7 +804,7 @@ def text_result(text, bot, update):
 	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').isdigit()):
 		# check if digit is correct
 		digit_split = text.replace(' ', '').replace('mrai', '').split(',')
-		if (text.startswith('0,') or ('.' in text) or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
+		if (text.startswith('0,') or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
 			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', ''))
@@ -876,11 +874,11 @@ def photo_filter_callback(bot, update):
 		elif (('NULL' in account) or (account is None) or (account is False)):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_recognize_error', lang_id))
 		else:
-			lang_keyboard(bot, update.message.chat_id, lang_text('qr_account_error', lang_id))
+			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_account_error', lang_id))
 		#print(account)
 		logging.info('QR by file: {0}'.format(account))
 	except UnicodeEncodeError:
-		lang_keyboard(bot, update.message.chat_id, lang_text('text_decode_error', lang_id))
+		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('text_decode_error', lang_id))
 
 
 @run_async
@@ -903,17 +901,17 @@ def password_callback(bot, update, args):
 					mysql_set_password(user_id, hex)
 					message_markdown(bot, chat_id, lang(user_id, 'password_success'))
 				else:
-					update.message.reply_text(lang(user_id, 'password_uppercase'))
+					text_reply(update, lang(user_id, 'password_uppercase'))
 					logging.info('Password set failed for user {0}. Reason: uppercase-lowercase-digits'.format(user_id))
 			else:
-				update.message.reply_text(lang(user_id, 'password_short'))
+				text_reply(update, lang(user_id, 'password_short'))
 				logging.info('Password set failed for user {0}. Reason: Too short'.format(user_id))
 		else:
-			update.message.reply_text(lang(user_id, 'password_not_empty'))
+			text_reply(update, lang(user_id, 'password_not_empty'))
 			logging.info('Password set failed for user {0}. Reason: Already protected'.format(user_id))
 	else:
-		update.message.reply_text(lang(user_id, 'password_command'))
-		update.message.reply_text('Use command\n/password HereYourPass')
+		text_reply(update, lang(user_id, 'password_command'))
+		text_reply(update, 'Use command\n/password HereYourPass')
 
 def password_delete(bot, update, args):
 	ddos_protection_args(bot, update, args, password_delete_callback)
@@ -931,19 +929,19 @@ def password_delete_callback(bot, update, args):
 		#print(check)
 		if (check == hex):
 			mysql_delete_password(user_id)
-			update.message.reply_text(lang(user_id, 'password_delete_success'))
+			text_reply(update, lang(user_id, 'password_delete_success'))
 			logging.info('Password deletion for user {0}'.format(user_id))
 		else:
-			update.message.reply_text(lang(user_id, 'password_error'))
+			text_reply(update, lang(user_id, 'password_error'))
 			logging.info('Password deletion failed for user {0}. Reason: Wrong password'.format(user_id))
 	else:
-		update.message.reply_text(lang(user_id, 'password_delete_command'))
+		text_reply(update, lang(user_id, 'password_delete_command'))
 
 
 @run_async
 def echo(bot, update):
 	info_log(update)
-	update.message.reply_text(update.message.text)
+	text_reply(update, update.message.text)
 
 
 @run_async
@@ -957,9 +955,9 @@ def ping(bot, update):
 def stats(bot, update):
 	info_log(update)
 	typing_illusion(bot, update.message.chat_id) # typing illusion
-	fee_balance = account_balance(fee_account)
+	fee_balance = account_balance(fee_account) / (10 ** 6)
 	stats = '{0}\nFees balance: {1} Mrai (XRB)'.format(mysql_stats(), "{:,}".format(fee_balance))
-	fee_pending = account_pending(fee_account)
+	fee_pending = account_pending(fee_account) / (10 ** 6)
 	if (fee_pending > 0):
 		stats = '{0}\nPending fees: {1} Mrai (XRB)'.format(stats, "{:,}".format(fee_pending))
 	default_keyboard(bot, update.message.chat_id, stats)

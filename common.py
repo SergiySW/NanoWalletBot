@@ -78,6 +78,7 @@ def message_markdown(bot, chat_id, message):
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
 	except RetryAfter:
+		sleep(240)
 		bot.sendMessage(chat_id=chat_id, 
 					text=replace_unsafe(message),
 					parse_mode=ParseMode.MARKDOWN,
@@ -89,4 +90,21 @@ def message_markdown(bot, chat_id, message):
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
 
+
+def text_reply(update, text):
+	try:
+		update.message.reply_text(text)
+	except:
+		sleep(1)
+		update.message.reply_text(text)
+
+
+def mrai_text(rai):
+	mrai = rai / (10 ** 6)
+	floating = (float(rai) / (10 ** 6)) % 1
+	if (floating == 0):
+		mrai_text = "{:,}".format(mrai)
+	else:
+		mrai_text = '{0}{1}'.format("{:,}".format(mrai), floating).replace('0.', '.')
+	return mrai_text
 

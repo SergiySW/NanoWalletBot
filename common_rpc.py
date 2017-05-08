@@ -42,7 +42,7 @@ def raw_account_balance(account):
 
 def account_balance(account):
 	raw_balance = raw_account_balance(account)
-	balance = int(math.floor(raw_balance / (10 ** 30)))
+	balance = int(math.floor(raw_balance / (10 ** 24)))
 	return(balance)
 
 
@@ -54,7 +54,7 @@ def raw_account_pending(account):
 
 def account_pending(account):
 	raw_pending = raw_account_pending(account)
-	pending = int(math.floor(raw_pending / (10 ** 30)))
+	pending = int(math.floor(raw_pending / (10 ** 24)))
 	return(pending)
 
 
@@ -78,7 +78,7 @@ def check_block_community(block):
 			return True
 		else:
 			return False
-	except (MaxRetryError):
+	except urllib3.exceptions.MaxRetryError:
 		return True
 
 def check_block(block):
