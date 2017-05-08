@@ -381,7 +381,7 @@ def account_text(bot, update):
 		if (balance == 0):
 			message_markdown(bot, chat_id, lang_text('account_balance_zero', lang_id).format(faucet_url, r))
 		elif (max_send < min_send):
-			message_markdown(bot, chat_id, lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), min_send))
+			message_markdown(bot, chat_id, lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), mrai_text(min_send)))
 		else:
 			price = mysql_select_price()
 			last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6]))) / (float(price[0][6]) + float(price[1][6]))
