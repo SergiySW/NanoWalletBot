@@ -257,7 +257,7 @@ def start_text(bot, update):
 #	hide_keyboard(bot, update.message.chat_id, text)
 	text_reply(update, lang_text('start_introduce', lang_id))
 	sleep(0.1)
-	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(fee_amount, min_send, incoming_fee_text))
+	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
 	sleep(0.1)
 	message_markdown(bot, chat_id, lang_text('start_learn_more', lang_id))
 	# Check user existance in database

@@ -190,7 +190,7 @@ def mysql_stats():
 	users = cursor.fetchone()[0]
 	query = "SELECT SUM(balance) FROM rai_bot"
 	cursor.execute(query)
-	balance = cursor.fetchone()[0] / (10 ** 6)
+	balance = int(cursor.fetchone()[0] / (10 ** 6))
 	#price = mysql_select_price()[0]
 	cursor.close()
 	cnx.close()
