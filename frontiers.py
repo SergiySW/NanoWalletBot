@@ -152,9 +152,9 @@ def frontiers_sendlist():
 	for send in sendlist:
 		try:
 			push(bot, send[0], send[1].replace("_", "\_"))
-			logging.warning('From sendlist: {0} :: {1}'.format(send[0], send[1]))
+			logging.warning('From sendlist: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
 		except:
-			logging.warning('From sendlist + exception: {0} :: {1}'.format(send[0], send[1]))
+			logging.warning('From sendlist + exception: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
 		mysql_delete_sendlist(send[0])
 
 '''
