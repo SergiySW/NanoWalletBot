@@ -105,6 +105,7 @@ def mrai_text(rai):
 	if (floating == 0):
 		mrai_text = "{:,}".format(mrai)
 	else:
-		mrai_text = '{0}{1}'.format("{:,}".format(mrai), floating).replace('0.', '.')
+		floating_text = '{0}'.format(floating).replace('0.', '.')[:7]
+		mrai_text = '{0}{1}'.format("{:,}".format(mrai), floating_text)
 	return mrai_text
 

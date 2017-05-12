@@ -337,7 +337,7 @@
 		"send_confirm": "Confirme que desea enviar *{0} Mrai (XRB)* a *{2}*\nEsto le constará *{1} Mrai (XRB)* con comisiones",
 		"send_working": "Trabajando en su transacción...",
 		"send_cancelled": "Pago cancelado",
-		"price": "_Precio RaiBlocks (XRB)_\nÚltimo (Mercatox): *{0} BTC*\nVenta (Mercatox): *{1} BTC*\nCompra (Mercatox): *{2} BTC*\n\nÚltimo (BitGrail): *{3} BTC*\nVenta (BitGrail): *{4} BTC*\nCompra (BitGrail): *{5} BTC*\n\nVolumen de 24 horas: *{8} Mrai (XRB)*\n*{9} BTC*\nAltura de 24 horas: *{6} BTC*\nBaja de 24 horas: *{7} BTC*",
+		"price": "_Precio RaiBlocks (XRB)_\nÚltimo (Mercatox): *{0} BTC*\nVenta (Mercatox): *{1} BTC*\nCompra (Mercatox): *{2} BTC*\n\nÚltimo (BitGrail): *{3} BTC*\nVenta (BitGrail): *{4} BTC*\nCompra (BitGrail): *{5} BTC*\n\nVolumen de 24 horas: *{8} Mrai (XRB)*\n*{9} BTC*\nMás alto en 24 horas: *{6} BTC*\nMás bajo en 24 horas: *{7} BTC*",
 		"price_options": "Comercio: [BitGrail](https://bitgrail.com/market/BTC-XRB), [Mercatox](https://mercatox.com/exchange), @RaiBlocksTradeBot, @RaiBlocksTrade, más opciones próximamente!...",
 		"text_decode_error": "Lo siento, no puedo leer su texto",
 		"qr_send": "Enviar a la cuenta *{0}*",
