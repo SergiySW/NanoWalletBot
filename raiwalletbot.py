@@ -100,7 +100,7 @@ def restricted(func):
 						print("No user_id available in update.")
 						return
 		if user_id not in admin_list:
-			print("Unauthorized access denied for {}.".format(chat_id))
+			print("Unauthorized access denied for {0}.".format(user_id))
 			return
 		return func(bot, update, *args, **kwargs)
 	return wrapped
