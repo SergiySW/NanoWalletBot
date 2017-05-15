@@ -133,7 +133,7 @@ def frontiers():
 						#print(text)
 						push(bot, account[0], text)
 						mysql_delete_sendlist(account[0])
-					time.sleep(0.1)
+					time.sleep(0.25)
 		# no frontier. No transactions
 		except KeyError:
 			# doesn't exist

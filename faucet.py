@@ -79,7 +79,7 @@ def faucet():
 				push_simple(bot, account[0], text)
 				#print(text)
 				logging.info('{0}\n{1}'.format(account[0], text))
-				time.sleep(0.1)
+				time.sleep(1)
 	
 	
 faucet()
