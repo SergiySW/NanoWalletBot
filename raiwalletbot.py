@@ -147,7 +147,7 @@ def custom_keyboard(bot, chat_id, buttons, text):
 					 disable_web_page_preview=True,
 					 reply_markup=reply_markup)
 	except:
-		sleep(0.3)
+		sleep(1)
 		bot.sendMessage(chat_id=chat_id, 
 					 text=text, 
 					 parse_mode=ParseMode.MARKDOWN,
@@ -168,7 +168,7 @@ def hide_keyboard(bot, chat_id, text):
 	try:
 		bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
 	except:
-		sleep(0.3)
+		sleep(1)
 		bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup)
 
 @run_async
@@ -176,7 +176,7 @@ def typing_illusion(bot, chat_id):
 	try:
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
 	except:
-		sleep(0.3)
+		sleep(1)
 		bot.sendChatAction(chat_id=chat_id, action=ChatAction.TYPING) # typing illusion
 
 
@@ -256,15 +256,15 @@ def start_text(bot, update):
 	lang_id = mysql_select_language(user_id)
 #	hide_keyboard(bot, update.message.chat_id, text)
 	text_reply(update, lang_text('start_introduce', lang_id))
-	sleep(0.1)
+	sleep(1)
 	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
-	sleep(0.1)
+	sleep(1)
 	message_markdown(bot, chat_id, lang_text('start_learn_more', lang_id))
 	# Check user existance in database
 	exist = mysql_user_existance(user_id)
 	# Select language if 1st time
 	if (exist is False):
-		sleep(0.1)
+		sleep(1)
 		custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 
 
@@ -279,7 +279,7 @@ def help_callback(bot, update):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	lang_keyboard(lang_id, bot, chat_id, lang_text('help_advanced_usage', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
-	sleep(0.1)
+	sleep(1)
 	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
 
@@ -289,7 +289,7 @@ def help_text(bot, update):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
-	sleep(0.1)
+	sleep(1)
 	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
 
@@ -388,12 +388,13 @@ def account_text(bot, update):
 			btc_price = last_price / (10 ** 14)
 			btc_balance = ('%.8f' % (btc_price * balance))
 			message_markdown(bot, chat_id, lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send)))
-		sleep(0.1)
+		sleep(1)
 		text_reply(update, lang_text('account_your', lang_id))
-		sleep(0.1)
+		sleep(1)
 		message_markdown(bot, chat_id, '*{0}*'.format(r))
-		sleep(0.1)
+		sleep(1)
 		message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url))
+		sleep(1)
 		#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
 		bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
 		
@@ -409,13 +410,13 @@ def account_text(bot, update):
 			}
 			mysql_insert(insert_data)
 			text_reply(update, lang_text('account_created', lang_id))
-			sleep(0.1)
+			sleep(1)
 			message_markdown(bot, chat_id, '*{0}*'.format(r))
-			sleep(0.1)
+			sleep(1)
 			message_markdown(bot, chat_id, lang_text('account_explorer', lang_id).format(r, account_url))
-			sleep(0.1)
+			sleep(1)
 			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
-			sleep(0.1)
+			sleep(1)
 			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 		else:
 			text_reply(update, lang_text('account_error', lang_id))
@@ -492,7 +493,7 @@ def send_callback(bot, update, args):
 					hex = binascii.hexlify(dk)
 				else:
 					hex = False
-				typing_illusion(bot, update.message.chat_id) # typing illusion
+				# typing_illusion(bot, update.message.chat_id) # typing illusion
 				# Check password protection and frontier existance
 				frontier = m[3]
 				check_frontier = check_block(frontier)
@@ -511,9 +512,9 @@ def send_callback(bot, update, args):
 							mysql_update_balance(account, new_balance)
 							mysql_update_frontier(account, fee)
 							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
-							sleep(0.1)
+							sleep(1)
 							text_reply(update, send_hash)
-							sleep(0.1)
+							sleep(1)
 							message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
 							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
 							# update username
@@ -671,7 +672,7 @@ def send_finish(bot, update):
 	# FEELESS
 	try:
 		hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
-		typing_illusion(bot, chat_id)  # typing illusion
+		# typing_illusion(bot, chat_id)  # typing illusion
 		# Check frontier existance
 		frontier = m[3]
 		check_frontier = check_block(frontier)
@@ -687,11 +688,11 @@ def send_finish(bot, update):
 				new_balance = account_balance(account)
 				mysql_update_balance(account, new_balance)
 				mysql_update_frontier(account, fee)
-				sleep(0.4)
+				sleep(1)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
-				sleep(0.2)
+				sleep(1)
 				text_reply(update, send_hash)
-				sleep(0.2)
+				sleep(1)
 				message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
 				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
 				# update username
@@ -741,7 +742,7 @@ def price_text(bot, update):
 	volume_btc = ('%.2f' % ((float(price[0][6]) + float(price[1][6])) / (10 ** 8)))
 	text = lang_text('price', lang_id).format(last_price_merc, ask_price_merc, bid_price_merc, last_price_grail, ask_price_grail, bid_price_grail, high_price, low_price, "{:,}".format(volume), volume_btc)
 	lang_keyboard(lang_id, bot, chat_id, text)
-	sleep(0.1)
+	sleep(1)
 	message_markdown(bot, chat_id, lang_text('price_options', lang_id))
 
 
