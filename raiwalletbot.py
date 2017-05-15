@@ -388,7 +388,7 @@ def account_text(bot, update):
 			btc_price = last_price / (10 ** 14)
 			btc_balance = ('%.8f' % (btc_price * balance))
 			text = lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send))
-		text = '{0}\n\n{1}'.format(text, lang_text('account_your', lang_id))
+		text = '{0}\n\n{1}'.format(text.encode("utf8"), lang_text('account_your', lang_id))
 		message_markdown(bot, chat_id, text)
 		sleep(1)
 		message_markdown(bot, chat_id, '*{0}*'.format(r))
