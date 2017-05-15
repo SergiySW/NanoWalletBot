@@ -379,17 +379,17 @@ def account_text(bot, update):
 		balance = account_balance(r)
 		max_send = balance - fee_amount
 		if (balance == 0):
-			message_markdown(bot, chat_id, lang_text('account_balance_zero', lang_id).format(faucet_url, r))
+			text = lang_text('account_balance_zero', lang_id).format(faucet_url, r)
 		elif (max_send < min_send):
-			message_markdown(bot, chat_id, lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), mrai_text(min_send)))
+			text = lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), mrai_text(min_send))
 		else:
 			price = mysql_select_price()
 			last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6]))) / (float(price[0][6]) + float(price[1][6]))
 			btc_price = last_price / (10 ** 14)
 			btc_balance = ('%.8f' % (btc_price * balance))
-			message_markdown(bot, chat_id, lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send)))
-		sleep(1)
-		text_reply(update, lang_text('account_your', lang_id))
+			text = lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send))
+		text = '{0}\n\n{1}'.format(text, lang_text('account_your', lang_id))
+		message_markdown(bot, chat_id, text)
 		sleep(1)
 		message_markdown(bot, chat_id, '*{0}*'.format(r))
 		sleep(1)
@@ -513,9 +513,7 @@ def send_callback(bot, update, args):
 							mysql_update_frontier(account, fee)
 							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
 							sleep(1)
-							text_reply(update, send_hash)
-							sleep(1)
-							message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
+							message_markdown(bot, chat_id, '[{0}]({1}{0})'.format(send_hash, hash_url))
 							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
 							# update username
 							old_username = m[8]
@@ -691,9 +689,7 @@ def send_finish(bot, update):
 				sleep(1)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
 				sleep(1)
-				text_reply(update, send_hash)
-				sleep(1)
-				message_markdown(bot, chat_id, lang_text('send_hash', lang_id).format(send_hash, hash_url))
+				message_markdown(bot, chat_id, '[{0}]({1}{0})'.format(send_hash, hash_url))
 				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
 				# update username
 				old_username = m[8]
