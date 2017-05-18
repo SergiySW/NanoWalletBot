@@ -736,7 +736,7 @@ def price_text(bot, update):
 	bid_price_grail = ('%.8f' % (float(price[1][4]) / (10 ** 8)))
 	
 	high_price = ('%.8f' % (max(float(price[0][1]), float(price[1][1]), float(price[0][0])) / (10 ** 8)))
-	low_price = ('%.8f' % (min(float(price[0][2]), float(price[1][2]), float(price[0][0])) / (10 ** 8)))
+	low_price = ('%.8f' % (min(float(price[0][2]), float(price[1][2])) / (10 ** 8)))
 	volume = int(price[0][5]) + int(price[1][5])
 	volume_btc = ('%.2f' % ((float(price[0][6]) + float(price[1][6])) / (10 ** 8)))
 	text = lang_text('price', lang_id).format(last_price_merc, ask_price_merc, bid_price_merc, last_price_grail, ask_price_grail, bid_price_grail, high_price, low_price, "{:,}".format(volume), volume_btc)
