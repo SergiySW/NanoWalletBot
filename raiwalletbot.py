@@ -384,7 +384,10 @@ def account_text(bot, update):
 			text = lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), mrai_text(min_send))
 		else:
 			price = mysql_select_price()
-			last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6]))) / (float(price[0][6]) + float(price[1][6]))
+			if (int(price[0][0]) > 0):
+				last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6]))) / (float(price[0][6]) + float(price[1][6]))
+			else:
+				last_price = int(price[1][0])
 			btc_price = last_price / (10 ** 14)
 			btc_balance = ('%.8f' % (btc_price * balance))
 			text = lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send))

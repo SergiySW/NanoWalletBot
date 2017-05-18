@@ -181,7 +181,10 @@ def mercatox():
 	response = http.request('GET', url)
 	json_mercatox = json.loads(response.data)
 	json_array = json_mercatox['pairs']['XRB_BTC']
-	last_price = int(float(json_array['last']) * (10 ** 8))
+	try:
+		last_price = int(float(json_array['last']) * (10 ** 8))
+	except KeyError:
+		last_price = 0
 	high_price = int(float(json_array['high24hr']) * (10 ** 8))
 	low_price = int(float(json_array['low24hr']) * (10 ** 8))
 	ask_price = int(float(json_array['lowestAsk']) * (10 ** 8))
@@ -220,8 +223,7 @@ def frontiers_usual():
 	try:
 		mercatox()
 	except:
-		time.sleep(5)
-		mercatox()
+		time.sleep(1) # too many errors from Mercatox API
 	try:
 		bitgrail()
 	except:
