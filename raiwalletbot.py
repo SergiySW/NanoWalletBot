@@ -712,7 +712,8 @@ def send_finish(bot, update):
 		else:
 			text_reply(update, lang_text('send_frontier', lang_id))
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
-	except (GeneratorExit, ValueError):
+	except (GeneratorExit, ValueError) as e:
+		logging.error(e)
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
 
 

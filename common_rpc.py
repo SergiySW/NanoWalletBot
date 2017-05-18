@@ -92,7 +92,7 @@ def check_block(block):
 				return True
 			else:
 				return check_block_community(block)
-		except requests.exceptions.RequestException:
+		except:
 			return check_block_community(block)
 	else:
 		return check_block_community(block)
