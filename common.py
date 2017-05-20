@@ -101,11 +101,32 @@ def text_reply(update, text):
 
 def mrai_text(rai):
 	mrai = rai / (10 ** 6)
-	floating = (float(rai) / (10 ** 6)) % 1
+	floating = int(rai - (mrai * (10 ** 6)))
 	if (floating == 0):
 		mrai_text = "{:,}".format(mrai)
 	else:
-		floating_text = '{0}'.format(floating).replace('0.', '.')[:7]
-		mrai_text = '{0}{1}'.format("{:,}".format(mrai), floating_text)
+		if (floating < 10):
+			floating_text = '00000{0}'.format(floating)
+		elif (floating < 100):
+			floating_text = '0000{0}'.format(floating)
+		elif (floating < 1000):
+			floating_text = '000{0}'.format(floating)
+		elif (floating < 10000):
+			floating_text = '00{0}'.format(floating)
+		elif (floating < 100000):
+			floating_text = '0{0}'.format(floating)
+		else:
+			floating_text = '{0}'.format(floating)
+		if (floating_text.endswith('0',1,2) and floating_text.endswith('0')):
+			floating_text = floating_text[:-5]
+		elif (floating_text.endswith('0',2,3) and floating_text.endswith('0')):
+			floating_text = floating_text[:-4]
+		elif (floating_text.endswith('0',3,4) and floating_text.endswith('0')):
+			floating_text = floating_text[:-3]
+		elif (floating_text.endswith('0',4,5) and floating_text.endswith('0')):
+			floating_text = floating_text[:-2]
+		elif (floating_text.endswith('0')):
+			floating_text = floating_text[:-1]
+		mrai_text = '{0}.{1}'.format("{:,}".format(mrai), floating_text)
 	return mrai_text
 
