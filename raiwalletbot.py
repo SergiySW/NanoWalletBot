@@ -45,7 +45,7 @@ incoming_fee = int(config.get('main', 'incoming_fee'))
 raw_incoming_fee = incoming_fee * (10 ** 24)
 incoming_fee_text = '\n'
 if (incoming_fee >= 1):
-	incoming_fee_text = '\nCurrent fee for INCOMING transaction (DDoS protection): *{0} Mrai (XRB)*\n'.format(incoming_fee)
+	incoming_fee_text = '\nCurrent fee for INCOMING transaction (DDoS protection): *{0} MXRB (Mrai)*\n'.format(incoming_fee)
 min_send = int(config.get('main', 'min_send'))
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
 admin_list = json.loads(config.get('main', 'admin_list'))
@@ -470,7 +470,7 @@ def send_callback(bot, update, args):
 			else:
 				# Check destination address
 				destination = args[1]
-				if ((len(args) > 2) and (args[1].lower() == 'mrai')):
+				if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'mxrb'))):
 					destination = args[2]
 				# if destination is username
 				if (destination.startswith('@') and (len(destination) > 3 )):
@@ -486,7 +486,7 @@ def send_callback(bot, update, args):
 				#print(destination)
 				# Check password protection
 				check = mysql_check_password(user_id)
-				if ((len(args) > 3) and (args[1].lower() == 'mrai')):
+				if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'mxrb'))):
 					password = args[3]
 					dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
 					hex = binascii.hexlify(dk)
@@ -802,13 +802,13 @@ def text_result(text, bot, update):
 		account_text(bot, update)
 	elif (text in language['commands']['send']):
 		send_text(bot, update)
-	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').isdigit()):
+	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').replace('mxrb', '').isdigit()):
 		# check if digit is correct
-		digit_split = text.replace(' ', '').replace('mrai', '').split(',')
+		digit_split = text.replace(' ', '').replace('mrai', '').replace('mxrb', '').split(',')
 		if (text.startswith('0,') or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
-			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', ''))
+			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('mxrb', ''))
 	elif ('xrb_' in text):
 		send_destination(bot, update, text)
 	elif (text.startswith('@') and (len(text) > 3 )):
