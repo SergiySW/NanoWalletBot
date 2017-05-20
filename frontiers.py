@@ -153,9 +153,10 @@ def frontiers_sendlist():
 		try:
 			push(bot, send[0], send[1].replace("_", "\_"))
 			logging.warning('From sendlist: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
-		except:
+			mysql_delete_sendlist(send[0])
+		except Exception as e:
 			logging.warning('From sendlist + exception: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
-		mysql_delete_sendlist(send[0])
+			logging.error(traceback.format_exc())
 
 '''
 def cryptopia():
