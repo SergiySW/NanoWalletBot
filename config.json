@@ -53,7 +53,7 @@
         "work_threads": "4",
         "enable_voting": "false",
         "bootstrap_connections": "16",
-        "callback_address": "localhost",
+        "callback_address": "::ffff:127.0.0.1",
         "callback_port": "5556",
         "callback_target": "/",
         "version": "7"

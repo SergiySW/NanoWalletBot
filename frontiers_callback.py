@@ -19,7 +19,9 @@ from telegram import Bot, ParseMode
 import logging
 import socket, json
 import time, math
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from SocketServer import ThreadingMixIn
+import threading
 
 
 # Parse config
@@ -67,8 +69,12 @@ def lang_text(text_id, lang_id):
 		return language['en'][text_id]
 
 
-class POST_server(BaseHTTPRequestHandler):
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+	allow_reuse_address = True
+	"""Handle requests in a separate thread."""
 
+
+class POST_server(BaseHTTPRequestHandler):
 	def do_POST(self):
 		post_string = self.rfile.read(int(self.headers['Content-Length']))
 		post = json.loads(post_string)
@@ -83,7 +89,7 @@ class POST_server(BaseHTTPRequestHandler):
 		account = mysql_select_by_account(xrb_account)
 		if (account is not False):
 			block = json.loads(post['block'])
-			if (block['type'] == 'receive'):
+			if ((block['type'] == 'receive') or (block['type'] == 'open')):
 				bot = Bot(api_key)
 				raw_received = int(post['amount'])
 				received_amount = int(math.floor(raw_received / (10 ** 24)))
@@ -124,11 +130,15 @@ class POST_server(BaseHTTPRequestHandler):
 				#print(text)
 				push(bot, account[0], text)
 				mysql_delete_sendlist(account[0])
+		return
+	
+	def log_message(self, format, *args):
+		return
 
 
 try:
 	#Create a web server and define the handler to manage the incoming request
-	server = HTTPServer(('localhost', callback_port), POST_server)
+	server = ThreadedHTTPServer(('localhost', callback_port), POST_server)
 	print 'Starting callback server at localhost:{0}'.format(callback_port)
 	
 	#Wait forever for incoming POST requests
