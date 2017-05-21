@@ -69,6 +69,20 @@ def mysql_select_accounts_list():
 	return(accounts_list)
 
 
+def mysql_select_by_account(xrb_account):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT user_id, account, frontier, balance FROM rai_bot WHERE account LIKE '{0}'".format(xrb_account)
+	cursor.execute(query)
+	account = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	if (account is not None):
+		return(account)
+	else:
+		return False
+
+
 def mysql_select_accounts_balances():
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)
@@ -349,6 +363,26 @@ def mysql_select_sendlist():
 	cursor.close()
 	cnx.close()
 	return(price)
+
+
+def mysql_select_frontiers():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT json FROM rai_frontiers"
+	cursor.execute(query)
+	price = cursor.fetchone()[0]
+	cursor.close()
+	cnx.close()
+	return(price)
+
+def mysql_set_frontiers(json):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	add_frontiers = "REPLACE INTO rai_frontiers SET id = 1, json = '{0}'".format(json)
+	cursor.execute(add_frontiers)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
 
 
 #@run_async

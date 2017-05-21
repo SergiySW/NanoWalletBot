@@ -11,8 +11,7 @@
 # 
 """
 Usage:
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
+Press Ctrl-C on the command line or send a signal to the process to stop the bot.
 """
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
@@ -41,11 +40,7 @@ password = config.get('main', 'password')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
-incoming_fee = int(config.get('main', 'incoming_fee'))
-raw_incoming_fee = incoming_fee * (10 ** 24)
 incoming_fee_text = '\n'
-if (incoming_fee >= 1):
-	incoming_fee_text = '\nCurrent fee for INCOMING transaction (DDoS protection): *{0} MXRB (Mrai)*\n'.format(incoming_fee)
 min_send = int(config.get('main', 'min_send'))
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
 admin_list = json.loads(config.get('main', 'admin_list'))

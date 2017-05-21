@@ -109,6 +109,22 @@ CREATE TABLE `rai_bot_passwords` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rai_frontiers`
+--
+
+DROP TABLE IF EXISTS `rai_frontiers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_frontiers` (
+  `id` int(2) NOT NULL,
+  `json` mediumtext NOT NULL,
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO `rai_frontiers` (`id`, `json`) VALUES
+(1, '{}')
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_price`
 --
 

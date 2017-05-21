@@ -9,7 +9,6 @@
         "chain_request_limit": "16384"
     },
     "node": {
-        "version": "5",
         "peering_port": "7075",
         "packet_delay_microseconds": "500",
         "bootstrap_fraction_numerator": "1",
@@ -51,7 +50,13 @@
         "inactive_supply": "0",
         "password_fanout": "1024",
         "io_threads": "8",
-        "work_threads": "4"
+        "work_threads": "4",
+        "enable_voting": "false",
+        "bootstrap_connections": "16",
+        "callback_address": "localhost",
+        "callback_port": "5556",
+        "callback_target": "/",
+        "version": "7"
     },
     "opencl_enable": "false",
     "opencl": {

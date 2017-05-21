@@ -18,7 +18,6 @@ from telegram import Bot, ParseMode
 import logging
 import urllib3, certifi, socket, json
 import time, math
-import os, sys
 
 # Parse config
 import ConfigParser
@@ -30,8 +29,6 @@ wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
-incoming_fee = int(config.get('main', 'incoming_fee'))
-raw_incoming_fee = incoming_fee * (10 ** 24)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -42,9 +39,10 @@ logger = logging.getLogger(__name__)
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php?a='
+faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
-from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language, mysql_set_sendlist, mysql_delete_sendlist, mysql_select_sendlist
+from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language, mysql_set_sendlist, mysql_delete_sendlist, mysql_select_sendlist, mysql_select_frontiers, mysql_set_frontiers
 
 
 # Request to node
@@ -74,19 +72,18 @@ def frontiers():
 	accounts_list = mysql_select_accounts_list()
 	# list from node
 	frontiers = rpc({"action":"wallet_frontiers","wallet":wallet}, 'frontiers')
-	
-	faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
+	frontiers_old = json.loads(mysql_select_frontiers())
+	mysql_set_frontiers(json.dumps(frontiers))
 	
 	for account in accounts_list:
 		try:
 			frontier = frontiers[account[1]]
-		#if ((account[1] == r.keys()[0]) and (account[2] != frontier)):
-			if (account[2] != frontier):
+			frontier_old = frontiers_old[account[1]]
+			if ((account[2] != frontier) and (frontier == frontier_old)):
 				# update frontier
 				balance = account_balance(account[1])
 				# check if balance changed
 				mysql_update_frontier(account[1], frontier)
-				#print('{0} --> {1}	{2}'.format(account[3], balance, frontier))
 				logging.info('{0} --> {1}	{2}'.format(mrai_text(account[3]), mrai_text(balance), frontier))
 				#print(balance)
 				if (int(account[3]) < balance):
@@ -96,13 +93,11 @@ def frontiers():
 						max_send = 0
 					# retrieve sender
 					send_tx = json.loads(rpc({"action":"block","hash":frontier}, 'contents'))
-					#print (send_tx)
 					send_source = send_tx['source']
-					#print (send_source)
 					block_account = rpc({"action":"block_account","hash":send_source}, 'account')
-					#print (block_account)
 					sender = ''
 					lang_id = mysql_select_language(account[0])
+					# Sender info
 					if (block_account == faucet_account):
 						sender = lang_text('frontiers_sender_faucet', lang_id)
 					elif (block_account == fee_account):
@@ -116,23 +111,16 @@ def frontiers():
 									sender = lang_text('frontiers_sender_username', lang_id).format(sender_account[4])
 								else:
 									sender = lang_text('frontiers_sender_users', lang_id)
-					#print (sender)
 					logging.info(sender)
+					
 					logging.info(block_account)
-					# receive fee protection
 					mysql_update_balance(account[1], balance)
-					logging.info('{0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
-					if (incoming_fee >= 1):
-						fee = rpc({"action": "send", "wallet": wallet, "source": account[1], "destination": fee_account, "amount": raw_incoming_fee}, 'block')
-						balance = account_balance(account[1])
-						push(bot, account[0], '*{0} Mrai (XRB)* received{7}. Transaction hash: [{5}]({6}{5})\nIncoming fee: *{4} Mrai (XRB)*. Your current balance: {1} Mrai (XRB). Send limit: {2} Mrai (XRB)'.format("{:,}".format(received_amount), "{:,}".format(balance), "{:,}".format(max_send), incoming_fee, frontier, hash_url, sender))
-						logging.info('Incoming fee deducted')
-					else:
-						text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
-						mysql_set_sendlist(account[0], text.encode("utf8"))
-						#print(text)
-						push(bot, account[0], text)
-						mysql_delete_sendlist(account[0])
+					logging.warning('NoCallback {0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
+					text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
+					mysql_set_sendlist(account[0], text.encode("utf8"))
+					#print(text)
+					push(bot, account[0], text)
+					mysql_delete_sendlist(account[0])
 					time.sleep(0.25)
 		# no frontier. No transactions
 		except KeyError:
@@ -145,35 +133,22 @@ def frontiers():
 		logging.warning(('WARNING!!! \nMore than 15 seconds execution time!!!'))
 	return total_time
 
+
 # send old data
 def frontiers_sendlist():
 	bot = Bot(api_key)
 	sendlist = mysql_select_sendlist()
 	for send in sendlist:
-		try:
-			push(bot, send[0], send[1].replace("_", "\_"))
-			logging.warning('From sendlist: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
+		time.sleep(5) # if long push to user
+		sendlist_new = mysql_select_sendlist()
+		if (send in sendlist_new):
+			try:
+				push(bot, send[0], send[1].replace("_", "\_"))
+				logging.warning('NoCallback From sendlist: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
+			except Exception as e:
+				logging.warning('NoCallback From sendlist + exception: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
+				logging.error(e)
 			mysql_delete_sendlist(send[0])
-		except Exception as e:
-			logging.warning('From sendlist + exception: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
-			logging.error(traceback.format_exc())
-
-'''
-def cryptopia():
-	http = urllib3.PoolManager()
-	url = 'https://www.cryptopia.co.nz/api/GetMarket/4874'
-	response = http.request('GET', url)
-	json_cryptopia = json.loads(response.data)
-	json_array = json_cryptopia['Data']
-	last_price = int(json_array['LastPrice'] * (10 ** 8))
-	high_price = int(json_array['High'] * (10 ** 8))
-	low_price = int(json_array['Low'] * (10 ** 8))
-	ask_price = int(json_array['AskPrice'] * (10 ** 8))
-	bid_price = int(json_array['BidPrice'] * (10 ** 8))
-	volume = int(json_array['Volume'])
-	
-	mysql_set_price(last_price, high_price, low_price, ask_price, bid_price, volume)
-'''
 
 
 def mercatox():
@@ -216,11 +191,10 @@ def bitgrail():
 def frontiers_usual():
 	frontiers_sendlist()
 	run_time = frontiers()
-	while run_time < 55:
-		time.sleep(3)
-		run_time = run_time + 3 + frontiers()
+	if (run_time < 30):
+		time.sleep(30-run_time)
+		frontiers()
 	
-	#cryptopia()
 	try:
 		mercatox()
 	except:
@@ -232,25 +206,5 @@ def frontiers_usual():
 		bitgrail()
 
 
-# check if already running
-def frontiers_proc_check():
-	for dirname in os.listdir('/proc'):
-		if dirname == 'curproc':
-			continue
 
-		try:
-			with open('/proc/{}/cmdline'.format(dirname), mode='rb') as fd:
-				content = fd.read().decode().split('\x00')
-		except Exception:
-			continue
-
-		cont3 = ''
-		if (len(content) == 3):
-			cont3 = content[2]
-		if (('python' in content[0]) or ('python' in cont3)):
-			if (((content[1] in sys.argv[0]) or (sys.argv[0] in cont3)) and ('self' not in dirname)):
-				frontiers_usual()
-
-
-#frontiers_proc_check()
 frontiers_usual()
