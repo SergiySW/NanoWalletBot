@@ -94,6 +94,7 @@ def monitoring_block_count():
 		# Warning to admins
 		for user_id in admin_list:
 			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*'.format(count, community_count, difference))
+			bootstrap_multi()
 
 monitoring_peers()
 monitoring_block_count()

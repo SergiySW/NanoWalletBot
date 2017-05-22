@@ -339,7 +339,7 @@ def broadcast(bot, update):
 @restricted
 def bootstrap(bot, update):
 	info_log(update)
-	rpc({"action": "bootstrap", "address": "::ffff:138.201.94.249", "port": "7075"}, 'success')
+	bootstrap_multi()
 	bot.sendMessage(update.message.chat_id, "Bootstraping...")
 
 
