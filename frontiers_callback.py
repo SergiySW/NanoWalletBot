@@ -34,6 +34,7 @@ wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
+welcome_account = config.get('main', 'welcome_account')
 callback_port = int(config.get('main', 'callback_port'))
 
 # Enable logging
@@ -108,7 +109,7 @@ class POST_server(BaseHTTPRequestHandler):
 				# Sender info
 				if (block_account == faucet_account):
 					sender = lang_text('frontiers_sender_faucet', lang_id)
-				elif (block_account == fee_account):
+				elif ((block_account == fee_account) or (block_account == welcome_account)):
 					sender = lang_text('frontiers_sender_bot', lang_id)
 				elif (block_account == account[1]):
 					sender = lang_text('frontiers_sender_self', lang_id)

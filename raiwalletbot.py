@@ -40,6 +40,9 @@ password = config.get('main', 'password')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
+welcome_account = config.get('main', 'welcome_account')
+welcome_amount = int(config.get('main', 'welcome_amount'))
+raw_welcome_amount = fee_amount * (10 ** 24)
 incoming_fee_text = '\n'
 min_send = int(config.get('main', 'min_send'))
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
@@ -416,6 +419,8 @@ def account_text(bot, update):
 			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
 			sleep(1)
 			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
+			welcome = rpc({"action": "send", "wallet": wallet, "source": welcome_account, "destination": r, "amount": raw_welcome_amount}, 'block')
+			logging.info('New user registered {0} {1}'.format(user_id, r))
 		else:
 			text_reply(update, lang_text('account_error', lang_id))
 
@@ -956,6 +961,8 @@ def stats(bot, update):
 	fee_pending = account_pending(fee_account) / (10 ** 6)
 	if (fee_pending > 0):
 		stats = '{0}\nPending fees: {1} Mrai (XRB)'.format(stats, "{:,}".format(fee_pending))
+	welcome_balance = account_balance(welcome_account) / (10 ** 6)
+	stats = '{0}\nWelcome balance: {1} Mrai (XRB)'.format(stats, "{:,}".format(welcome_balance))
 	default_keyboard(bot, update.message.chat_id, stats)
 
 

@@ -28,10 +28,16 @@ def push(bot, chat_id, message):
 			parse_mode=ParseMode.MARKDOWN,
 			disable_web_page_preview=True)
 	except BadRequest:
-		bot.sendMessage(chat_id=chat_id, 
-			text=replace_unsafe(message), 
-			parse_mode=ParseMode.MARKDOWN,
-			disable_web_page_preview=True)
+		try:
+			bot.sendMessage(chat_id=chat_id, 
+				text=replace_unsafe(message), 
+				parse_mode=ParseMode.MARKDOWN,
+				disable_web_page_preview=True)
+		except BadRequest:
+			bot.sendMessage(chat_id=chat_id, 
+				text=message.replace("_", "\_"), 
+				parse_mode=ParseMode.MARKDOWN,
+				disable_web_page_preview=True)
 	except RetryAfter:
 		sleep(240)
 		bot.sendMessage(chat_id=chat_id, 
