@@ -94,6 +94,8 @@ def monitoring_block_count():
 		# Warning to admins
 		for user_id in admin_list:
 			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*'.format(count, community_count, difference))
+			rpc({"action": "bootstrap", "address": "::ffff:51.255.160.144", "port": "7075"}, 'success')
+			time.sleep(180)
 			bootstrap_multi()
 
 monitoring_peers()
