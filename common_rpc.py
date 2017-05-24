@@ -97,5 +97,21 @@ def check_block(block):
 	else:
 		return check_block_community(block)
 
+def reference_block_count():
+	# check ip in list
+	peers = peers_ip()
+	peer = reference_url.replace("http://", "").split(":")[0]
+	if (peer in peers):
+		try:
+			r = requests.post(reference_url, json = {"action": "block_count"}).json()
+			if 'error' not in r:
+				return r['count']
+			else:
+				return 0
+		except:
+			return 0
+	else:
+		return 0
+
 def bootstrap_multi():
 	rpc({"action": "bootstrap_multi"}, 'success')

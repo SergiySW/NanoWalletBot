@@ -90,10 +90,11 @@ def monitoring_block_count():
 	json_data = json.loads(response.data)
 	community_count = json_data['blocks']
 	difference = int(math.fabs(int(community_count) - int(count)))
+	reference_count = reference_block_count()
 	if (difference > block_count_difference_threshold):
 		# Warning to admins
 		for user_id in admin_list:
-			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*'.format(count, community_count, difference))
+			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}'.format(count, community_count, difference, reference_count))
 			rpc({"action": "bootstrap", "address": "::ffff:51.255.160.144", "port": "7075"}, 'success')
 			time.sleep(180)
 			bootstrap_multi()
