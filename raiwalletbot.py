@@ -316,6 +316,9 @@ def block_count_callback(bot, update):
 		community_count = json_data['blocks']
 		if (math.fabs(int(community_count) - int(count)) > block_count_difference_threshold):
 			text_reply(update, 'Community: {0}'.format("{:,}".format(int(community_count))))
+			reference_count = int(reference_block_count())
+			sleep(1)
+			text_reply(update, 'Reference: {0}'.format("{:,}".format(reference_count)))
 
 
 
@@ -397,7 +400,11 @@ def account_text(bot, update):
 		message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url))
 		sleep(1)
 		#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
-		bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+		try:
+			bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+		except (urllib3.exceptions.ProtocolError) as e:
+			sleep(3)
+			bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
 		
 	except (TypeError):
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
