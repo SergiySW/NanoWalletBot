@@ -39,7 +39,6 @@ logger = logging.getLogger(__name__)
 
 account_url = 'https://raiblockscommunity.net/account/index.php?acc='
 hash_url = 'https://raiblockscommunity.net/block/index.php?h='
-faucet_url = 'https://faucet.raiblockscommunity.net/form.php?a='
 faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
@@ -177,6 +176,10 @@ def bitgrail():
 	url = 'https://bitgrail.com/api/v1/BTC-XRB/ticker'
 	response = http.request('GET', url)
 	json_bitgrail = json.loads(response.data)
+	if (int(json_bitgrail['success']) == 0):
+		url = 'https://bitgrail.com/api/v1/BTC-MXRB/ticker'
+		response = http.request('GET', url)
+		json_bitgrail = json.loads(response.data)
 	json_array = json_bitgrail['response']
 	last_price = int(float(json_array['last']) * (10 ** 8))
 	high_price = int(float(json_array['high']) * (10 ** 8))
