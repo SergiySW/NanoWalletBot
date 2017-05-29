@@ -114,4 +114,4 @@ def reference_block_count():
 		return 0
 
 def bootstrap_multi():
-	rpc({"action": "bootstrap_multi"}, 'success')
+	rpc({"action": "bootstrap_any"}, 'success')
