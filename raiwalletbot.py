@@ -540,6 +540,7 @@ def send_callback(bot, update, args):
 							logging.info('Transaction FAILURE! Account {0}'.format(account))
 							new_balance = account_balance(account)
 							lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
+							unlock(wallet, password) # try to unlock wallet
 					except (GeneratorExit, ValueError):
 						lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
 				elif (not (check == hex)):
@@ -716,6 +717,7 @@ def send_finish(bot, update):
 				logging.info('Transaction FAILURE! Account {0}'.format(account))
 				new_balance = account_balance(account)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
+				unlock(wallet, password) # try to unlock wallet
 		else:
 			text_reply(update, lang_text('send_frontier', lang_id))
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
