@@ -537,7 +537,7 @@ def send_callback(bot, update, args):
 								logging.info(username_text)
 							# update username
 						else:
-							logging.info('Transaction FAILURE! Account {0}'.format(account))
+							logging.warn('Transaction FAILURE! Account {0}'.format(account))
 							new_balance = account_balance(account)
 							lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 							unlock(wallet, wallet_password) # try to unlock wallet
@@ -714,7 +714,7 @@ def send_finish(bot, update):
 					logging.info(username_text)
 				# update username
 			else:
-				logging.info('Transaction FAILURE! Account {0}'.format(account))
+				logging.warn('Transaction FAILURE! Account {0}'.format(account))
 				new_balance = account_balance(account)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 				unlock(wallet, wallet_password) # try to unlock wallet

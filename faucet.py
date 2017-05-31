@@ -76,10 +76,13 @@ def faucet():
 			if ((paylist['account'] == account[1]) and (account[0] not in BLACK_LIST)):
 				claims = int(paylist['pending'])
 				text = lang(account[0], 'faucet_claims').format("{:,}".format(claims))
-				push_simple(bot, account[0], text)
+				try:
+					push_simple(bot, account[0], text)
+				except Exception as e:
+					logging.warn('Push failed for {0}\n{1}'.format(account[0], text))
 				#print(text)
 				logging.info('{0}\n{1}'.format(account[0], text))
-				time.sleep(1)
+				time.sleep(1.25)
 	
 	
 faucet()
