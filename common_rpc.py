@@ -24,7 +24,7 @@ def rpc(json, key):
 		else:
 			print(r['error'])
 			return(r['error'])
-	except:
+	except Exception as e:
 		sleep(0.5)
 		r = requests.post(url, json=json).json()
 		if 'error' not in r:
@@ -32,6 +32,15 @@ def rpc(json, key):
 		else:
 			print(r['error'])
 			return(r['error'])
+
+
+def rpc_send(wallet, source, destination, raw_amount):
+	r = requests.post(url, json={"action": "send", "wallet": wallet, "source": source, "destination": destination, "amount": raw_amount}).json()
+	if 'error' not in r:
+		return(r['block'])
+	else:
+		print(r['error'])
+		return(r['error'])
 
 
 def raw_account_balance(account):

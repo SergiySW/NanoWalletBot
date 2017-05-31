@@ -510,11 +510,19 @@ def send_callback(bot, update, args):
 				if ((destination_check == '1') and (check == hex) and (check_frontier)):
 					# Sending
 					try:
-						send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
+						try:
+							send_hash = rpc_send(wallet, account, destination, raw_send_amount)
+						except Exception as e:
+							send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+							logging.exception("message")
 						if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 							# FEELESS
 							if (final_fee_amount > 0):
-								fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
+								try:
+									fee = rpc_send(wallet, account, fee_account, raw_fee_amount)
+								except Exception as e:
+									fee = '00000000000000000000000000000000000000000000000000000000000000'
+									logging.exception("message")
 							else:
 								fee = send_hash
 							# FEELESS
@@ -686,11 +694,19 @@ def send_finish(bot, update):
 		frontier = m[3]
 		check_frontier = check_block(frontier)
 		if (check_frontier):
-			send_hash = rpc({"action": "send", "wallet": wallet, "source": account, "destination": destination, "amount": raw_send_amount}, 'block')
+			try:
+				send_hash = rpc_send(wallet, account, destination, raw_send_amount)
+			except Exception as e:
+				send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+				logging.exception("message")
 			if ('00000000000000000000000000000000000000000000000000000000000000' not in send_hash):
 				# FEELESS
 				if (final_fee_amount > 0):
-					fee = rpc({"action": "send", "wallet": wallet, "source": account, "destination": fee_account, "amount": raw_fee_amount}, 'block')
+					try:
+						fee = rpc_send(wallet, account, fee_account, raw_fee_amount)
+					except Exception as e:
+						fee = '00000000000000000000000000000000000000000000000000000000000000'
+						logging.exception("message")
 				else:
 					fee = send_hash
 				# FEELESS
