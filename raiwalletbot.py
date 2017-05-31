@@ -426,7 +426,10 @@ def account_text(bot, update):
 			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
 			sleep(1)
 			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
-			welcome = rpc({"action": "send", "wallet": wallet, "source": welcome_account, "destination": r, "amount": raw_welcome_amount}, 'block')
+			try:
+				welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
+			except Exception as e:
+				logging.exception("message")
 			logging.info('New user registered {0} {1}'.format(user_id, r))
 		else:
 			text_reply(update, lang_text('account_error', lang_id))

@@ -35,7 +35,13 @@ def rpc(json, key):
 
 
 def rpc_send(wallet, source, destination, raw_amount):
-	r = requests.post(url, json={"action": "send", "wallet": wallet, "source": source, "destination": destination, "amount": raw_amount}).json()
+	try:
+		req = requests.post(url, json={"action": "send", "wallet": wallet, "source": source, "destination": destination, "amount": raw_amount})
+		r = req.json()
+	except ValueError as e:
+		print(req)
+		print(req.text)
+		r = json.loads(req.text[:84])
 	if 'error' not in r:
 		return(r['block'])
 	else:
