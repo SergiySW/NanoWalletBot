@@ -482,8 +482,6 @@ def send_callback(bot, update, args):
 				destination = args[1]
 				if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb'))):
 					destination = args[2]
-				destination = destination.encode("utf8").replace('\xad','').replace('\r','').replace('\n','');
-				destination = destination.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
 				# if destination is username
 				if (destination.startswith('@') and (len(destination) > 3 )):
 					username = destination.replace('@', '')
@@ -494,6 +492,8 @@ def send_callback(bot, update, args):
 						destination = dest_account
 					else:
 						text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
+				destination = destination.encode("utf8").replace('­','').replace('\r','').replace('\n','');
+				destination = destination.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
 				destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
 				#print(destination)
 				# Check password protection
@@ -610,7 +610,7 @@ def send_destination(bot, update, text):
 	m = mysql_select_user(user_id)
 	try:
 		account = m[2]
-		destination = text.encode("utf8").replace('\xad','').replace('\r','').replace('\n','');
+		destination = text.encode("utf8").replace('­','').replace('\r','').replace('\n','');
 		destination = destination.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
 		destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
 		if (destination_check == '1'):
