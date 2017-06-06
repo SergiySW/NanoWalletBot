@@ -26,6 +26,7 @@ config = ConfigParser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 wallet = config.get('main', 'wallet')
+password = config.get('main', 'password')
 log_file = config.get('main', 'log_file')
 admin_list = json.loads(config.get('main', 'admin_list'))
 peer_list = json.loads(config.get('monitoring', 'peer_list'))
@@ -95,9 +96,14 @@ def monitoring_block_count():
 		# Warning to admins
 		for user_id in admin_list:
 			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}'.format(count, community_count, difference, reference_count))
-			rpc({"action": "bootstrap", "address": "::ffff:51.255.160.144", "port": "7075"}, 'success')
-			time.sleep(180)
 			bootstrap_multi()
+
+def monitoring_password():
+	valid = rpc({"action": "password_valid", "wallet": wallet}, 'valid')
+	if (int(valid) == 0):
+		unlock(wallet, password)
+
 
 monitoring_peers()
 monitoring_block_count()
+monitoring_password()
