@@ -16,7 +16,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
 import logging
-import urllib3, socket, json
+import urllib3, certifi, socket, json
 import time, math
 from requests.utils import quote
 
@@ -61,7 +61,7 @@ def monitoring_peers():
 	for peer in peer_list:
 		if (peer not in rpc_peers):
 			# check peers from raiblockscommunity.net
-			http = urllib3.PoolManager()
+			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 			response = http.request('GET', peers_url)
 			json_data = json.loads(response.data)
 			json_peers = json_data['peers']
@@ -85,18 +85,19 @@ def monitoring_peers():
 def monitoring_block_count():
 	# set bot
 	bot = Bot(api_key)
-	count = rpc({"action": "block_count"}, 'count')
-	http = urllib3.PoolManager()
+	count = int(rpc({"action": "block_count"}, 'count'))
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	response = http.request('GET', summary_url)
 	json_data = json.loads(response.data)
-	community_count = json_data['blocks']
-	difference = int(math.fabs(int(community_count) - int(count)))
+	community_count = int(json_data['blocks'])
+	difference = int(math.fabs(community_count - count))
 	reference_count = reference_block_count()
 	if (difference > block_count_difference_threshold):
 		# Warning to admins
 		for user_id in admin_list:
 			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}'.format(count, community_count, difference, reference_count))
-			bootstrap_multi()
+		# trying to fix
+		bootstrap_multi()
 
 def monitoring_password():
 	valid = rpc({"action": "password_valid", "wallet": wallet}, 'valid')
