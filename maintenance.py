@@ -19,6 +19,7 @@ from telegram.ext import Updater, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram import Bot
 import logging
+import time
 
 # Parse config
 import ConfigParser
@@ -36,11 +37,20 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+text = raw_input("Please enter text: ")
+minutes = int(raw_input("Please enter ETA (minutes): "))
+time_start = int(time.time())
+end_time = time_start + (minutes * 60)
 
 @run_async
 def maintenance(bot, update):
-	#logging.info(update.message)
-	update.message.reply_text('@RaiWalletBot Maintenance')
+	if (minutes > 0):
+		time_remain = end_time - int(time.time())
+		sec_remain = time_remain % 60
+		min_remain = time_remain // 60
+		update.message.reply_text('@RaiWalletBot Maintenance\n{0}\n~{1}:{2} minutes remain'.format(text, min_remain, sec_remain))
+	else:
+		update.message.reply_text('@RaiWalletBot Maintenance\n{0}'.format(text))
 
 def error(bot, update, error):
 	logger.warn('Update "%s" caused error "%s"' % (update, error))
