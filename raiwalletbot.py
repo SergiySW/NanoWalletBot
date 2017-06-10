@@ -428,6 +428,9 @@ def account_text(bot, update):
 			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
 			try:
 				welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
+				new_balance = account_balance(welcome_account)
+				mysql_update_balance(welcome_account, new_balance)
+				mysql_update_frontier(welcome_account, welcome)
 			except Exception as e:
 				logging.exception("message")
 			logging.info('New user registered {0} {1}'.format(user_id, r))
