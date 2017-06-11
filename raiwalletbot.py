@@ -523,7 +523,7 @@ def send_callback(bot, update, args):
 						except Exception as e:
 							send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 							logging.exception("message")
-						if ('000000000000000000000000000000000000000000000000000000000000000' not in send_hash):
+						if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 							# FEELESS
 							if (final_fee_amount > 0):
 								try:
@@ -708,7 +708,7 @@ def send_finish(bot, update):
 			except Exception as e:
 				send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 				logging.exception("message")
-			if ('00000000000000000000000000000000000000000000000000000000000000' not in send_hash):
+			if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 				# FEELESS
 				if (final_fee_amount > 0):
 					try:
