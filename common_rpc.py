@@ -75,6 +75,7 @@ def account_pending(account):
 
 def unlock(wallet, password):
 	r = rpc({"action": "password_enter", "wallet": wallet, "password": password}, 'valid')
+	search = rpc({"action": "search_pending", "wallet": wallet}, 'started')
 
 def peers_ip():
 	peers = rpc({"action":"peers"}, 'peers')
