@@ -47,12 +47,38 @@ def mysql_insert(data):
 	cnx.close()
 
 
+def mysql_insert_extra(data):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	add_data = ("INSERT INTO rai_bot_extra "
+			  "(user_id, account, extra_id) "
+			  "VALUES (%(user_id)s, %(account)s, %(extra_id)s)")
+	cursor.execute(add_data, data)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
 def mysql_select_user(user_id):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)
 	query = "SELECT * FROM rai_bot WHERE user_id = {0}".format(user_id)
 	cursor.execute(query)
 	account = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	return(account)
+
+
+def mysql_select_user_extra(user_id, active = False):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	if (active is not False):
+		query = "SELECT * FROM rai_bot_extra WHERE user_id = {0} AND send_from = 1".format(user_id)
+	else:
+		query = "SELECT * FROM rai_bot_extra WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	account = cursor.fetchall()
 	cursor.close()
 	cnx.close()
 	return(account)
@@ -83,6 +109,34 @@ def mysql_select_by_account(xrb_account):
 		return False
 
 
+def mysql_select_by_account_extra(xrb_account):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT user_id, account, frontier, balance, extra_id FROM rai_bot_extra WHERE account LIKE '{0}'".format(xrb_account)
+	cursor.execute(query)
+	account = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	if (account is not None):
+		return(account)
+	else:
+		return False
+
+
+def mysql_select_by_id_extra(user_id, extra_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT user_id, account, frontier, balance, extra_id FROM rai_bot_extra WHERE user_id = {0} AND extra_id = {1}".format(user_id, extra_id)
+	cursor.execute(query)
+	account = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	if (account is not None):
+		return(account)
+	else:
+		return False
+
+
 def mysql_select_accounts_balances():
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)
@@ -93,6 +147,16 @@ def mysql_select_accounts_balances():
 	cnx.close()
 	return(accounts_balances)
 
+
+def mysql_select_accounts_list_extra():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT user_id, account, frontier, balance, extra_id, '1' as extra FROM rai_bot_extra"
+	cursor.execute(query)
+	accounts_list = cursor.fetchall()
+	cursor.close()
+	cnx.close()
+	return(accounts_list)
 
 
 def mysql_user_existance(user_id):
@@ -113,24 +177,42 @@ def mysql_update_frontier(account, frontier):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
 	query = "UPDATE rai_bot SET frontier = '{0}' WHERE account LIKE '{1}'".format(frontier, account)
-#	print(query)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
 	cnx.close()
 
-#@run_async
+
+def mysql_update_frontier_extra(account, frontier):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "UPDATE rai_bot_extra SET frontier = '{0}' WHERE account LIKE '{1}'".format(frontier, account)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
 def mysql_update_balance(account, balance):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
 	query = "UPDATE rai_bot SET balance = '{0}' WHERE account LIKE '{1}'".format(balance, account)
-#	print(query)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
 	cnx.close()
 
-#@run_async
+
+def mysql_update_balance_extra(account, balance):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "UPDATE rai_bot_extra SET balance = '{0}' WHERE account LIKE '{1}'".format(balance, account)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
 def mysql_update_username(user_id, username):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -140,7 +222,7 @@ def mysql_update_username(user_id, username):
 	cursor.close()
 	cnx.close()
 
-#@run_async
+
 def mysql_update_send_amount(account, amount):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -150,7 +232,7 @@ def mysql_update_send_amount(account, amount):
 	cursor.close()
 	cnx.close()
 
-#@run_async
+
 def mysql_update_send_destination(account, send_account):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -160,7 +242,17 @@ def mysql_update_send_destination(account, send_account):
 	cursor.close()
 	cnx.close()
 
-#@run_async
+
+def mysql_update_send_from(from_account):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "UPDATE rai_bot_extra SET send_from = 1 WHERE account LIKE '{0}'".format(from_account)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
 def mysql_update_send_clean(account):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -171,10 +263,33 @@ def mysql_update_send_clean(account):
 	cnx.close()
 
 
+def mysql_update_send_clean_extra(from_account):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "UPDATE rai_bot_extra SET send_from = 0 WHERE account LIKE '{0}'".format(from_account)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
+def mysql_update_send_clean_extra_user(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "UPDATE rai_bot_extra SET send_from = 0 WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
 def mysql_update_send_clean_all():
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
 	query = "UPDATE rai_bot SET send_destination = NULL, send_amount = 0"
+	cursor.execute(query)
+	cnx.commit()
+	query = "UPDATE rai_bot_extra SET send_from = 0"
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
@@ -202,13 +317,19 @@ def mysql_stats():
 	query = "SELECT COUNT(*) FROM rai_bot"
 	cursor.execute(query)
 	users = cursor.fetchone()[0]
+	query = "SELECT COUNT(*) FROM rai_bot_extra"
+	cursor.execute(query)
+	accounts = users + cursor.fetchone()[0]
 	query = "SELECT SUM(balance) FROM rai_bot"
 	cursor.execute(query)
 	balance = int(cursor.fetchone()[0] / (10 ** 6))
+	query = "SELECT SUM(balance) FROM rai_bot_extra"
+	cursor.execute(query)
+	balance = balance + int(cursor.fetchone()[0] / (10 ** 6))
 	#price = mysql_select_price()[0]
 	cursor.close()
 	cnx.close()
-	stats = "Total users: {0}\nTotal balance: {1} Mrai (XRB)".format("{:,}".format(users), "{:,}".format(balance))
+	stats = "Total users: {0}\nTotal accounts: {2}\nTotal balance: {1} Mrai (XRB)".format("{:,}".format(users), "{:,}".format(balance), "{:,}".format(accounts))
 	return stats
 
 
@@ -334,6 +455,32 @@ def mysql_select_language(user_id):
 	cursor.close()
 	cnx.close()
 	return(language)
+
+
+def mysql_set_hide(user_id, hide):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "REPLACE INTO rai_bot_hide_list SET user_id = {0}, hide = {1}".format(user_id, hide)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	mysql_update_send_clean_extra_user(user_id)
+
+def mysql_select_hide(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT hide FROM rai_bot_hide_list WHERE user_id = {0}".format(user_id)
+	try:
+		cursor.execute(query)
+		select = cursor.fetchone()[0]
+		hide = int(select)
+	except TypeError:
+		mysql_set_hide(user_id, 0)
+		hide = 0
+	cursor.close()
+	cnx.close()
+	return(hide)
 
 
 def mysql_set_sendlist(user_id, text):

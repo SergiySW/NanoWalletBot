@@ -42,7 +42,7 @@ hash_url = 'https://raiblockscommunity.net/block/index.php?h='
 faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
-from common_mysql import mysql_update_balance, mysql_update_frontier, mysql_select_accounts_list, mysql_set_price, mysql_select_language, mysql_set_sendlist, mysql_delete_sendlist, mysql_select_sendlist, mysql_select_frontiers, mysql_set_frontiers
+from common_mysql import *
 
 
 # Request to node
@@ -69,7 +69,9 @@ def frontiers():
 	# set bot
 	bot = Bot(api_key)
 	# list from MySQL
-	accounts_list = mysql_select_accounts_list()
+	accounts_list_orig = mysql_select_accounts_list()
+	accounts_list_extra = mysql_select_accounts_list_extra()
+	accounts_list = accounts_list_orig + accounts_list_extra
 	# list from node
 	frontiers = rpc({"action":"wallet_frontiers","wallet":wallet}, 'frontiers')
 	frontiers_old = json.loads(mysql_select_frontiers())
@@ -83,7 +85,11 @@ def frontiers():
 				# update frontier
 				balance = account_balance(account[1])
 				# check if balance changed
-				mysql_update_frontier(account[1], frontier)
+				try:
+					z = account[5]
+					mysql_update_frontier_extra(account[1], frontier)
+				except IndexError as e:
+					mysql_update_frontier(account[1], frontier)
 				logging.info('{0} --> {1}	{2}'.format(mrai_text(account[3]), mrai_text(balance), frontier))
 				#print(balance)
 				if (int(account[3]) < balance):
@@ -95,8 +101,8 @@ def frontiers():
 					send_tx = json.loads(rpc({"action":"block","hash":frontier}, 'contents'))
 					send_source = send_tx['source']
 					block_account = rpc({"action":"block_account","hash":send_source}, 'account')
-					sender = ''
 					lang_id = mysql_select_language(account[0])
+					sender = lang_text('frontiers_sender_account', lang_id).format(block_account)
 					# Sender info
 					if (block_account == faucet_account):
 						sender = lang_text('frontiers_sender_faucet', lang_id)
@@ -105,16 +111,27 @@ def frontiers():
 					elif (block_account == account[1]):
 						sender = lang_text('frontiers_sender_self', lang_id)
 					else:
-						for sender_account in accounts_list:
+						for sender_account in accounts_list_orig:
 							if (sender_account[1] == block_account):
 								if ((sender_account[4] is not None) and (sender_account[4])):
 									sender = lang_text('frontiers_sender_username', lang_id).format(sender_account[4])
 								else:
-									sender = lang_text('frontiers_sender_users', lang_id)
+									sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
+						for sender_account in accounts_list_extra:
+							if (sender_account[1] == block_account):
+								user_sender = mysql_select_user(sender_account[0])
+								if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != sender_account[0])):
+									sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
+								elif (account[0] != sender_account[0]):
+									sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
+					try:
+						z = account[5]
+						sender = lang_text('frontiers_sender_by', lang_id).format(sender, account[1].replace("_", "\_"))
+						mysql_update_balance_extra(account[1], balance)
+					except IndexError as e:
+						mysql_update_balance(account[1], balance)
 					logging.info(sender)
-					
 					logging.info(block_account)
-					mysql_update_balance(account[1], balance)
 					logging.warning('NoCallback {0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
 					text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
 					mysql_set_sendlist(account[0], text.encode("utf8"))

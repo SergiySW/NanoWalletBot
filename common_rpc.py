@@ -61,6 +61,20 @@ def account_balance(account):
 	return(balance)
 
 
+def accounts_balances(accounts):
+	req = requests.post(url, json={"action": "accounts_balances", "accounts": accounts})
+	r = req.json()
+	if 'error' not in r:
+		rpc_balances = r['balances']
+		balances = {}
+		for account in accounts:
+			balances[account] = int(math.floor(int(rpc_balances[account]['balance']) / (10 ** 24)))
+		return(balances)
+	else:
+		print(r['error'])
+		return(r['error'])
+
+
 def raw_account_pending(account):
 	r = rpc({"action": "account_balance", "account": account}, 'pending')
 	pending = int(r)

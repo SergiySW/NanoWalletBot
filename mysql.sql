@@ -57,8 +57,7 @@ CREATE TABLE `rai_bot` (
   UNIQUE KEY `id` (`id`),
   KEY `username` (`username`),
   KEY `user_id` (`user_id`),
-  KEY `account` (`account`),
-  KEY `id_2` (`id`)
+  KEY `account` (`account`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -73,9 +72,42 @@ CREATE TABLE `rai_bot_access` (
   `user_id` int(10) unsigned NOT NULL,
   `datetime` int(11) unsigned NOT NULL DEFAULT '0',
   `message_id` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_id_2` (`user_id`),
-  KEY `user_id` (`user_id`)
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rai_bot_extra`
+--
+
+DROP TABLE IF EXISTS `rai_bot_extra`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_bot_extra` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `extra_id` int(3) unsigned NOT NULL DEFAULT '1',
+  `account` varchar(64) DEFAULT NULL,
+  `frontier` varchar(64) DEFAULT NULL,
+  `balance` bigint(15) unsigned NOT NULL DEFAULT '0',
+  `send_from` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `account` (`account`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rai_bot_hide_list`
+--
+
+DROP TABLE IF EXISTS `rai_bot_hide_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_bot_hide_list` (
+  `user_id` int(10) unsigned NOT NULL,
+  `hide` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -103,8 +135,7 @@ DROP TABLE IF EXISTS `rai_bot_passwords`;
 CREATE TABLE `rai_bot_passwords` (
   `user_id` int(10) unsigned NOT NULL,
   `password` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_id` (`user_id`)
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -140,8 +171,7 @@ CREATE TABLE `rai_price` (
   `bid_price` int(8) unsigned NOT NULL DEFAULT '0',
   `volume` int(11) unsigned NOT NULL DEFAULT '0',
   `btc_volume` int(12) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id` (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

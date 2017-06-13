@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 # MySQL requests
-from common_mysql import mysql_select_accounts_list, mysql_select_blacklist, mysql_select_language
+from common_mysql import mysql_select_accounts_list, mysql_select_blacklist, mysql_select_language, mysql_select_accounts_list_extra
 
 
 # Common functions
@@ -68,7 +68,9 @@ def faucet():
 	
 	bot = Bot(api_key)
 	# list from MySQL
-	accounts_list = mysql_select_accounts_list()
+	accounts_list_orig = mysql_select_accounts_list()
+	accounts_list_extra = mysql_select_accounts_list_extra()
+	accounts_list = accounts_list_orig + accounts_list_extra
 	# blacklist
 	BLACK_LIST = mysql_select_blacklist()
 	for account in accounts_list:
