@@ -405,7 +405,13 @@ def account_text(bot, update, list = False):
 		qr_by_account(r)
 		balance = account_balance(r)
 		total_balance = balance
-		max_send = balance - fee_amount
+		# FEELESS
+		if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
+			final_fee_amount = 0
+		else:
+			final_fee_amount = fee_amount
+		# FEELESS
+		max_send = balance - final_fee_amount
 		extra_accounts = mysql_select_user_extra(user_id)
 		extra_array = []
 		for extra_account in extra_accounts:
@@ -442,7 +448,7 @@ def account_text(bot, update, list = False):
 			if ((balance == 0) and (list is False)):
 				text = lang_text('account_balance_zero', lang_id).format(faucet_url, r)
 			elif ((max_send < min_send) and (list is False)):
-				text = lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(fee_amount), mrai_text(min_send))
+				text = lang_text('account_balance_low', lang_id).format(faucet_url, r, mrai_text(balance), mrai_text(final_fee_amount), mrai_text(min_send))
 			else:
 				if (balance == total_balance):
 					text = lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send))
@@ -582,7 +588,7 @@ def send_callback(bot, update, args, from_account = 0):
 		try:
 			balance = account_balance(account)
 			# FEELESS
-			if (user_id in LIST_OF_FEELESS):
+			if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
 				final_fee_amount = 0
 			else:
 				final_fee_amount = fee_amount
@@ -662,6 +668,7 @@ def send_callback(bot, update, args, from_account = 0):
 								mysql_update_balance_extra(account, new_balance)
 								mysql_update_frontier_extra(account, fee)
 							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
+							mysql_update_send_time(user_id)
 							sleep(1)
 							message_markdown(bot, chat_id, '[{0}]({1}{0})'.format(send_hash, hash_url))
 							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
@@ -706,7 +713,7 @@ def send_text(bot, update, default = False):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	# FEELESS
-	if (user_id in LIST_OF_FEELESS):
+	if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
 		final_fee_amount = 0
 	else:
 		final_fee_amount = fee_amount
@@ -725,8 +732,8 @@ def send_text(bot, update, default = False):
 				extra_array.append(extra_account[3])
 			balances = accounts_balances(extra_array)
 			for extra_account in extra_accounts:
-				#if (balances[extra_account[3]] >= (min_send + final_fee_amount)):
-				extra_keyboard.append(['{0} - {1} XRB'.format(extra_account[3], mrai_text(balances[extra_account[3]]))])
+				if (balances[extra_account[3]] >= (min_send + final_fee_amount)):
+					extra_keyboard.append(['{0} - {1} XRB'.format(extra_account[3], mrai_text(balances[extra_account[3]]))])
 		if (len(extra_keyboard) <= 1):
 			default = True
 		if ((default is False) and (hide == 0)):
@@ -746,7 +753,7 @@ def send_destination(bot, update, text):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	# FEELESS
-	if (user_id in LIST_OF_FEELESS):
+	if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
 		final_fee_amount = 0
 	else:
 		final_fee_amount = fee_amount
@@ -789,7 +796,7 @@ def send_amount(bot, update, text):
 	user_id = update.message.from_user.id
 	lang_id = mysql_select_language(user_id)
 	# FEELESS
-	if (user_id in LIST_OF_FEELESS):
+	if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
 		final_fee_amount = 0
 	else:
 		final_fee_amount = fee_amount
@@ -843,7 +850,13 @@ def send_extra(bot, update, text):
 		mysql_update_send_from(xrb_account)
 		text_reply(update, lang_text('send_from', lang_id).format(xrb_account))
 		sleep(1)
-		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_amount', lang_id).format(mrai_text(fee_amount), mrai_text(min_send)))
+		# FEELESS
+		if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
+			final_fee_amount = 0
+		else:
+			final_fee_amount = fee_amount
+		# FEELESS
+		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_amount', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 	else:
 		send_destination(bot, update, text)
 
@@ -864,7 +877,7 @@ def send_finish(bot, update):
 		account = extra_account[0][3]
 		mysql_update_send_clean_extra(account)
 	# FEELESS
-	if (user_id in LIST_OF_FEELESS):
+	if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
 		final_fee_amount = 0
 	else:
 		final_fee_amount = fee_amount
@@ -901,6 +914,7 @@ def send_finish(bot, update):
 					mysql_update_frontier(account, fee)
 				sleep(1)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
+				mysql_update_send_time(user_id)
 				sleep(1)
 				message_markdown(bot, chat_id, '[{0}]({1}{0})'.format(send_hash, hash_url))
 				logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))

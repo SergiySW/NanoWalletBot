@@ -36,6 +36,7 @@ fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
 callback_port = int(config.get('main', 'callback_port'))
+LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -97,7 +98,13 @@ class POST_server(BaseHTTPRequestHandler):
 				received_amount = int(math.floor(raw_received / (10 ** 24)))
 				balance = account_balance(xrb_account)
 				frontier = post['hash']
-				max_send = balance - fee_amount
+				# FEELESS
+				if ((account[0] in LIST_OF_FEELESS) or (mysql_select_send_time(account[0]) is not False)):
+					final_fee_amount = 0
+				else:
+					final_fee_amount = fee_amount
+				# FEELESS
+				max_send = balance - final_fee_amount
 				if (max_send < 0):
 					max_send = 0
 				try:

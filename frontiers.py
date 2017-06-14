@@ -30,6 +30,7 @@ fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
+LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -94,7 +95,13 @@ def frontiers():
 				#print(balance)
 				if (int(account[3]) < balance):
 					received_amount = balance - int(account[3])
-					max_send = balance - fee_amount
+					# FEELESS
+					if ((account[0] in LIST_OF_FEELESS) or (mysql_select_send_time(account[0]) is not False)):
+						final_fee_amount = 0
+					else:
+						final_fee_amount = fee_amount
+					# FEELESS
+					max_send = balance - final_fee_amount
 					if (max_send < 0):
 						max_send = 0
 					# retrieve sender

@@ -20,6 +20,7 @@ mysql_database = config.get('mysql', 'mysql_database')
 mysql_user = config.get('mysql', 'mysql_user')
 mysql_pass = config.get('mysql', 'mysql_pass')
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
+feeless_seconds = int(config.get('main', 'feeless_seconds'))
 
 # MySQL requests
 
@@ -532,7 +533,6 @@ def mysql_set_frontiers(json):
 	cnx.close()
 
 
-#@run_async
 from datetime import datetime
 import time
 def mysql_ddos_protector(user_id, message_id):
@@ -561,3 +561,34 @@ def mysql_ddos_protector(user_id, message_id):
 	cursor.close()
 	cnx.close()
 	return returned
+
+def mysql_select_send_time(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT datetime FROM rai_bot_send_time WHERE user_id = {0}".format(user_id)
+	timestamp = int(time.time())
+	try:
+		cursor.execute(query)
+		old_timestamp = int(cursor.fetchone()[0])
+		if ((timestamp - old_timestamp) >= feeless_seconds):
+			returned = True
+		else:
+			returned = False
+	except TypeError:
+		add_timestamp = "REPLACE INTO rai_bot_send_time SET user_id = {0}, datetime = {1}".format(user_id, timestamp)
+		cursor.execute(add_timestamp)
+		cnx.commit()
+		returned = True
+	cursor.close()
+	cnx.close()
+	return returned
+
+def mysql_update_send_time(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	timestamp = int(time.time())
+	add_timestamp = "REPLACE INTO rai_bot_send_time SET user_id = {0}, datetime = {1}".format(user_id, timestamp)
+	cursor.execute(add_timestamp)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
