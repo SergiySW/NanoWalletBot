@@ -426,11 +426,11 @@ def account_text(bot, update, list = False):
 		for extra_account in extra_accounts:
 			num = num + 1
 			if ((num <= 3) and (list is False) and (hide == 0)):
-				extra = '{0}\n*{1}.* {2} - {3} XRB (Mrai)  /send\\_from {1}'.format(extra, extra_account[2], extra_account[3].replace("xrb_", "xrb\_"), mrai_text(balances[extra_account[3]]))
+				extra = '{0}\n*{1}.* {2} - {3} XRB (Mrai)  {4} {1}'.format(extra, extra_account[2], extra_account[3].replace("xrb_", "xrb\_"), mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8"))
 			elif (list is not False):
 				extra = '{0}\n*{1}.* {2} - {3} XRB (Mrai)'.format(extra, extra_account[2], extra_account[3].replace("xrb_", "xrb\_"), mrai_text(balances[extra_account[3]]))
 				if (num == 1):
-					extra = '{0}  /send\\_from 1'.format(extra)
+					extra = '{0}  {1} 1'.format(extra, lang_text('send_from_command', lang_id).encode("utf8"))
 			total_balance = total_balance + balances[extra_account[3]]
 		# price
 		price = mysql_select_price()
@@ -442,7 +442,7 @@ def account_text(bot, update, list = False):
 		btc_balance = ('%.8f' % (btc_price * total_balance))
 		# price
 		if (list is not False):
-			text = 'Total: *{0} XRB (Mrai)*\n~ {1} BTC\n\n{2}\n/account\\_add'.format(mrai_text(total_balance), btc_balance, extra)
+			text = 'Total: *{0} XRB (Mrai)*\n~ {1} BTC\n\n{2}\n/{3}'.format(mrai_text(total_balance), btc_balance, extra, lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"))
 			message_markdown(bot, chat_id, text)
 		else:
 			if ((balance == 0) and (list is False)):
@@ -460,11 +460,11 @@ def account_text(bot, update, list = False):
 			message_markdown(bot, chat_id, '*{0}*'.format(r))
 			sleep(1)
 			if ((num > 3) and (hide == 0)):
-				message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url, extra).replace("_add", "_list")) # full accounts list
+				message_markdown(bot, chat_id, lang_text('account_history', lang_id).encode("utf8").format(r, account_url, faucet_url, extra).replace(lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('account_list', lang_id).encode("utf8").replace("_", "\_"))) # full accounts list
 			elif (hide == 1):
-				message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url, extra).replace("_add", "_list").replace("_hide", "_expand")) # hide-expand
+				message_markdown(bot, chat_id, lang_text('account_history', lang_id).encode("utf8").format(r, account_url, faucet_url, extra).replace(lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('account_list', lang_id).encode("utf8").replace("_", "\_")).replace(lang_text('accounts_hide', lang_id).encode("utf8").replace("_", "\_"), lang_text('accounts_expand', lang_id).encode("utf8").replace("_", "\_"))) # hide-expand
 			else:
-				message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url, extra))
+				message_markdown(bot, chat_id, lang_text('account_history', lang_id).encode("utf8").format(r, account_url, faucet_url, extra))
 			sleep(1)
 			#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
 			try:
@@ -1229,36 +1229,39 @@ def main():
 	dp = updater.dispatcher
 
 	# on different commands - answer in Telegram
-	dp.add_handler(CommandHandler("start", start))
-	dp.add_handler(CommandHandler("Start", start)) # symlink
-	dp.add_handler(CommandHandler("help", help))
-	dp.add_handler(CommandHandler("Help", help)) # symlink
-	dp.add_handler(CommandHandler("support", help)) # symlink
+	for command in language['commands']['start']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), start))
+	for command in language['commands']['help']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), help))
 	dp.add_handler(CommandHandler("info", start))
 
 	# my custom commands
 	dp.add_handler(CommandHandler("user_id", user_id))
-	dp.add_handler(CommandHandler("block_count", block_count))
+	for command in language['commands']['block_count']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), block_count))
 	dp.add_handler(CommandHandler("ping", ping))
-	dp.add_handler(CommandHandler("account", account))
-	dp.add_handler(CommandHandler("Account", account)) # symlink
-	dp.add_handler(CommandHandler("balance", account)) # symlink
-	dp.add_handler(CommandHandler("register", account)) # symlink
-	dp.add_handler(CommandHandler("account_add", account_add))
-	dp.add_handler(CommandHandler("account_list", account_list))
-	dp.add_handler(CommandHandler("accounts_hide", accounts_hide))
-	dp.add_handler(CommandHandler("accounts_expand", accounts_hide))
-	dp.add_handler(CommandHandler("send", send, pass_args=True))
-	dp.add_handler(CommandHandler("send_from", send_from, pass_args=True))
+	for command in language['commands']['account']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), account))
+	for command in language['commands']['account_add']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), account_add))
+	for command in language['commands']['account_list']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), account_list))
+	for command in (language['commands']['accounts_hide'] + language['commands']['accounts_expand']):
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), accounts_hide))
+	for command in language['commands']['send']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), send, pass_args=True))
+	for command in language['commands']['send_from']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), send_from, pass_args=True))
 	dp.add_handler(CommandHandler("password", password, pass_args=True))
 	dp.add_handler(CommandHandler("Password", password, pass_args=True)) # symlink
 	dp.add_handler(CommandHandler("secret", password, pass_args=True)) # symlink
 	dp.add_handler(CommandHandler("password_delete", password_delete, pass_args=True))
 	dp.add_handler(CommandHandler("secret_delete", password_delete, pass_args=True)) # symlink
-	dp.add_handler(CommandHandler("price", price))
-	dp.add_handler(CommandHandler("market", price)) # symlink
+	for command in language['commands']['price']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), price))
 	dp.add_handler(CommandHandler("version", version))
-	dp.add_handler(CommandHandler("language", language_select, pass_args=True))
+	for command in language['common']['lang']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
 
 	
 	# admin commands
