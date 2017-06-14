@@ -426,11 +426,11 @@ def account_text(bot, update, list = False):
 		for extra_account in extra_accounts:
 			num = num + 1
 			if ((num <= 3) and (list is False) and (hide == 0)):
-				extra = '{0}\n*{1}.* {2} - {3} XRB (Mrai)  {4} {1}'.format(extra, extra_account[2], extra_account[3].replace("xrb_", "xrb\_"), mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8"))
+				extra = '{0}\n*{1}.* {2} - {3} XRB (Mrai)  {4} {1}'.format(extra, extra_account[2], extra_account[3].replace("xrb_", "xrb\_"), mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_"))
 			elif (list is not False):
 				extra = '{0}\n*{1}.* {2} - {3} XRB (Mrai)'.format(extra, extra_account[2], extra_account[3].replace("xrb_", "xrb\_"), mrai_text(balances[extra_account[3]]))
 				if (num == 1):
-					extra = '{0}  {1} 1'.format(extra, lang_text('send_from_command', lang_id).encode("utf8"))
+					extra = '{0}  {1} 1'.format(extra, lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_"))
 			total_balance = total_balance + balances[extra_account[3]]
 		# price
 		price = mysql_select_price()
