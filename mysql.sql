@@ -178,13 +178,13 @@ DROP TABLE IF EXISTS `rai_price`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rai_price` (
   `id` int(3) unsigned NOT NULL AUTO_INCREMENT,
-  `last_price` int(8) unsigned NOT NULL DEFAULT '0',
-  `high_price` int(8) unsigned NOT NULL DEFAULT '0',
-  `low_price` int(8) unsigned NOT NULL DEFAULT '0',
-  `ask_price` int(8) unsigned NOT NULL DEFAULT '0',
-  `bid_price` int(8) unsigned NOT NULL DEFAULT '0',
-  `volume` int(11) unsigned NOT NULL DEFAULT '0',
-  `btc_volume` int(12) unsigned NOT NULL DEFAULT '0',
+  `last_price` int(11) unsigned NOT NULL DEFAULT '0',
+  `high_price` int(11) unsigned NOT NULL DEFAULT '0',
+  `low_price` int(11) unsigned NOT NULL DEFAULT '0',
+  `ask_price` int(11) unsigned NOT NULL DEFAULT '0',
+  `bid_price` int(11) unsigned NOT NULL DEFAULT '0',
+  `volume` bigint(18) unsigned NOT NULL DEFAULT '0',
+  `btc_volume` bigint(18) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
