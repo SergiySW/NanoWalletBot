@@ -575,7 +575,7 @@ def mysql_select_send_time(user_id):
 		else:
 			returned = False
 	except TypeError:
-		add_timestamp = "REPLACE INTO rai_bot_send_time SET user_id = {0}, datetime = {1}".format(user_id, timestamp)
+		add_timestamp = "REPLACE INTO rai_bot_send_time SET user_id = {0}, datetime = 0".format(user_id)
 		cursor.execute(add_timestamp)
 		cnx.commit()
 		returned = True
