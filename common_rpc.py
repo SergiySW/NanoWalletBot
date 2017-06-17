@@ -108,7 +108,7 @@ def check_block_community(block):
 			return True
 		else:
 			return False
-	except urllib3.exceptions.MaxRetryError:
+	except Exception as e:
 		return True
 
 def check_block(block):

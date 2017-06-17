@@ -5,7 +5,7 @@
         "address": "::1",
         "port": "7076",
         "enable_control": "true",
-        "frontier_request_limit": "65536",
+        "frontier_request_limit": "1000000",
         "chain_request_limit": "16384"
     },
     "node": {
