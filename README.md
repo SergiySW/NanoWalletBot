@@ -13,15 +13,14 @@ PyQRCode
 python-telegram-bot   
 
 # Other software configurations
-rai_node config samples in config.json   
+rai_node config sample in config.json   
 MySQL database structure in mysql.sql   
 Nginx config sample in nginx_site.conf   
 
 # rai_node config.json tuning
 If you use docker node, set "address": "::0.0.0.0"   
-Modify "work_threads" as available threads - 1 to prevent 100% CPU usage   
 
-1 Mrai (XRB) incoming limit: "receive_minimum": "1000000000000000000000000000000"   
+0.1 Mrai (XRB) incoming limit: "receive_minimum": "100000000000000000000000000000"   
 https://github.com/clemahieu/raiblocks/wiki/Distribution-and-Mining#Divider   
 
 # Start bot
@@ -29,7 +28,8 @@ Create wallet with `curl -g -d '{ "action": "wallet_create" }' http://localhost:
 Set password with `curl -g -d '{ "action": "password_change", "wallet": "WALLETID", "password": "WalletPassword123" }' http://localhost:7076`   
 Edit bot.cfg with your preferences   
 Start bot `python raiwalletbot.py`   
-Set cron job for python frontiers.py   
+Start callback incoming transactions server `python frontiers_callback.py`   
+Set cron job for `python frontiers.py` and other scripts if required   
 
 # Thanks
 * [clemahieu](https://github.com/clemahieu) for RaiBlocks creation and development
