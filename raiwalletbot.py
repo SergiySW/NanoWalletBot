@@ -1145,6 +1145,7 @@ def password_callback(bot, update, args):
 					print(hex)
 					mysql_set_password(user_id, hex)
 					message_markdown(bot, chat_id, lang(user_id, 'password_success'))
+					logging.info('Password added for user {0}'.format(user_id))
 				else:
 					text_reply(update, lang(user_id, 'password_uppercase'))
 					logging.info('Password set failed for user {0}. Reason: uppercase-lowercase-digits'.format(user_id))
