@@ -568,15 +568,23 @@ def send_from_callback(bot, update, args):
 		if ('xrb_' in args[0]):
 			from_account = mysql_select_by_account_extra(args[0])
 		else:
-			from_account = mysql_select_by_id_extra(user_id, args[0].replace('.',''))
-		if (from_account is not False):
-			args = args[1:]
-			send_callback(bot, update, args, from_account)
-		elif ((int(args[0]) == 0) or (args[0] == 'default')):
-			args = args[1:]
-			send_callback(bot, update, args)
-		else:
-			text_reply(update, lang(user_id, 'send_from_id_error'))
+			try:
+				extra_id = int(args[0].replace('.',''))
+				from_account = mysql_select_by_id_extra(user_id, extra_id)
+			except ValueError, ProgrammingError as e:
+				from_account = False
+				text_reply(update, "Error")
+		try:
+			if (from_account is not False):
+				args = args[1:]
+				send_callback(bot, update, args, from_account)
+			elif ((int(args[0]) == 0) or (args[0] == 'default')):
+				args = args[1:]
+				send_callback(bot, update, args)
+			else:
+				text_reply(update, lang(user_id, 'send_from_id_error'))
+		except ValueError as e:
+			text_reply(update, "Error")
 	else:
 		m = mysql_select_user(user_id)
 		chat_id = update.message.chat_id
