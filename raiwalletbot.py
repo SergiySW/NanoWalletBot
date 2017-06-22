@@ -571,9 +571,9 @@ def send_from_callback(bot, update, args):
 			try:
 				extra_id = int(args[0].replace('.',''))
 				from_account = mysql_select_by_id_extra(user_id, extra_id)
-			except ValueError, ProgrammingError as e:
+			except (ValueError, ProgrammingError) as e:
 				from_account = False
-				text_reply(update, "Error")
+				text_reply(update, lang(user_id, 'value_error'))
 		try:
 			if (from_account is not False):
 				args = args[1:]
@@ -584,7 +584,7 @@ def send_from_callback(bot, update, args):
 			else:
 				text_reply(update, lang(user_id, 'send_from_id_error'))
 		except ValueError as e:
-			text_reply(update, "Error")
+			text_reply(update, lang(user_id, 'value_error'))
 	else:
 		m = mysql_select_user(user_id)
 		chat_id = update.message.chat_id
@@ -634,10 +634,13 @@ def send_callback(bot, update, args, from_account = 0):
 				# if destination is username
 				if (destination.startswith('@') and (len(destination) > 3 )):
 					username = destination.replace('@', '')
-					dest_account = mysql_account_by_username(username)
-					if (dest_account is not False):
-						destination = dest_account
-					else:
+					try:
+						dest_account = mysql_account_by_username(username)
+						if (dest_account is not False):
+							destination = dest_account
+						else:
+							text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
+					except UnicodeEncodeError as e:
 						text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
 				destination = destination.encode("utf8").replace('­','').replace('\r','').replace('\n','');
 				destination = destination.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
@@ -801,13 +804,14 @@ def send_destination(bot, update, text):
 def send_destination_username(bot, update, text):
 	user_id = update.message.from_user.id
 	username = text.replace('@', '')
-	#print(username)
-	account = mysql_account_by_username(username)
-	#print(account)
-	if (account is not False):
-		text_reply(update, lang(user_id, 'send_user').format(text, account))
-		send_destination(bot, update, account)
-	else:
+	try:
+		account = mysql_account_by_username(username)
+		if (account is not False):
+			text_reply(update, lang(user_id, 'send_user').format(text, account))
+			send_destination(bot, update, account)
+		else:
+			text_reply(update, lang(user_id, 'send_user_not_found').format(text))
+	except UnicodeEncodeError as e:
 		text_reply(update, lang(user_id, 'send_user_not_found').format(text))
 
 
