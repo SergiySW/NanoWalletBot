@@ -21,6 +21,7 @@ from telegram.error import BadRequest, RetryAfter
 import logging
 import urllib3, certifi, socket, json, re
 import hashlib, binascii, string, math
+from mysql.connector import ProgrammingError
 from time import sleep
 import os, sys
 
@@ -592,6 +593,16 @@ def send_from_callback(bot, update, args):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), m[2]))
 
 
+# Instant receiving
+@run_async
+def receive(destination, send_hash):
+	destination_local = mysql_select_by_account(destination)
+	if (destination_local is False):
+		destination_local = mysql_select_by_account_extra(destination)
+	if (destination_local is not False):
+		receive = rpc({"action": "receive", "wallet": wallet, "account": destination, "block": send_hash}, 'block')
+
+
 @run_async
 def send_callback(bot, update, args, from_account = 0):
 	user_id = update.message.from_user.id
@@ -673,6 +684,7 @@ def send_callback(bot, update, args, from_account = 0):
 							send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 							logging.exception("message")
 						if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+							receive(destination, send_hash)
 							# FEELESS
 							if (final_fee_amount > 0):
 								try:
@@ -919,6 +931,7 @@ def send_finish(bot, update):
 				send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 				logging.exception("message")
 			if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+				receive(destination, send_hash)
 				# FEELESS
 				if (final_fee_amount > 0):
 					try:
