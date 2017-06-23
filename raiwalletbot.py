@@ -253,8 +253,14 @@ def start(bot, update):
 def start_text(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
-	lang_id = mysql_select_language(user_id)
-#	hide_keyboard(bot, update.message.chat_id, text)
+	try:
+		lang_id = update.message.from_user.language_code
+		if (lang_id in language['common']['language_list']):
+			mysql_set_language(user_id, lang_id)
+		else:
+			lang_id = mysql_select_language(user_id)
+	except Exception as e:
+		lang_id = mysql_select_language(user_id)
 	text_reply(update, lang_text('start_introduce', lang_id))
 	sleep(1)
 	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
