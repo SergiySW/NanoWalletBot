@@ -92,7 +92,7 @@ def prices_above_below(bot, user_id, price, exchange, above = 1):
 		else:
 			text = lang_text('prices_below', lang_id).format(exchange, btc_price)
 		push(bot, user_id, text)
-		#print(text)
+		print(text)
 		mysql_delete_blacklist(user_id) # if someone deleted chat, broadcast will fail and he will remain in blacklist
 		if (above == 1):
 			mysql_delete_price_high(user_id)

@@ -604,7 +604,7 @@ def mysql_select_price_high():
 def mysql_set_price_high(user_id, price):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
-	query = "INSERT INTO rai_price_high SET user_id = {0}, price = {1}".format(user_id, price)
+	query = "REPLACE INTO rai_price_high SET user_id = {0}, price = {1}".format(user_id, price)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
@@ -633,7 +633,7 @@ def mysql_select_price_low():
 def mysql_set_price_low(user_id, price):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
-	query = "INSERT INTO rai_price_low SET user_id = {0}, price = {1}".format(user_id, price)
+	query = "REPLACE INTO rai_price_low SET user_id = {0}, price = {1}".format(user_id, price)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
