@@ -601,10 +601,10 @@ def mysql_select_price_high():
 	cnx.close()
 	return(array)
 
-def mysql_set_price_high(user_id, price):
+def mysql_set_price_high(user_id, price, exchange = 0):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
-	query = "REPLACE INTO rai_price_high SET user_id = {0}, price = {1}".format(user_id, price)
+	query = "REPLACE INTO rai_price_high SET user_id = {0}, price = {1}, exchange = {2}".format(user_id, price, exchange)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
@@ -630,10 +630,10 @@ def mysql_select_price_low():
 	cnx.close()
 	return(array)
 
-def mysql_set_price_low(user_id, price):
+def mysql_set_price_low(user_id, price, exchange = 0):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
-	query = "REPLACE INTO rai_price_low SET user_id = {0}, price = {1}".format(user_id, price)
+	query = "REPLACE INTO rai_price_low SET user_id = {0}, price = {1}, exchange = {2}".format(user_id, price, exchange)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()

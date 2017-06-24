@@ -1037,12 +1037,20 @@ def price_above_callback(bot, update, args):
 				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).encode("utf8").replace("_", "\_")))
 		price = mysql_select_price()
 		price_high = max(int(price[0][1]), int(price[1][1]))
+		exchange = 0
+		if (len(args) > 1):
+			if (args[1].lower() == 'bitgrail'):
+				price_high = int(price[1][1])
+				exchange = 1
+			elif (args[1].lower() == 'mercatox'):
+				price_high = int(price[0][1])
+				exchange = 2
 		if (value <= price_high):
 			btc_price = ('%.8f' % (float(price_high) / (10 ** 8)))
 			message_markdown(bot, chat_id, lang_text('prices_above', lang_id).format('exchanges', btc_price))
 		elif ((value > 0) and (value < 4294967295)):
 			btc_value = ('%.8f' % (float(value) / (10 ** 8)))
-			mysql_set_price_high(user_id, value)
+			mysql_set_price_high(user_id, value, exchange)
 			message_markdown(bot, chat_id, lang_text('prices_success', lang_id).format(btc_value))
 		else:
 			lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))
@@ -1075,12 +1083,20 @@ def price_below_callback(bot, update, args):
 				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).encode("utf8").replace("_", "\_")))
 		price = mysql_select_price()
 		price_low = min(int(price[0][2]), int(price[1][2]))
+		exchange = 0
+		if (len(args) > 1):
+			if (args[1].lower() == 'bitgrail'):
+				price_low = int(price[1][2])
+				exchange = 1
+			elif (args[1].lower() == 'mercatox'):
+				price_low = int(price[0][2])
+				exchange = 2
 		if (value >= price_low):
 			btc_price = ('%.8f' % (float(price_low) / (10 ** 8)))
 			message_markdown(bot, chat_id, lang_text('prices_below', lang_id).format('exchanges', btc_price))
 		elif ((value > 0) and (value < 4294967295)):
 			btc_value = ('%.8f' % (float(value) / (10 ** 8)))
-			mysql_set_price_low(user_id, value)
+			mysql_set_price_low(user_id, value, exchange)
 			message_markdown(bot, chat_id, lang_text('prices_success', lang_id).format(btc_value))
 		else:
 			lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))

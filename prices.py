@@ -108,15 +108,15 @@ def price_check():
 	users_low = mysql_select_price_low()
 	# check if higher
 	for user in users_high:
-		if (int(price[1][1]) >= int(user[1])):
+		if ((int(price[1][1]) >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price[1][1], "BitGrail.com")
-		elif (int(price[0][1]) >= int(user[1])):
+		elif ((int(price[0][1]) >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price[0][1], "Mercatox.com")
 	# check if lower
 	for user in users_low:
-		if (int(price[1][2]) <= int(user[1])):
+		if ((int(price[1][2]) <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price[1][2], "BitGrail.com", 0)
-		elif (int(price[0][2]) <= int(user[1])):
+		elif ((int(price[0][2]) <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price[0][2], "Mercatox.com", 0)
 
 def prices_usual():

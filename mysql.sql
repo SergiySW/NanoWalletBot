@@ -208,6 +208,7 @@ DROP TABLE IF EXISTS `rai_price_high`;
 CREATE TABLE `rai_price_high` (
   `user_id` int(10) unsigned NOT NULL,
   `price` int(10) unsigned NOT NULL DEFAULT '100000000',
+  `exchange` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -222,6 +223,7 @@ DROP TABLE IF EXISTS `rai_price_low`;
 CREATE TABLE `rai_price_low` (
   `user_id` int(10) unsigned NOT NULL,
   `price` int(10) unsigned NOT NULL DEFAULT '1000',
+  `exchange` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
