@@ -346,7 +346,7 @@ def broadcast(bot, update):
 			print(account[0])
 			push_simple(bot, account[0], update.message.text.replace('/broadcast ', ''))
 			sleep(0.2)
-			mysql_delete_blacklist(account[0]) # if someone deleted chat, broadcast will fail and he wilk remain be blacklisted
+			mysql_delete_blacklist(account[0]) # if someone deleted chat, broadcast will fail and he will remain in blacklist
 
 
 # bootstrap
@@ -1015,6 +1015,97 @@ def price_text(bot, update):
 
 
 @run_async
+def price_above(bot, update, args):
+	info_log(update)
+	ddos_protection_args(bot, update, args, price_above_callback)
+
+@run_async
+def price_above_callback(bot, update, args):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	if (len(args) > 0):
+		value = 0
+		try:
+			value = int(args[0])
+		except ValueError as e:
+			try:
+				value = int(float(args[0]) * (10 ** 8))
+			except ValueError as e:
+				lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
+				sleep(1)
+				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).encode("utf8").replace("_", "\_")))
+		price = mysql_select_price()
+		price_high = max(int(price[0][1]), int(price[1][1]))
+		if (value <= price_high):
+			btc_price = ('%.8f' % (float(price_high) / (10 ** 8)))
+			message_markdown(bot, chat_id, lang_text('prices_above', lang_id).format('exchanges', btc_price))
+		elif ((value > 0) and (value < 4294967295)):
+			btc_value = ('%.8f' % (float(value) / (10 ** 8)))
+			mysql_set_price_high(user_id, value)
+			message_markdown(bot, chat_id, lang_text('prices_success', lang_id).format(btc_value))
+		else:
+			lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))
+	else:
+		lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
+		sleep(1)
+		message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).encode("utf8").replace("_", "\_")))
+
+
+@run_async
+def price_below(bot, update, args):
+	info_log(update)
+	ddos_protection_args(bot, update, args, price_below_callback)
+
+@run_async
+def price_below_callback(bot, update, args):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	if (len(args) > 0):
+		value = 0
+		try:
+			value = int(args[0])
+		except ValueError as e:
+			try:
+				value = int(float(args[0]) * (10 ** 8))
+			except ValueError as e:
+				lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
+				sleep(1)
+				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).encode("utf8").replace("_", "\_")))
+		price = mysql_select_price()
+		price_low = min(int(price[0][2]), int(price[1][2]))
+		if (value >= price_low):
+			btc_price = ('%.8f' % (float(price_low) / (10 ** 8)))
+			message_markdown(bot, chat_id, lang_text('prices_below', lang_id).format('exchanges', btc_price))
+		elif ((value > 0) and (value < 4294967295)):
+			btc_value = ('%.8f' % (float(value) / (10 ** 8)))
+			mysql_set_price_low(user_id, value)
+			message_markdown(bot, chat_id, lang_text('prices_success', lang_id).format(btc_value))
+		else:
+			lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))
+	else:
+		lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
+		sleep(1)
+		message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).encode("utf8").replace("_", "\_")))
+
+		
+@run_async
+def price_flush(bot, update):
+	info_log(update)
+	ddos_protection(bot, update, price_flush_callback)
+
+@run_async
+def price_flush_callback(bot, update):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	mysql_delete_price_high(user_id)
+	mysql_delete_price_low(user_id)
+	message_markdown(bot, chat_id, lang_text('prices_flushed', lang_id))
+
+
+@run_async
 def version(bot, update):
 	info_log(update)
 	ddos_protection(bot, update, version_text)
@@ -1303,6 +1394,12 @@ def main():
 	dp.add_handler(CommandHandler("secret_delete", password_delete, pass_args=True)) # symlink
 	for command in language['commands']['price']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), price))
+	for command in language['commands']['price_above']:
+		dp.add_handler(CommandHandler(command, price_above, pass_args=True))
+	for command in language['commands']['price_below']:
+		dp.add_handler(CommandHandler(command, price_below, pass_args=True))
+	for command in language['commands']['price_flush']:
+		dp.add_handler(CommandHandler(command, price_flush))
 	dp.add_handler(CommandHandler("version", version))
 	for command in language['common']['lang']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))

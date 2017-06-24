@@ -17,12 +17,6 @@
 import urllib3, certifi, json
 import time
 
-# Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('bot.cfg')
-wallet = config.get('main', 'wallet')
-
 frontiers_url = 'https://raiwallet.info/frontiers.json'
 
 # Request to node

@@ -391,7 +391,6 @@ def mysql_select_price():
 	cnx.close()
 	return(price)
 
-#@run_async
 def mysql_set_price(id, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -413,7 +412,6 @@ def mysql_select_blacklist():
 	cnx.close()
 	return(black_list)
 
-#@run_async
 def mysql_set_blacklist(user_id):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -423,7 +421,6 @@ def mysql_set_blacklist(user_id):
 	cursor.close()
 	cnx.close()
 
-#@run_async
 def mysql_delete_blacklist(user_id):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
@@ -589,6 +586,64 @@ def mysql_update_send_time(user_id):
 	timestamp = int(time.time())
 	add_timestamp = "REPLACE INTO rai_bot_send_time SET user_id = {0}, datetime = {1}".format(user_id, timestamp)
 	cursor.execute(add_timestamp)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
+def mysql_select_price_high():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT * FROM rai_price_high"
+	cursor.execute(query)
+	array = cursor.fetchall()
+	cursor.close()
+	cnx.close()
+	return(array)
+
+def mysql_set_price_high(user_id, price):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "INSERT INTO rai_price_high SET user_id = {0}, price = {1}".format(user_id, price)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+def mysql_delete_price_high(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "DELETE FROM rai_price_high WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
+def mysql_select_price_low():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT * FROM rai_price_low"
+	cursor.execute(query)
+	array = cursor.fetchall()
+	cursor.close()
+	cnx.close()
+	return(array)
+
+def mysql_set_price_low(user_id, price):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "INSERT INTO rai_price_low SET user_id = {0}, price = {1}".format(user_id, price)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+def mysql_delete_price_low(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "DELETE FROM rai_price_low WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
 	cnx.close()

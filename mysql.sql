@@ -199,6 +199,34 @@ CREATE TABLE `rai_price` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 --
+-- Table structure for table `rai_price_high`
+--
+
+DROP TABLE IF EXISTS `rai_price_high`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_price_high` (
+  `user_id` int(10) unsigned NOT NULL,
+  `price` int(10) unsigned NOT NULL DEFAULT '100000000',
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rai_price_low`
+--
+
+DROP TABLE IF EXISTS `rai_price_low`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_price_low` (
+  `user_id` int(10) unsigned NOT NULL,
+  `price` int(10) unsigned NOT NULL DEFAULT '1000',
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_send_list`
 --
 

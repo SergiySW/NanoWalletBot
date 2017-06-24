@@ -175,64 +175,12 @@ def frontiers_sendlist():
 			mysql_delete_sendlist(send[0])
 
 
-def mercatox():
-	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	url = 'https://mercatox.com/public/json24'
-	response = http.request('GET', url)
-	json_mercatox = json.loads(response.data)
-	json_array = json_mercatox['pairs']['XRB_BTC']
-	try:
-		last_price = int(float(json_array['last']) * (10 ** 8))
-	except KeyError:
-		last_price = 0
-	high_price = int(float(json_array['high24hr']) * (10 ** 8))
-	low_price = int(float(json_array['low24hr']) * (10 ** 8))
-	ask_price = int(float(json_array['lowestAsk']) * (10 ** 8))
-	bid_price = int(float(json_array['highestBid']) * (10 ** 8))
-	volume = int(float(json_array['baseVolume']))
-	btc_volume = int(float(json_array['quoteVolume']) * (10 ** 8))
-	
-	mysql_set_price(1, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
-
-
-def bitgrail():
-	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	url = 'https://bitgrail.com/api/v1/BTC-XRB/ticker'
-	response = http.request('GET', url)
-	json_bitgrail = json.loads(response.data)
-	if (int(json_bitgrail['success']) == 0):
-		url = 'https://bitgrail.com/api/v1/BTC-MXRB/ticker'
-		response = http.request('GET', url)
-		json_bitgrail = json.loads(response.data)
-	json_array = json_bitgrail['response']
-	last_price = int(float(json_array['last']) * (10 ** 8))
-	high_price = int(float(json_array['high']) * (10 ** 8))
-	low_price = int(float(json_array['low']) * (10 ** 8))
-	ask_price = int(float(json_array['ask']) * (10 ** 8))
-	bid_price = int(float(json_array['bid']) * (10 ** 8))
-	volume = int(float(json_array['coinVolume']))
-	btc_volume = int(float(json_array['volume']) * (10 ** 8))
-	
-	mysql_set_price(2, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
-
-
 def frontiers_usual():
 	frontiers_sendlist()
 	run_time = frontiers()
 	if (run_time < 30):
 		time.sleep(30-run_time)
 		frontiers()
-	
-	try:
-		mercatox()
-	except:
-		time.sleep(1) # too many errors from Mercatox API
-	try:
-		bitgrail()
-	except:
-		time.sleep(5)
-		bitgrail()
-
 
 
 frontiers_usual()
