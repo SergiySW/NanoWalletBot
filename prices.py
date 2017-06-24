@@ -107,16 +107,20 @@ def price_check():
 	users_high = mysql_select_price_high()
 	users_low = mysql_select_price_low()
 	# check if higher
+	price_high_bitgrail =  max(int(price[1][0]), int(price[1][4]))
+	price_high_mercatox =  max(int(price[0][0]), int(price[0][4]))
 	for user in users_high:
-		if ((int(price[1][1]) >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
+		if ((price_high_bitgrail >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price[1][1], "BitGrail.com")
-		elif ((int(price[0][1]) >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
+		elif ((price_high_mercatox >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price[0][1], "Mercatox.com")
 	# check if lower
+	price_low_bitgrail =  min(int(price[1][0]), int(price[1][3]))
+	price_low_mercatox =  min(int(price[0][0]), int(price[0][3]))
 	for user in users_low:
-		if ((int(price[1][2]) <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
+		if ((price_low_bitgrail <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price[1][2], "BitGrail.com", 0)
-		elif ((int(price[0][2]) <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
+		elif ((price_low_mercatox <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price[0][2], "Mercatox.com", 0)
 
 def prices_usual():

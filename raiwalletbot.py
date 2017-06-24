@@ -1036,14 +1036,16 @@ def price_above_callback(bot, update, args):
 				sleep(1)
 				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).encode("utf8").replace("_", "\_")))
 		price = mysql_select_price()
-		price_high = max(int(price[0][1]), int(price[1][1]))
+		price_high_bitgrail =  max(int(price[1][0]), int(price[1][4]))
+		price_high_mercatox =  max(int(price[0][0]), int(price[0][4]))
+		price_high = max(price_high_bitgrail, price_high_mercatox)
 		exchange = 0
 		if (len(args) > 1):
-			if (args[1].lower() == 'bitgrail'):
-				price_high = int(price[1][1])
+			if (args[1].lower().startswith('bitgrail')):
+				price_high = price_high_bitgrail
 				exchange = 1
-			elif (args[1].lower() == 'mercatox'):
-				price_high = int(price[0][1])
+			elif (args[1].lower().startswith('mercatox')):
+				price_high = price_high_mercatox
 				exchange = 2
 		if (value <= price_high):
 			btc_price = ('%.8f' % (float(price_high) / (10 ** 8)))
@@ -1082,14 +1084,16 @@ def price_below_callback(bot, update, args):
 				sleep(1)
 				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).encode("utf8").replace("_", "\_")))
 		price = mysql_select_price()
-		price_low = min(int(price[0][2]), int(price[1][2]))
+		price_low_bitgrail =  min(int(price[1][0]), int(price[1][3]))
+		price_low_mercatox =  min(int(price[0][0]), int(price[0][3]))
+		price_low = min(price_low_bitgrail, price_low_mercatox)
 		exchange = 0
 		if (len(args) > 1):
-			if (args[1].lower() == 'bitgrail'):
-				price_low = int(price[1][2])
+			if (args[1].lower().startswith('bitgrail')):
+				price_low = price_low_bitgrail
 				exchange = 1
-			elif (args[1].lower() == 'mercatox'):
-				price_low = int(price[0][2])
+			elif (args[1].lower().startswith('mercatox')):
+				price_low = price_low_mercatox
 				exchange = 2
 		if (value >= price_low):
 			btc_price = ('%.8f' % (float(price_low) / (10 ** 8)))
