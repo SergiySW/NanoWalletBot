@@ -647,3 +647,28 @@ def mysql_delete_price_low(user_id):
 	cnx.commit()
 	cursor.close()
 	cnx.close()
+
+
+def mysql_select_seed(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT seed FROM rai_bot_seeds WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	seed = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	try:
+		seed = seed[0]
+	except Exception as e:
+		seed = False
+	return(seed)
+
+def mysql_set_seed(user_id, seed):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "INSERT INTO rai_bot_seeds SET user_id = {0}, seed = '{1}'".format(user_id, seed)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+

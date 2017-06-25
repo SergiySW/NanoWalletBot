@@ -491,6 +491,14 @@ def account_text(bot, update, list = False):
 			except (urllib3.exceptions.ProtocolError) as e:
 				sleep(3)
 				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+			seed = mysql_select_seed(user_id)
+			check = mysql_check_password(user_id)
+			if ((seed is False) and (check is False)):
+				sleep(1)
+				seed_callback(bot, update, [0])
+			elif (check is not False):
+				sleep(1)
+				text_reply(update, lang_text('seed_protected', lang_id))
 	
 	except (TypeError):
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
@@ -520,6 +528,8 @@ def account_text(bot, update, list = False):
 			except Exception as e:
 				logging.exception("message")
 			logging.info('New user registered {0} {1}'.format(user_id, r))
+			sleep(2)
+			seed_callback(bot, update, [0])
 		else:
 			text_reply(update, lang_text('account_error', lang_id))
 
@@ -1301,6 +1311,7 @@ def password_callback(bot, update, args):
 		text_reply(update, lang(user_id, 'password_command'))
 		text_reply(update, 'Use command\n/password HereYourPass')
 
+@run_async
 def password_delete(bot, update, args):
 	ddos_protection_args(bot, update, args, password_delete_callback)
 
@@ -1324,6 +1335,36 @@ def password_delete_callback(bot, update, args):
 			logging.info('Password deletion failed for user {0}. Reason: Wrong password'.format(user_id))
 	else:
 		text_reply(update, lang(user_id, 'password_delete_command'))
+
+
+@run_async
+def seed(bot, update, args):
+	ddos_protection_args(bot, update, args, seed_callback)
+
+@run_async
+def seed_callback(bot, update, args):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	seed = mysql_select_seed(user_id)
+	if (seed is False):
+		seed = binascii.b2a_hex(os.urandom(8)).upper()
+		mysql_set_seed(user_id, seed)
+	seed_split = [seed[i:i+4] for i in range(0, len(seed), 4)]
+	seed_text = seed_split[0] + '-' + seed_split[1] + '-' + seed_split[2] + '-' + seed_split[3]
+	check = mysql_check_password(user_id)
+	if ((len(args) > 0) and (check is not False)):
+		password = args[0]
+		dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
+		hex = binascii.hexlify(dk)
+		if (check == hex):
+			message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
+		else:
+			text_reply(update, lang_text('password_error', lang_id))
+	elif (check is not False):
+		text_reply(update, lang_text('password_error', lang_id))
+	else:
+		message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
 
 
 @run_async
@@ -1423,6 +1464,7 @@ def main():
 	dp.add_handler(CommandHandler("version", version))
 	for command in language['common']['lang']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
+	dp.add_handler(CommandHandler("seed", seed, pass_args=True))
 
 	
 	# admin commands

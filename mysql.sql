@@ -140,6 +140,20 @@ CREATE TABLE `rai_bot_passwords` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rai_bot_seeds`
+--
+
+DROP TABLE IF EXISTS `rai_bot_seeds`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_bot_seeds` (
+  `user_id` int(10) NOT NULL,
+  `seed` char(16) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_bot_send_time`
 --
 
