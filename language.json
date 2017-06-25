@@ -19,7 +19,7 @@
 		"account_list": [ "account_list", "accounts_list", "аккаунт_список", "аккаунты_список", "akun_daftar" ],
 		"accounts_hide": [ "accounts_hide", "аккаунты_скрыть", "akun_sembunyikan" ],
 		"accounts_expand": [ "accounts_expand", "аккаунты_развернуть", "akun_memperluas" ],
-		"send_from": [ "send_from", "отправить_c", "послать_c", "kirim_dari" ],
+		"send_from": [ "send_from", "отправить_с", "послать_с", "kirim_dari" ],
 		"yes": [ "yes", "confirm", "да", "подтвердить", "подтверждаю", "ya", "confirmasi", "sì", "si", "conferma", "confirmar", "vâng", "xác nhận" ],
 		"not": [ "no", "not", "cancel", "stop", "нет", "отмена", "отменить", "tidak", "batal", "berhenti", "annulla", "cancelar", "detener", "không", "hủy bỏ", "dừng lại" ]
 	},
