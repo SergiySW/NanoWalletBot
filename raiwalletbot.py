@@ -1194,13 +1194,13 @@ def text_result(text, bot, update):
 		send_text(bot, update)
 	elif ('default' in text):
 		send_text(bot, update, True)
-	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').replace('xrb', '').isdigit()):
+	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('()', '').isdigit()):
 		# check if digit is correct
-		digit_split = text.replace(' ', '').replace('mrai', '').replace('xrb', '').split(',')
+		digit_split = text.replace(' ', '').replace('mrai', '').replace('xrb', '').replace('()', '').split(',')
 		if (text.startswith('0,') or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
-			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('xrb', ''))
+			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('()', ''))
 	elif ('xrb_' in text):
 		extra_accounts = mysql_select_user_extra(user_id)
 		if ((len(extra_accounts) > 0) and (len(text.split()) > 1)):
@@ -1309,7 +1309,6 @@ def password_callback(bot, update, args):
 			logging.info('Password set failed for user {0}. Reason: Already protected'.format(user_id))
 	else:
 		text_reply(update, lang(user_id, 'password_command'))
-		text_reply(update, 'Use command\n/password HereYourPass')
 
 @run_async
 def password_delete(bot, update, args):
