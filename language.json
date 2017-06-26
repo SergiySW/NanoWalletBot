@@ -113,7 +113,7 @@
 		"prices_digits": "Command supports integers for satoshi and float for Bitcoin. Example:",
 		"prices_success": "XRB price monitoring enabled at level *{0}* BTC. Disable with /price\\_flush",
 		"prices_flushed": "Price monitoring was disabled",
-		"seed_creation": "Save your Seed for @RaiWalletBot! With Seed you can restore bot account via support even if you lose access to Telegram account. Do not share secret Seed to other users!\nYour Seed is:\n*{0}*",
+		"seed_creation": "Save your Seed for @RaiWalletBot! With Seed you can restore bot account via support even if you lose access to Telegram account (bot Seed is not RaiBlocks desktop wallet Seed). Do not share secret Seed to other users!\nYour Seed is:\n*{0}*",
 		"seed_protected": "Use command /seed YourPassword to see Seed"
 	},
 	"ru": {
@@ -206,7 +206,7 @@
 		"prices_digits": "Команда поддерживает цену в целых числах для сатоши и дробных для Биткойна. Пример:",
 		"prices_success": "Слежение за ценой XRB на уровне *{0}* BTC. Удаление через /цена\\_удалить",
 		"prices_flushed": "Слежение за ценой отменено",
-		"seed_creation": "Обязательно сохраните Seed для @RaiWalletBot! С помощью Seed вы сможете восстановить аккаунт через техподдержку, даже если утерян доступ к Telegram. Не делитесь секретным Seed с другими!\nВаш Seed:\n*{0}*",
+		"seed_creation": "Обязательно сохраните Seed для @RaiWalletBot! С помощью Seed вы сможете восстановить аккаунт через техподдержку, даже если утерян доступ к Telegram (Seed бота - это не Seed десктопного кошелька RaiBlocks). Не делитесь секретным Seed с другими!\nВаш Seed:\n*{0}*",
 		"seed_protected": "Используйте команду /seed ВашПароль для просмотра Seed"
 	},
 	"id": {
