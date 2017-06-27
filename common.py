@@ -12,7 +12,7 @@
 
 
 from telegram import Bot, ParseMode
-from telegram.error import BadRequest, RetryAfter
+from telegram.error import BadRequest, RetryAfter, TimedOut, Unauthorized
 from time import sleep
 
 
@@ -27,7 +27,7 @@ def push(bot, chat_id, message):
 			text=message, 
 			parse_mode=ParseMode.MARKDOWN,
 			disable_web_page_preview=True)
-	except BadRequest:
+	except BadRequest as e:
 		try:
 			bot.sendMessage(chat_id=chat_id, 
 				text=replace_unsafe(message), 
@@ -38,13 +38,21 @@ def push(bot, chat_id, message):
 				text=message.replace("_", "\_"), 
 				parse_mode=ParseMode.MARKDOWN,
 				disable_web_page_preview=True)
-	except RetryAfter:
+	except RetryAfter as e:
 		sleep(240)
 		bot.sendMessage(chat_id=chat_id, 
 			text=replace_unsafe(message), 
 			parse_mode=ParseMode.MARKDOWN,
 			disable_web_page_preview=True)
-	except:
+	except TimedOut as e:
+		sleep(60)
+		bot.sendMessage(chat_id=chat_id, 
+			text=replace_unsafe(message), 
+			parse_mode=ParseMode.MARKDOWN,
+			disable_web_page_preview=True)
+	except Unauthorized as e:
+		sleep(0.25)
+	except Exception as e:
 		sleep(1)
 		try:
 			bot.sendMessage(chat_id=chat_id, 
@@ -62,12 +70,17 @@ def push(bot, chat_id, message):
 def push_simple(bot, chat_id, message):
 	try:
 		bot.sendMessage(chat_id=chat_id, text=message)
-	except BadRequest:
+	except BadRequest as e:
 		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
-	except RetryAfter:
+	except RetryAfter as e:
 		sleep(240)
 		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
-	except:
+	except TimedOut as e:
+		sleep(60)
+		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
+	except Unauthorized as e:
+		sleep(0.25)
+	except Exception as e:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, text=message)
 
@@ -89,7 +102,15 @@ def message_markdown(bot, chat_id, message):
 					text=replace_unsafe(message),
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
-	except:
+	except TimedOut as e:
+		sleep(60)
+		bot.sendMessage(chat_id=chat_id, 
+					text=replace_unsafe(message),
+					parse_mode=ParseMode.MARKDOWN,
+					disable_web_page_preview=True)
+	except Unauthorized as e:
+		sleep(0.25)
+	except Exception as e:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, 
 					text=message,
@@ -100,7 +121,10 @@ def message_markdown(bot, chat_id, message):
 def text_reply(update, text):
 	try:
 		update.message.reply_text(text)
-	except:
+	except TimedOut as e:
+		sleep(60)
+		update.message.reply_text(text)
+	except Exception as e:
 		sleep(1)
 		update.message.reply_text(text)
 
