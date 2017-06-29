@@ -43,7 +43,6 @@ def lang_text(text_id, lang_id):
 	except KeyError:
 		return language['en'][text_id]
 
-BLACK_LIST = mysql_select_blacklist()
 
 def mercatox():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
@@ -85,20 +84,20 @@ def bitgrail():
 def prices_above_below(bot, user_id, price, exchange, above = 1):
 	lang_id = mysql_select_language(user_id)
 	btc_price = ('%.8f' % (float(price) / (10 ** 8)))
-	if (user_id not in BLACK_LIST):
-		mysql_set_blacklist(user_id)
-		if (above == 1):
-			text = lang_text('prices_above', lang_id).format(exchange, btc_price)
-		else:
-			text = lang_text('prices_below', lang_id).format(exchange, btc_price)
+	if (above == 1):
+		text = lang_text('prices_above', lang_id).format(exchange, btc_price)
+	else:
+		text = lang_text('prices_below', lang_id).format(exchange, btc_price)
+	try:
 		push(bot, user_id, text)
-		print(text)
-		mysql_delete_blacklist(user_id) # if someone deleted chat, broadcast will fail and he will remain in blacklist
-		if (above == 1):
-			mysql_delete_price_high(user_id)
-		else:
-			mysql_delete_price_low(user_id)
-		time.sleep(0.5)
+	except Exception as e:
+		print('Exception user_id {0}'.format(user_id))
+	print(text)
+	if (above == 1):
+		mysql_delete_price_high(user_id)
+	else:
+		mysql_delete_price_low(user_id)
+	time.sleep(0.5)
 
 
 def price_check():
