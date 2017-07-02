@@ -14,7 +14,7 @@
 		"price": [ "price", "market", "trade", "цена", "рынок", "торговля", "harga", "pasar", "prezzo", "mercato", "scambia", "precio", "mercado", "comercio", "giá", "chợ", "buôn bán" ],
 		"price_above": [ "price_above", "цена_выше" ],
 		"price_below": [ "price_below", "цена_ниже" ],
-		"price_flush": ["price_flush", "цена_очистить" ],
+		"price_flush": [ "price_flush", "price_delete", "цена_очистить", "цена_удалить" ],
 		"account_add": [ "account_add", "accounts_add", "аккаунт_добавить", "akun_tambahkan" ],
 		"account_list": [ "account_list", "accounts_list", "аккаунт_список", "аккаунты_список", "akun_daftar" ],
 		"accounts_hide": [ "accounts_hide", "аккаунты_скрыть", "akun_sembunyikan" ],

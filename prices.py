@@ -81,7 +81,7 @@ def bitgrail():
 	mysql_set_price(2, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 
 
-def prices_above_below(bot, user_id, price, exchange, above = 1):
+def prices_above_below(bot, user_id, price, exchange, above):
 	lang_id = mysql_select_language(user_id)
 	btc_price = ('%.8f' % (float(price) / (10 ** 8)))
 	if (above == 1):
@@ -110,9 +110,9 @@ def price_check():
 	price_high_mercatox =  max(int(price[0][0]), int(price[0][4]))
 	for user in users_high:
 		if ((price_high_bitgrail >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
-			prices_above_below(bot, user[0], price_high_bitgrail, "BitGrail.com")
+			prices_above_below(bot, user[0], price_high_bitgrail, "BitGrail.com", 1)
 		elif ((price_high_mercatox >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
-			prices_above_below(bot, user[0], price_high_mercatox, "Mercatox.com")
+			prices_above_below(bot, user[0], price_high_mercatox, "Mercatox.com", 1)
 	# check if lower
 	price_low_bitgrail =  min(int(price[1][0]), int(price[1][3]))
 	price_low_mercatox =  min(int(price[0][0]), int(price[0][3]))
