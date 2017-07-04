@@ -131,7 +131,10 @@ def prices_usual():
 		bitgrail()
 	except:
 		time.sleep(5)
-		bitgrail()
+		try:
+			bitgrail()
+		except:
+			time.sleep(1) # even BitGrail can fail
 	
 	price_check()
 
