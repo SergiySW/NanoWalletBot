@@ -454,6 +454,20 @@ def mysql_select_language(user_id):
 	cnx.close()
 	return(language)
 
+def mysql_exist_language(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT language FROM rai_bot_language WHERE user_id = {0}".format(user_id)
+	try:
+		cursor.execute(query)
+		language = cursor.fetchone()[0]
+		returned = language
+	except TypeError:
+		returned = False
+	cursor.close()
+	cnx.close()
+	return(returned)
+
 
 def mysql_set_hide(user_id, hide):
 	cnx = mysql.connector.connect(**mysql_config)
