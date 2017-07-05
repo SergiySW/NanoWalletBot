@@ -12,7 +12,7 @@
 
 
 from telegram import Bot, ParseMode
-from telegram.error import BadRequest, RetryAfter, TimedOut, Unauthorized
+from telegram.error import BadRequest, RetryAfter, TimedOut, Unauthorized, NetworkError
 from time import sleep
 
 
@@ -52,6 +52,12 @@ def push(bot, chat_id, message):
 			disable_web_page_preview=True)
 	except Unauthorized as e:
 		sleep(0.25)
+	except NetworkError as e:
+		sleep(30)
+		bot.sendMessage(chat_id=chat_id, 
+			text=replace_unsafe(message), 
+			parse_mode=ParseMode.MARKDOWN,
+			disable_web_page_preview=True)
 	except Exception as e:
 		sleep(1)
 		try:
@@ -74,12 +80,15 @@ def push_simple(bot, chat_id, message):
 		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
 	except RetryAfter as e:
 		sleep(240)
-		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
+		bot.sendMessage(chat_id=chat_id, text=message)
 	except TimedOut as e:
 		sleep(60)
-		bot.sendMessage(chat_id=chat_id, text=replace_unsafe(message))
+		bot.sendMessage(chat_id=chat_id, text=message)
 	except Unauthorized as e:
 		sleep(0.25)
+	except NetworkError as e:
+		sleep(30)
+		bot.sendMessage(chat_id=chat_id, text=message)
 	except Exception as e:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, text=message)
@@ -99,17 +108,23 @@ def message_markdown(bot, chat_id, message):
 	except RetryAfter:
 		sleep(240)
 		bot.sendMessage(chat_id=chat_id, 
-					text=replace_unsafe(message),
+					text=message,
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
 	except TimedOut as e:
 		sleep(60)
 		bot.sendMessage(chat_id=chat_id, 
-					text=replace_unsafe(message),
+					text=message,
 					parse_mode=ParseMode.MARKDOWN,
 					disable_web_page_preview=True)
 	except Unauthorized as e:
 		sleep(0.25)
+	except NetworkError as e:
+		sleep(30)
+		bot.sendMessage(chat_id=chat_id, 
+					text=message,
+					parse_mode=ParseMode.MARKDOWN,
+					disable_web_page_preview=True)
 	except Exception as e:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, 
@@ -123,6 +138,9 @@ def text_reply(update, text):
 		update.message.reply_text(text)
 	except TimedOut as e:
 		sleep(60)
+		update.message.reply_text(text)
+	except NetworkError as e:
+		sleep(30)
 		update.message.reply_text(text)
 	except Exception as e:
 		sleep(1)

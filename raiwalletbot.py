@@ -17,7 +17,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram import Bot, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatAction
-from telegram.error import BadRequest, RetryAfter, TimedOut
+from telegram.error import BadRequest, RetryAfter, TimedOut, NetworkError
 import logging
 import urllib3, certifi, socket, json, re
 import hashlib, binascii, string, math
@@ -493,6 +493,9 @@ def account_text(bot, update, list = False):
 				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
 			except TimedOut as e:
 				sleep(10)
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+			except NetworkError as e:
+				sleep(20)
 				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
 			seed = mysql_select_seed(user_id)
 			check = mysql_check_password(user_id)
