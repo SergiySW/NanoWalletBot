@@ -31,6 +31,7 @@ log_file = config.get('main', 'log_file')
 admin_list = json.loads(config.get('main', 'admin_list'))
 peer_list = json.loads(config.get('monitoring', 'peer_list'))
 block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
+pending_threshold = int(config.get('monitoring', 'pending_action_threshold'))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -104,7 +105,20 @@ def monitoring_password():
 	if (int(valid) == 0):
 		unlock(wallet, password)
 
+def monitoring_pending():
+	pending_raw = rpc({"action": "wallet_balance_total", "wallet": wallet}, 'pending')
+	pending_mrai = int(math.floor(int(pending_raw) / (10 ** 30)))
+	if (pending_mrai > pending_threshold):
+		time.sleep(90)
+		# recheck
+		pending_raw = rpc({"action": "wallet_balance_total", "wallet": wallet}, 'pending')
+		pending_mrai = int(math.floor(pending_raw / (10 ** 30)))
+		if (pending_mrai > pending_threshold):
+			unlock(wallet, password)
+
 
 monitoring_peers()
 monitoring_block_count()
 monitoring_password()
+time.sleep(5)
+monitoring_pending()
