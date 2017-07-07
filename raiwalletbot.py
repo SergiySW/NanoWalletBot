@@ -1400,6 +1400,12 @@ def stats(bot, update):
 	stats = '{0}\nWelcome balance: {1} Mrai (XRB)'.format(stats, "{:,}".format(welcome_balance))
 	default_keyboard(bot, update.message.chat_id, stats)
 
+@restricted
+def unlock_command(bot, update):
+	info_log(update)
+	unlock(wallet, wallet_password)
+	default_keyboard(bot, update.message.chat_id, 'Wallet unlocked')
+
 
 @run_async
 def unknown(bot, update):
@@ -1479,6 +1485,7 @@ def main():
 	dp.add_handler(CommandHandler("bootstrap", bootstrap))
 	dp.add_handler(CommandHandler("restart", restart))
 	dp.add_handler(CommandHandler("stats", stats))
+	dp.add_handler(CommandHandler("unlock", unlock_command))
 
 	# on noncommand i.e message - return not found
 	dp.add_handler(MessageHandler(Filters.text, text_filter))

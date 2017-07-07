@@ -112,8 +112,8 @@ def monitoring_pending():
 		time.sleep(90)
 		# recheck
 		pending_raw = rpc({"action": "wallet_balance_total", "wallet": wallet}, 'pending')
-		pending_mrai = int(math.floor(pending_raw / (10 ** 30)))
-		if (pending_mrai > pending_threshold):
+		pending_mrai_new = int(math.floor(int(pending_raw) / (10 ** 30)))
+		if ((pending_mrai_new > pending_threshold) and (pending_mrai_new >= pending_mrai)):
 			unlock(wallet, password)
 
 
