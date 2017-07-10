@@ -329,7 +329,10 @@ def block_count_callback(bot, update):
 			reference_count = int(reference_block_count())
 			sleep(1)
 			text_reply(update, 'Reference: {0}'.format("{:,}".format(reference_count)))
-
+			response = http.request('GET', 'https://raiwallet.info/api/block_count.php')
+			raiwallet_count = int(response.data)
+			sleep(1)
+			text_reply(update, 'raiwallet.info: {0}'.format("{:,}".format(raiwallet_count)))
 
 
 # broadcast

@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 peers_url = 'https://raiblockscommunity.net/page/peers.php?json=1'
 summary_url = 'https://raiblockscommunity.net/page/summary.php?json=1'
 known_ips_url = 'https://raiblockscommunity.net/page/knownips.php?json=1'
-
+block_count_url = 'https://raiwallet.info/api/block_count.php'
 
 # Request to node
 from common_rpc import *
@@ -93,10 +93,13 @@ def monitoring_block_count():
 	community_count = int(json_data['blocks'])
 	difference = int(math.fabs(community_count - count))
 	reference_count = reference_block_count()
+	
+	response = http.request('GET', block_count_url)
+	raiwallet_count = int(response.data)
 	if (difference > block_count_difference_threshold):
 		# Warning to admins
 		for user_id in admin_list:
-			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}'.format(count, community_count, difference, reference_count))
+			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}\nraiwallet.info: {4}'.format(count, community_count, difference, reference_count, raiwallet_count))
 		# trying to fix
 		bootstrap_multi()
 
@@ -104,6 +107,7 @@ def monitoring_password():
 	valid = rpc({"action": "password_valid", "wallet": wallet}, 'valid')
 	if (int(valid) == 0):
 		unlock(wallet, password)
+		print('Unlock: wallet was locked')
 
 def monitoring_pending():
 	pending_raw = rpc({"action": "wallet_balance_total", "wallet": wallet}, 'pending')
@@ -115,6 +119,7 @@ def monitoring_pending():
 		pending_mrai_new = int(math.floor(int(pending_raw) / (10 ** 30)))
 		if ((pending_mrai_new > pending_threshold) and (pending_mrai_new >= pending_mrai)):
 			unlock(wallet, password)
+			print('Unlock: pending {0}'.format(pending_mrai_new))
 
 
 monitoring_peers()

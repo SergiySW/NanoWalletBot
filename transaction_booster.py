@@ -17,7 +17,7 @@
 import urllib3, certifi, json
 import time
 
-frontiers_url = 'https://raiwallet.info/frontiers.json'
+frontiers_url = 'https://raiwallet.info/api/frontiers.json'
 
 # Request to node
 from common_rpc import *
