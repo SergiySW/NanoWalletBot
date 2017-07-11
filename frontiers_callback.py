@@ -126,21 +126,20 @@ class POST_server(BaseHTTPRequestHandler):
 				elif (block_account == account[1]):
 					sender = lang_text('frontiers_sender_self', lang_id)
 				else:
-					accounts_list = mysql_select_accounts_list()
-					for sender_account in accounts_list:
-						if (sender_account[1] == block_account):
-							if ((sender_account[4] is not None) and (sender_account[4])):
-								sender = lang_text('frontiers_sender_username', lang_id).format(sender_account[4])
-							else:
+					sender_account = mysql_select_by_account(block_account)
+					if (sender_account is not False):
+						if ((sender_account[4] is not None) and (sender_account[4])):
+							sender = lang_text('frontiers_sender_username', lang_id).format(sender_account[4])
+						else:
+							sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
+					else:
+						sender_account_extra = mysql_select_by_account_extra(block_account)
+						if (sender_account_extra is not False):
+							user_sender = mysql_select_user(sender_account_extra[0])
+							if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != sender_account_extra[0])):
+								sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
+							elif (account[0] != sender_account_extra[0]):
 								sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
-					accounts_list_extra = mysql_select_accounts_list_extra()
-					for sender_account in accounts_list_extra:
-							if (sender_account[1] == block_account):
-								user_sender = mysql_select_user(sender_account[0])
-								if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != sender_account[0])):
-									sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
-								elif (account[0] != sender_account[0]):
-									sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
 				try:
 					z = account[4]
 					sender = lang_text('frontiers_sender_by', lang_id).format(sender, account[1].replace("_", "\_"))
