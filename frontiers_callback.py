@@ -108,7 +108,7 @@ class POST_server(BaseHTTPRequestHandler):
 				if (max_send < 0):
 					max_send = 0
 				try:
-					z = account[4]
+					z = account[5]
 					mysql_update_frontier_extra(account[1], frontier)
 				except IndexError as e:
 					mysql_update_frontier(account[1], frontier)
@@ -141,7 +141,7 @@ class POST_server(BaseHTTPRequestHandler):
 							elif (account[0] != sender_account_extra[0]):
 								sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
 				try:
-					z = account[4]
+					z = account[5]
 					sender = lang_text('frontiers_sender_by', lang_id).format(sender, account[1].replace("_", "\_"))
 					mysql_update_balance_extra(account[1], balance)
 				except IndexError as e:

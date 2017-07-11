@@ -445,7 +445,7 @@ def account_text(bot, update, list = False):
 		btc_balance = ('%.8f' % (btc_price * total_balance))
 		# price
 		if (list is not False):
-			text = 'Total: *{0} XRB (Mrai)*\n~ {1} BTC\n/{3}'.format(mrai_text(total_balance), btc_balance, '', lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"))
+			text = 'Total: *{0} XRB (Mrai)*\n~ {1} BTC\n/{3}\n{4}'.format(mrai_text(total_balance), btc_balance, '', lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('send_all', lang_id).encode("utf8"))
 			message_markdown(bot, chat_id, text)
 			sleep(1)
 			message_markdown(bot, chat_id, '*0.* {0} XRB (Mrai)'.format(mrai_text(balance)))
@@ -767,6 +767,55 @@ def send_callback(bot, update, args, from_account = 0):
 		message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
 	except (IndexError):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), m[2]))
+
+
+@run_async
+def send_all(bot, update):
+	info_log(update)
+	ddos_protection(bot, update, send_all_callback)
+
+
+@run_async
+def send_all_callback(bot, update):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	m = mysql_select_user(user_id)
+	destination = m[2]
+	final_fee_amount = 0 # 0 fee to accumulate
+	extra_accounts = mysql_select_user_extra(user_id)
+	extra_array = []
+	for extra_account in extra_accounts:
+		extra_array.append(extra_account[3])
+	reply = 0
+	if (len(extra_accounts) > 0):
+		balances = accounts_balances(extra_array)
+		for account, balance in balances.items():
+			max_send = balance - final_fee_amount
+			if (max_send >= min_send):
+				if (reply == 0):
+					lang_keyboard(lang_id, bot, chat_id, lang_text('send_mass', lang_id))
+					reply = 1
+				try:
+					send_amount = max_send
+					raw_send_amount = send_amount * (10 ** 24)
+					send_hash = rpc_send(wallet, account, destination, raw_send_amount)
+				except Exception as e:
+					send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+					logging.exception("message")
+				if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+					receive(destination, send_hash)
+					new_balance = account_balance(account)
+					mysql_update_balance_extra(account, new_balance)
+					mysql_update_frontier_extra(account, send_hash)
+					mysql_update_send_time(user_id)
+					sleep(5)
+				else:
+					logging.warn('Transaction FAILURE! Account {0}'.format(account))
+					new_balance = account_balance(account)
+					lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
+	if (reply == 0):
+		lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))
 
 
 @run_async
@@ -1464,6 +1513,8 @@ def main():
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), send, pass_args=True))
 	for command in language['commands']['send_from']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), send_from, pass_args=True))
+	for command in language['commands']['send_all']:
+		dp.add_handler(CommandHandler(command.replace(" ", "_"), send_all))
 	dp.add_handler(CommandHandler("password", password, pass_args=True))
 	dp.add_handler(CommandHandler("Password", password, pass_args=True)) # symlink
 	dp.add_handler(CommandHandler("secret", password, pass_args=True)) # symlink

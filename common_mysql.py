@@ -113,7 +113,7 @@ def mysql_select_by_account(xrb_account):
 def mysql_select_by_account_extra(xrb_account):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)
-	query = "SELECT user_id, account, frontier, balance, extra_id FROM rai_bot_extra WHERE account LIKE '{0}'".format(xrb_account)
+	query = "SELECT user_id, account, frontier, balance, extra_id, '1' as extra FROM rai_bot_extra WHERE account LIKE '{0}'".format(xrb_account)
 	cursor.execute(query)
 	account = cursor.fetchone()
 	cursor.close()
