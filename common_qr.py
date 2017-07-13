@@ -42,5 +42,15 @@ def account_by_qr(qr_file):
 		qr2.decode('{0}'.format(qr_file.replace('.jpg', '_.jpg')))
 		#print(qr2.data)
 		qr = qr2
-	return qr.data.replace('raiblocks://', '')
+	returning = qr.data.replace('raiblocks://', '').replace('raiblocks:', '').split('?')
+	# parsing amount
+	if (len(returning) > 1):
+		if 'amount=' in returning[1]:
+			returning[1] = returning[1].replace('amount=', '')
+			# don't use empty
+			if (len(returning[1]) == 0):
+				returning.pop()
+		else:
+			returning.pop()
+	return returning
 

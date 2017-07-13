@@ -859,7 +859,7 @@ def send_text(bot, update, default = False):
 
 
 @run_async
-def send_destination(bot, update, text):
+def send_destination(bot, update, text, qr = False):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
@@ -880,7 +880,7 @@ def send_destination(bot, update, text):
 			mysql_update_send_destination(account, destination)
 			if (m[6] != 0):
 				custom_keyboard(bot, chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format(mrai_text(m[6]), mrai_text(m[6]+final_fee_amount), destination))
-			else:
+			elif (qr is False):
 				text_reply(update, lang_text('send_amount', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
 		else:
 			message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
@@ -1323,11 +1323,18 @@ def photo_filter_callback(bot, update):
 		#print(image)
 		newFile = bot.getFile(image.file_id)
 		newFile.download(path)
-		account = account_by_qr(path)
+		qr = account_by_qr(path)
+		account = qr[0]
 		print(account)
 		if ('xrb_' in account):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_send', lang_id).format(account))
-			send_destination(bot, update, account)
+			sleep(1)
+			if (len(qr) > 1):
+				send_destination(bot, update, account, True)
+				print(qr[1])
+				send_amount(bot, update, qr[1])
+			else:
+				send_destination(bot, update, account)
 		elif (('NULL' in account) or (account is None) or (account is False)):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_recognize_error', lang_id))
 		else:
