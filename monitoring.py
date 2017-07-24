@@ -32,6 +32,7 @@ admin_list = json.loads(config.get('main', 'admin_list'))
 peer_list = json.loads(config.get('monitoring', 'peer_list'))
 block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
 pending_threshold = int(config.get('monitoring', 'pending_action_threshold'))
+min_receive = int(config.get('main', 'min_receive'))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -96,6 +97,7 @@ def monitoring_block_count():
 	
 	response = http.request('GET', block_count_url)
 	raiwallet_count = int(response.data)
+	
 	if (difference > block_count_difference_threshold):
 		# Warning to admins
 		for user_id in admin_list:
@@ -110,17 +112,23 @@ def monitoring_password():
 		print('Unlock: wallet was locked')
 
 def monitoring_pending():
-	pending_raw = rpc({"action": "wallet_balance_total", "wallet": wallet}, 'pending')
-	pending_mrai = int(math.floor(int(pending_raw) / (10 ** 30)))
-	if (pending_mrai > pending_threshold):
-		time.sleep(90)
-		# recheck
-		pending_raw = rpc({"action": "wallet_balance_total", "wallet": wallet}, 'pending')
-		pending_mrai_new = int(math.floor(int(pending_raw) / (10 ** 30)))
-		if ((pending_mrai_new > pending_threshold) and (pending_mrai_new >= pending_mrai)):
-			unlock(wallet, password)
-			print('Unlock: pending {0}'.format(pending_mrai_new))
-
+	pending_list = rpc({"action": "wallet_pending", "wallet": wallet, "threshold": (min_receive * (10 ** 24))}, 'pending')
+	hash_list = []
+	# list of pending hashes
+	for account, pending in pending_list.items():
+		for hash in pending:
+			hash_list.extend(hash.keys())
+	# recheck
+	time.sleep(90)
+	for hash in hash_list:
+		exists = rpc({"action": "pending_exists", "hash": hash}, 'exists')
+		if (int(exists) == 1):
+			# wait & check again
+			time.sleep(30)
+			exists_2 = rpc({"action": "pending_exists", "hash": hash}, 'exists')
+			if (int(exists_2) == 1):
+				print('Pending hash {0}'.format(hash))
+				unlock(wallet, password)
 
 monitoring_peers()
 monitoring_block_count()
