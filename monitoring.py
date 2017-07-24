@@ -119,16 +119,18 @@ def monitoring_pending():
 		for hash in pending:
 			hash_list.extend(hash.keys())
 	# recheck
-	time.sleep(90)
-	for hash in hash_list:
-		exists = rpc({"action": "pending_exists", "hash": hash}, 'exists')
-		if (int(exists) == 1):
-			# wait & check again
-			time.sleep(30)
-			exists_2 = rpc({"action": "pending_exists", "hash": hash}, 'exists')
-			if (int(exists_2) == 1):
-				print('Pending hash {0}'.format(hash))
-				unlock(wallet, password)
+	if (len(hash_list) > 0):
+		time.sleep(90)
+		for hash in hash_list:
+			exists = rpc({"action": "pending_exists", "hash": hash}, 'exists')
+			if (int(exists) == 1):
+				# wait & check again
+				time.sleep(30)
+				exists_2 = rpc({"action": "pending_exists", "hash": hash}, 'exists')
+				if (int(exists_2) == 1):
+					print('Pending hash {0}'.format(hash))
+					unlock(wallet, password)
+					break
 
 monitoring_peers()
 monitoring_block_count()
