@@ -604,13 +604,17 @@ def send_from_callback(bot, update, args):
 				text_reply(update, lang(user_id, 'value_error'))
 		try:
 			if (from_account is not False):
-				args = args[1:]
-				send_callback(bot, update, args, from_account)
+				if (int(user_id) == int(from_account[0])):
+					args = args[1:]
+					send_callback(bot, update, args, from_account)
+				else:
+					text_reply(update, lang(user_id, 'send_from_id_error').format(args[0]))
+					logging.warn('User {0} trying to steal funds from {1}'.format(user_id, args[0]))
 			elif ((int(args[0]) == 0) or (args[0] == 'default')):
 				args = args[1:]
 				send_callback(bot, update, args)
 			else:
-				text_reply(update, lang(user_id, 'send_from_id_error'))
+				text_reply(update, lang(user_id, 'send_from_id_error').format(args[0]))
 		except ValueError as e:
 			text_reply(update, lang(user_id, 'value_error'))
 	else:

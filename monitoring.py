@@ -113,13 +113,13 @@ def monitoring_password():
 
 def monitoring_pending():
 	pending_list = rpc({"action": "wallet_pending", "wallet": wallet, "threshold": (min_receive * (10 ** 24))}, 'pending')
-	hash_list = []
-	# list of pending hashes
-	for account, pending in pending_list.items():
-		for hash in pending:
-			hash_list.extend(hash.keys())
-	# recheck
-	if (len(hash_list) > 0):
+	if (len(pending_list) > 0):
+		# list of pending hashes
+		hash_list = []
+		for account, pending in pending_list.items():
+			for hash in pending:
+				hash_list.extend(hash.keys())
+		# recheck
 		time.sleep(90)
 		for hash in hash_list:
 			exists = rpc({"action": "pending_exists", "hash": hash}, 'exists')
