@@ -792,8 +792,10 @@ def send_all_callback(bot, update):
 	for extra_account in extra_accounts:
 		extra_array.append(extra_account[3])
 	reply = 0
-	if (len(extra_accounts) > 0):
+	active = mysql_select_send_all(user_id)
+	if ((len(extra_accounts) > 0) and (active is False)):
 		balances = accounts_balances(extra_array)
+		mysql_set_send_all(user_id)
 		for account, balance in balances.items():
 			max_send = balance - final_fee_amount
 			if (max_send >= min_send):
@@ -813,11 +815,13 @@ def send_all_callback(bot, update):
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, send_hash)
 					mysql_update_send_time(user_id)
-					sleep(5)
+					logging.info('Send from {0} to {1}  amount {2}  hash {3} /send_all'.format(account, destination, mrai_text(send_amount), send_hash))
+					sleep(6)
 				else:
 					logging.warn('Transaction FAILURE! Account {0}'.format(account))
 					new_balance = account_balance(account)
 					lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
+		mysql_delete_send_all(user_id)
 	if (reply == 0):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))
 

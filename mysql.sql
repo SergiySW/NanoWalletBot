@@ -155,6 +155,20 @@ CREATE TABLE `rai_bot_seeds` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rai_bot_send_all`
+--
+
+DROP TABLE IF EXISTS `rai_bot_send_all`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_bot_send_all` (
+  `user_id` int(10) unsigned NOT NULL,
+  `active` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_bot_send_time`
 --
 

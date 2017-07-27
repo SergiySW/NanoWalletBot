@@ -293,6 +293,9 @@ def mysql_update_send_clean_all():
 	query = "UPDATE rai_bot_extra SET send_from = 0"
 	cursor.execute(query)
 	cnx.commit()
+	query = "TRUNCATE rai_bot_send_all"
+	cursor.execute(query)
+	cnx.commit()
 	cursor.close()
 	cnx.close()
 
@@ -681,6 +684,39 @@ def mysql_set_seed(user_id, seed):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
 	query = "INSERT INTO rai_bot_seeds SET user_id = {0}, seed = '{1}'".format(user_id, seed)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+
+def mysql_select_send_all(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT active FROM rai_bot_send_all WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	send = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	try:
+		send = send[0]
+	except Exception as e:
+		send = False
+	return(send)
+
+def mysql_set_send_all(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "REPLACE INTO rai_bot_send_all SET user_id = {0}, active = 1".format(user_id)
+	cursor.execute(query)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+
+def mysql_delete_send_all(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	query = "DELETE FROM rai_bot_send_all WHERE user_id = {0}".format(user_id)
 	cursor.execute(query)
 	cnx.commit()
 	cursor.close()
