@@ -604,7 +604,7 @@ def send_from_callback(bot, update, args):
 				text_reply(update, lang(user_id, 'value_error'))
 		try:
 			if (from_account is not False):
-				if (int(user_id) == int(from_account[0])):
+				if (user_id == from_account[0]):
 					args = args[1:]
 					send_callback(bot, update, args, from_account)
 				else:

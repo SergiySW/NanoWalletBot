@@ -112,13 +112,13 @@ def monitoring_password():
 		print('Unlock: wallet was locked')
 
 def monitoring_pending():
-	pending_list = rpc({"action": "wallet_pending", "wallet": wallet, "threshold": (min_receive * (10 ** 24))}, 'pending')
+	pending_list = rpc({"action": "wallet_pending", "wallet": wallet, "threshold": (min_receive * (10 ** 24))}, 'blocks')
 	if (len(pending_list) > 0):
 		# list of pending hashes
 		hash_list = []
 		for account, pending in pending_list.items():
 			for hash in pending:
-				hash_list.extend(hash.keys())
+				hash_list.append(hash)
 		# recheck
 		time.sleep(90)
 		for hash in hash_list:
