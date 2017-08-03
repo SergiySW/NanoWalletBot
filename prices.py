@@ -24,6 +24,7 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
+bitgrail_price = config.get('monitoring', 'bitgrail_price')
 
 # MySQL requests
 from common_mysql import *
@@ -66,8 +67,7 @@ def mercatox():
 
 def bitgrail():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	url = 'https://bitgrail.com/api/v1/BTC-XRB/ticker'
-	response = http.request('GET', url)
+	response = http.request('GET', bitgrail_price)
 	json_bitgrail = json.loads(response.data)
 	json_array = json_bitgrail['response']
 	last_price = int(float(json_array['last']) * (10 ** 8))
