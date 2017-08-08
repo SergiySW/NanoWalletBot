@@ -24,6 +24,14 @@ def rpc(json, key):
 		else:
 			print(r['error'])
 			return(r['error'])
+	except requests.exceptions.ConnectionError as e:
+		sleep(7.5)
+		r = requests.post(url, json=json).json()
+		if 'error' not in r:
+			return(r[key])
+		else:
+			print(r['error'])
+			return(r['error'])
 	except Exception as e:
 		sleep(0.5)
 		r = requests.post(url, json=json).json()
@@ -142,6 +150,17 @@ def reference_block_count():
 			return 0
 	else:
 		return 0
+
+def rpc_remote(json, key):
+	req = requests.post(reference_url, json=json).json()
+	try:
+		if 'error' not in req:
+			return(req[key])
+		else:
+			print(req['error'])
+			return(req['error'])
+	except KeyError as e:
+		return False
 
 def bootstrap_multi():
 	rpc({"action": "bootstrap_any"}, 'success')

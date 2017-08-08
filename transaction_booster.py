@@ -49,6 +49,23 @@ def checker():
 			rpc({"action":"republish","hash":hash}, 'success')
 			time.sleep(0.3)
 
+	for account in remote_frontiers:
+		remote_frontier = remote_frontiers[account]
+		try:
+			frontier = frontiers[account]
+			# if frontiers not same
+			if (not (frontier == remote_frontier)):
+				rpc_remote({"action":"republish","hash":frontier}, 'success')
+				print("Hash {0} republished remotely".format(frontier))
+				time.sleep(0.3)
+		except KeyError, IndexError:
+			# doesn't exist
+			blocks = rpc_remote({"action":"chain","block":remote_frontier,"count":32}, 'blocks')
+			hash = blocks[len(blocks) - 1]
+			rpc_remote({"action":"republish","hash":hash}, 'success')
+			time.sleep(0.3)
+
+
 def starter():
 	time_start = int(time.time())
 	checker()
