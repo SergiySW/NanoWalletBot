@@ -110,7 +110,7 @@ def peers_ip():
 def check_block_community(block):
 	try:
 		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, block))
+		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, block), timeout=15.0)
 		json_data = json.loads(response.data)
 		if ('error' not in json_data):
 			return True
