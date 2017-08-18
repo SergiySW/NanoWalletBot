@@ -823,7 +823,7 @@ def send_all_callback(bot, update):
 					lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 		mysql_delete_send_all(user_id)
 	if (reply == 0):
-		lang_keyboard(lang_id, bot, chat_id, lang_text('error', lang_id))
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_all_min_error', lang_id).format(mrai_text(min_send)))
 
 
 @run_async
