@@ -102,9 +102,10 @@ def unlock(wallet, password):
 def peers_ip():
 	peers = rpc({"action":"peers"}, 'peers')
 	# only IP of peers
-	for (i, item) in enumerate(peers):
-		peers[i] = item.split("]:")[0].replace("[", "").replace("::ffff:", "")
-	return peers
+	peers_list = []
+	for item, version in peers.items():
+		peers_list.append(item.split("]:")[0].replace("[", "").replace("::ffff:", ""))
+	return peers_list
 
 # Check frontier existance at remote node or website
 def check_block_community(block):
