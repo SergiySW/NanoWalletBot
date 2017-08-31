@@ -715,7 +715,6 @@ def send_callback(bot, update, args, from_account = 0):
 							send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 							logging.exception("message")
 						if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-							receive(destination, send_hash)
 							# FEELESS
 							if (final_fee_amount > 0):
 								try:
@@ -750,6 +749,7 @@ def send_callback(bot, update, args, from_account = 0):
 									print(username_text)
 									logging.info(username_text)
 							# update username
+							receive(destination, send_hash)
 						else:
 							logging.warn('Transaction FAILURE! Account {0}'.format(account))
 							new_balance = account_balance(account)
@@ -810,13 +810,14 @@ def send_all_callback(bot, update):
 					send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 					logging.exception("message")
 				if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-					receive(destination, send_hash)
 					new_balance = account_balance(account)
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, send_hash)
 					mysql_update_send_time(user_id)
 					logging.info('Send from {0} to {1}  amount {2}  hash {3} /send_all'.format(account, destination, mrai_text(send_amount), send_hash))
-					sleep(6)
+					sleep(2)
+					receive(destination, send_hash)
+					sleep(4)
 				else:
 					logging.warn('Transaction FAILURE! Account {0}'.format(account))
 					new_balance = account_balance(account)
@@ -1015,7 +1016,6 @@ def send_finish(bot, update):
 				send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 				logging.exception("message")
 			if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-				receive(destination, send_hash)
 				# FEELESS
 				if (final_fee_amount > 0):
 					try:
@@ -1050,6 +1050,7 @@ def send_finish(bot, update):
 					print(username_text)
 					logging.info(username_text)
 				# update username
+				receive(destination, send_hash)
 			else:
 				logging.warn('Transaction FAILURE! Account {0}'.format(account))
 				new_balance = account_balance(account)
