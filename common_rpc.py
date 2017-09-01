@@ -59,7 +59,10 @@ def rpc_send(wallet, source, destination, raw_amount):
 
 def raw_account_balance(account):
 	r = rpc({"action": "account_balance", "account": account}, 'balance')
-	balance = int(r)
+	try:
+		balance = int(r)
+	except ValueError as e:
+		balance = 0
 	return(balance)
 
 
@@ -85,7 +88,10 @@ def accounts_balances(accounts):
 
 def raw_account_pending(account):
 	r = rpc({"action": "account_balance", "account": account}, 'pending')
-	pending = int(r)
+	try:
+		pending = int(r)
+	except ValueError as e:
+		pending = 0
 	return(pending)
 
 
