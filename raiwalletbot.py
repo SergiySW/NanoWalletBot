@@ -1368,12 +1368,16 @@ def password_callback(bot, update, args):
 			if (len(args[0]) >= 8):
 				password = args[0]
 				if ((len(set(string.digits).intersection(password)) > 0) and (len(set(string.ascii_uppercase).intersection(password))> 0) and (len(set(string.ascii_lowercase).intersection(password)) > 0)):
-					dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-					hex = binascii.hexlify(dk)
-					print(hex)
-					mysql_set_password(user_id, hex)
-					message_markdown(bot, chat_id, lang(user_id, 'password_success'))
-					logging.info('Password added for user {0}'.format(user_id))
+					try:
+						dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
+						hex = binascii.hexlify(dk)
+						#print(hex)
+						mysql_set_password(user_id, hex)
+						message_markdown(bot, chat_id, lang(user_id, 'password_success'))
+						logging.info('Password added for user {0}'.format(user_id))
+					except UnicodeEncodeError:
+						text_reply(update, lang(user_id, 'password_uppercase'))
+						logging.info('Password set failed for user {0}. Reason: Unicode symbol'.format(user_id))
 				else:
 					text_reply(update, lang(user_id, 'password_uppercase'))
 					logging.info('Password set failed for user {0}. Reason: uppercase-lowercase-digits'.format(user_id))
