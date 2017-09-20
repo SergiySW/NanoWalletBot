@@ -552,7 +552,7 @@ def account_add(bot, update):
 	info_log(update)
 	ddos_protection(bot, update, account_add_callback)
 
-
+@run_async
 def account_add_callback(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
@@ -577,6 +577,16 @@ def account_add_callback(bot, update):
 		else:
 			text_reply(update, lang_text('account_error', lang_id))
 
+def password_check(update, password):
+	user_id = update.message.from_user.id
+	dk = '0000'
+	try:
+		dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
+	except UnicodeEncodeError as e:
+		text_reply(update, lang(user_id, 'encoding_error'))
+		sleep(0.5)
+	hex = binascii.hexlify(dk)
+	return hex
 
 @run_async
 def send(bot, update, args):
@@ -692,12 +702,10 @@ def send_callback(bot, update, args, from_account = 0):
 				check = mysql_check_password(user_id)
 				if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb'))):
 					password = args[3]
-					dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-					hex = binascii.hexlify(dk)
+					hex = password_check(update, password)
 				elif (len(args) > 2):
 					password = args[2]
-					dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-					hex = binascii.hexlify(dk)
+					hex = password_check(update, password)
 				else:
 					hex = False
 				# typing_illusion(bot, update.message.chat_id) # typing illusion
@@ -1377,7 +1385,6 @@ def password_callback(bot, update, args):
 					try:
 						dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
 						hex = binascii.hexlify(dk)
-						#print(hex)
 						mysql_set_password(user_id, hex)
 						message_markdown(bot, chat_id, lang(user_id, 'password_success'))
 						logging.info('Password added for user {0}'.format(user_id))
@@ -1407,10 +1414,7 @@ def password_delete_callback(bot, update, args):
 	if (len(args) > 0):
 		check = mysql_check_password(user_id)
 		password = args[0]
-		dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-		hex = binascii.hexlify(dk)
-		#print(hex)
-		#print(check)
+		hex = password_check(update, password)
 		if (check == hex):
 			mysql_delete_password(user_id)
 			text_reply(update, lang(user_id, 'password_delete_success'))
@@ -1440,8 +1444,7 @@ def seed_callback(bot, update, args):
 	check = mysql_check_password(user_id)
 	if ((len(args) > 0) and (check is not False)):
 		password = args[0]
-		dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-		hex = binascii.hexlify(dk)
+		hex = password_check(update, password)
 		if (check == hex):
 			message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
 		else:
