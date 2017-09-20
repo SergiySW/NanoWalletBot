@@ -536,6 +536,9 @@ def account_text(bot, update, list = False):
 				welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
 				sleep(0.5) # workaround
 				new_balance = account_balance(welcome_account)
+				if (new_balance == balance): # workaround
+					sleep(2.5)
+					new_balance = account_balance(account)
 				mysql_update_balance(welcome_account, new_balance)
 				mysql_update_frontier(welcome_account, welcome)
 			except Exception as e:
@@ -737,6 +740,9 @@ def send_callback(bot, update, args, from_account = 0):
 							# FEELESS
 							sleep(0.5) # workaround
 							new_balance = account_balance(account)
+							if (new_balance == balance): # workaround
+								sleep(2.5)
+								new_balance = account_balance(account)
 							if (from_account == 0):
 								mysql_update_balance(account, new_balance)
 								mysql_update_frontier(account, fee)
@@ -824,6 +830,9 @@ def send_all_callback(bot, update):
 				if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 					sleep(0.5) # workaround
 					new_balance = account_balance(account)
+					if (new_balance == balance): # workaround
+						sleep(2.5)
+						new_balance = account_balance(account)
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, send_hash)
 					mysql_update_send_time(user_id)
@@ -1041,6 +1050,9 @@ def send_finish(bot, update):
 				# FEELESS
 				sleep(0.5) # workaround
 				new_balance = account_balance(account)
+				if (new_balance == int(m[4])): # workaround
+					sleep(2.5)
+					new_balance = account_balance(account)
 				if (len(extra_account) > 0):
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, fee)
