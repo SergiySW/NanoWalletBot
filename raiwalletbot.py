@@ -22,6 +22,7 @@ import logging
 import urllib3, certifi, socket, json, re
 import hashlib, binascii, string, math
 from mysql.connector import ProgrammingError
+import time
 from time import sleep
 import os, sys
 
@@ -1241,7 +1242,10 @@ def faucet_text(bot, update):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	faucet = mysql_select_faucet()
-	message_markdown(bot, chat_id, lang_text('faucet_stats', lang_id).format("{:,}".format(faucet[0]), mrai_text(faucet[1]), "{:,}".format(faucet[2])))
+	time_remain = 3600 - int(time.time()) % 3600
+	sec_remain = time_remain % 60
+	min_remain = time_remain // 60
+	message_markdown(bot, chat_id, lang_text('faucet_stats', lang_id).format("{:,}".format(faucet[0]), mrai_text(faucet[1]), "{:,}".format(faucet[2]), min_remain, '{0:02d}'.format(sec_remain)))
 	m = mysql_select_user(user_id)
 	try:
 		account = m[2]
@@ -1255,13 +1259,14 @@ def faucet_text(bot, update):
 			message_markdown(bot, chat_id, lang_text('faucet_above', lang_id))
 		elif (user_mode == 1):
 			message_markdown(bot, chat_id, lang_text('faucet_under', lang_id))
+		elif (user_mode > 10):
+			message_markdown(bot, chat_id, lang_text('faucet_under_num', lang_id).format(user_mode))
 		else:
-			text_reply(update, lang_text('faucet_unknown_delta', lang_id).format(user_mode, account))
-	except (TypeError):
+			message_markdown(bot, chat_id, lang_text('faucet_check_account', lang_id).format(account))
+	except (TypeError, KeyError) as e:
+		logging.info('TypeError or KeyError: {0}'.format(url))
+	except Exception as e:
 		account = False
-	except KeyError as e:
-		text_reply(update, lang_text('faucet_unknown_delta', lang_id).format('key error', account))
-
 
 
 @run_async

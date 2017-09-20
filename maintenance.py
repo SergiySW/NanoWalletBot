@@ -48,7 +48,7 @@ def maintenance(bot, update):
 		time_remain = end_time - int(time.time())
 		sec_remain = time_remain % 60
 		min_remain = time_remain // 60
-		update.message.reply_text('@RaiWalletBot Maintenance\n{0}\n~{1}:{2} minutes remain'.format(text, min_remain, sec_remain))
+		update.message.reply_text('@RaiWalletBot Maintenance\n{0}\n~{1}:{2} minutes remain'.format(text, min_remain, '{0:02d}'.format(sec_remain)))
 	else:
 		update.message.reply_text('@RaiWalletBot Maintenance\n{0}'.format(text))
 

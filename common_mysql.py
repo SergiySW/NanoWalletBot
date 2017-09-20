@@ -547,7 +547,6 @@ def mysql_set_frontiers(json):
 	cnx.close()
 
 
-from datetime import datetime
 import time
 def mysql_ddos_protector(user_id, message_id):
 	cnx = mysql.connector.connect(**mysql_config)
