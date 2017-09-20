@@ -183,6 +183,22 @@ CREATE TABLE `rai_bot_send_time` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rai_faucet`
+--
+
+DROP TABLE IF EXISTS `rai_faucet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rai_faucet` (
+  `id` int(2) NOT NULL,
+  `threshold` int(10) unsigned NOT NULL DEFAULT '0',
+  `reward` int(10) unsigned NOT NULL DEFAULT '0',
+  `claimers` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rai_frontiers`
 --
 

@@ -10,8 +10,7 @@
 # Released under the BSD 3-Clause License
 # 
 # 
-# Run by cron every hour, 1-2 minutes after distribution starts
-# With new rules it can be inaccurate
+# Run by cron every minute 
 # 
 
 
@@ -38,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 # MySQL requests
-from common_mysql import mysql_select_accounts_list, mysql_select_blacklist, mysql_select_language, mysql_select_accounts_list_extra
+from common_mysql import mysql_select_accounts_list, mysql_select_blacklist, mysql_select_language, mysql_select_accounts_list_extra, mysql_set_faucet
 
 
 # Common functions
@@ -58,7 +57,7 @@ def lang(user_id, text_id):
 # Faucet
 def faucet():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	url = 'https://faucet.raiblockscommunity.net/paylist.php?json=1'
+	url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1'
 	response = http.request('GET', url, timeout=120.0)
 	json_paylist = json.loads(response.data)
 	#save it
@@ -85,6 +84,20 @@ def faucet():
 				#print(text)
 				logging.info('{0}\n{1}'.format(account[0], text))
 				time.sleep(1.25)
-	
-	
-faucet()
+
+
+# Faucet
+def faucet_stats():
+	time.sleep(5)
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+	url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1'
+	response = http.request('GET', url, timeout=40.0)
+	json_paylist = json.loads(response.data)
+	threshold = int(float(json_paylist['threshold']))
+	reward = int(float(json_paylist['reward']))
+	claimers = int(float(json_paylist['claimingnow']))
+	mysql_set_faucet(threshold, reward, claimers)
+
+
+#faucet()
+faucet_stats()

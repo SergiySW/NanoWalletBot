@@ -1231,6 +1231,40 @@ def version_text(bot, update):
 
 
 @run_async
+def faucet(bot, update):
+	info_log(update)
+	ddos_protection(bot, update, faucet_text)
+
+@run_async
+def faucet_text(bot, update):
+	user_id = update.message.from_user.id
+	chat_id = update.message.chat_id
+	lang_id = mysql_select_language(user_id)
+	faucet = mysql_select_faucet()
+	message_markdown(bot, chat_id, lang_text('faucet_stats', lang_id).format("{:,}".format(faucet[0]), mrai_text(faucet[1]), "{:,}".format(faucet[2])))
+	m = mysql_select_user(user_id)
+	try:
+		account = m[2]
+		time.sleep(1)
+		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+		url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1&acc={0}'.format(account)
+		response = http.request('GET', url, timeout=10.0)
+		json_paylist = json.loads(response.data)
+		user_mode = int(json_paylist['pending'][0]['delta'])
+		if (user_mode == 0):
+			message_markdown(bot, chat_id, lang_text('faucet_above', lang_id))
+		elif (user_mode == 1):
+			message_markdown(bot, chat_id, lang_text('faucet_under', lang_id))
+		else:
+			text_reply(update, lang_text('faucet_unknown_delta', lang_id).format(user_mode, account))
+	except (TypeError):
+		account = False
+	except KeyError as e:
+		text_reply(update, lang_text('faucet_unknown_delta', lang_id).format('key error', account))
+
+
+
+@run_async
 def text_result(text, bot, update):
 	user_id = update.message.from_user.id
 	lang_id = mysql_select_language(user_id)
@@ -1300,6 +1334,8 @@ def text_result(text, bot, update):
 		price_text(bot, update)
 	elif ('version' in text):
 		version_text(bot, update)
+	elif (text in language['commands']['faucet']):
+		faucet_text(bot, update)
 	# back
 	elif ('back' in text):
 		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('ping', lang_id))
@@ -1561,6 +1597,8 @@ def main():
 	for command in language['common']['lang']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
 	dp.add_handler(CommandHandler("seed", seed, pass_args=True))
+	for command in language['commands']['faucet']:
+		dp.add_handler(CommandHandler(command, faucet))
 
 	
 	# admin commands

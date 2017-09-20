@@ -722,3 +722,22 @@ def mysql_delete_send_all(user_id):
 	cursor.close()
 	cnx.close()
 
+
+def mysql_select_faucet():
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT threshold, reward, claimers FROM rai_faucet WHERE id = 1"
+	cursor.execute(query)
+	faucet = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	return(faucet)
+
+def mysql_set_faucet(threshold, reward, claimers):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor()
+	add_faucet = "REPLACE INTO rai_faucet SET id = 1, threshold = '{0}', reward = '{1}', claimers = '{2}'".format(threshold, reward, claimers)
+	cursor.execute(add_faucet)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
