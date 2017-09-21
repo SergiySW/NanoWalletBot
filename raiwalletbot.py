@@ -78,7 +78,7 @@ from common_rpc import *
 from common import *
 
 
-unlock(wallet, wallet_password)
+# unlock(wallet, wallet_password)
 
 # Restrict access to admins only
 from functools import wraps
@@ -1256,12 +1256,12 @@ def version_text(bot, update):
 
 
 @run_async
-def faucet(bot, update):
+def faucet(bot, update, args):
 	info_log(update)
-	ddos_protection(bot, update, faucet_text)
+	ddos_protection_args(bot, update, args, faucet_text)
 
 @run_async
-def faucet_text(bot, update):
+def faucet_text(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
@@ -1272,25 +1272,34 @@ def faucet_text(bot, update):
 	message_markdown(bot, chat_id, lang_text('faucet_stats', lang_id).format("{:,}".format(faucet[0]), mrai_text(faucet[1]), "{:,}".format(faucet[2]), min_remain, '{0:02d}'.format(sec_remain)))
 	m = mysql_select_user(user_id)
 	try:
-		account = m[2]
-		time.sleep(1)
-		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-		url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1&acc={0}'.format(account)
-		response = http.request('GET', url, timeout=10.0)
-		json_paylist = json.loads(response.data)
-		user_mode = int(json_paylist['pending'][0]['delta'])
-		if (user_mode == 0):
-			message_markdown(bot, chat_id, lang_text('faucet_above', lang_id))
-		elif (user_mode == 1):
-			message_markdown(bot, chat_id, lang_text('faucet_under', lang_id))
-		elif (user_mode > 10):
-			message_markdown(bot, chat_id, lang_text('faucet_under_num', lang_id).format(user_mode))
+		if (len(args) > 0):
+			account = args[0].lower().encode("utf8").replace('­','').replace('\r','').replace('\n','');
+			account = account.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
 		else:
-			message_markdown(bot, chat_id, lang_text('faucet_check_account', lang_id).format(account))
-	except (TypeError, KeyError) as e:
-		logging.info('TypeError or KeyError: {0}'.format(url))
-	except Exception as e:
-		account = False
+			account = m[2]
+		if (account.startswith('xrb_1') or account.startswith('xrb_3')):
+			time.sleep(1)
+			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+			url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1&acc={0}'.format(account)
+			response = http.request('GET', url, timeout=10.0)
+			json_paylist = json.loads(response.data)
+			user_mode = int(json_paylist['pending'][0]['delta'])
+			if (user_mode == 0):
+				message_markdown(bot, chat_id, lang_text('faucet_above', lang_id).format(account))
+			elif (user_mode == 1):
+				message_markdown(bot, chat_id, lang_text('faucet_under', lang_id).format(account))
+			elif (user_mode > 10):
+				message_markdown(bot, chat_id, lang_text('faucet_under_num', lang_id).format(user_mode, account))
+			else:
+				message_markdown(bot, chat_id, lang_text('faucet_check_account', lang_id).format(account))
+		else:
+			message_markdown(bot, chat_id, lang_text('account_invalid', lang_id))
+	except TypeError as e:
+		logging.info('TypeError: {0}'.format(url))
+	except KeyError as e:
+		message_markdown(bot, chat_id, lang_text('account_invalid', lang_id))
+	#except Exception as e:
+	#	account = False
 
 
 @run_async
@@ -1364,7 +1373,7 @@ def text_result(text, bot, update):
 	elif ('version' in text):
 		version_text(bot, update)
 	elif (text in language['commands']['faucet']):
-		faucet_text(bot, update)
+		faucet_text(bot, update, [])
 	# back
 	elif ('back' in text):
 		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('ping', lang_id))
@@ -1627,7 +1636,7 @@ def main():
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
 	dp.add_handler(CommandHandler("seed", seed, pass_args=True))
 	for command in language['commands']['faucet']:
-		dp.add_handler(CommandHandler(command, faucet))
+		dp.add_handler(CommandHandler(command, faucet, pass_args=True))
 
 	
 	# admin commands
