@@ -537,10 +537,10 @@ def account_text(bot, update, list = False):
 				sleep(0.5) # workaround
 				new_balance = account_balance(welcome_account)
 				if (new_balance == 0): # workaround
-					sleep(2.5)
+					sleep(2)
 					new_balance = account_balance(account)
 					if (new_balance == 0):
-						sleep(30)
+						sleep(16)
 						new_balance = account_balance(account)
 				mysql_update_balance(welcome_account, new_balance)
 				mysql_update_frontier(welcome_account, welcome)
@@ -650,6 +650,8 @@ def receive(destination, send_hash):
 		destination_local = mysql_select_by_account_extra(destination)
 	if (destination_local is not False):
 		receive = rpc({"action": "receive", "wallet": wallet, "account": destination, "block": send_hash}, 'block')
+		if ('receive' not in receive):
+			logging.warn('Block already received {0}'.format(send_hash))
 
 
 @run_async
@@ -744,11 +746,17 @@ def send_callback(bot, update, args, from_account = 0):
 							sleep(0.5) # workaround
 							new_balance = account_balance(account)
 							if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-								sleep(2.5)
+								hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
+								sleep(2)
 								new_balance = account_balance(account)
 								if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-									sleep(30)
+									sleep(4)
 									new_balance = account_balance(account)
+									if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
+										hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
+										sleep(8)
+										new_balance = account_balance(account)
+							 # workaround
 							if (from_account == 0):
 								mysql_update_balance(account, new_balance)
 								mysql_update_frontier(account, fee)
@@ -837,10 +845,10 @@ def send_all_callback(bot, update):
 					sleep(0.5) # workaround
 					new_balance = account_balance(account)
 					if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-						sleep(2.5)
+						sleep(2)
 						new_balance = account_balance(account)
 						if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-							sleep(30)
+							sleep(16)
 							new_balance = account_balance(account)
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, send_hash)
@@ -1059,12 +1067,18 @@ def send_finish(bot, update):
 				# FEELESS
 				sleep(0.5) # workaround
 				new_balance = account_balance(account)
-				if ((new_balance == int(m[4])) or (new_balance != int(m[4]) - send_amount - final_fee_amount)): # workaround
-					sleep(2.5)
+				balance = int(m[4])
+				if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
+					sleep(2)
 					new_balance = account_balance(account)
-					if ((new_balance == int(m[4])) or (new_balance != int(m[4]) - send_amount - final_fee_amount)):
-						sleep(30)
+					if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
+						sleep(4)
 						new_balance = account_balance(account)
+						if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
+							hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
+							sleep(8)
+							new_balance = account_balance(account)
+				# workaround
 				if (len(extra_account) > 0):
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, fee)
@@ -1296,7 +1310,7 @@ def faucet_text(bot, update, args):
 			message_markdown(bot, chat_id, lang_text('account_invalid', lang_id))
 	except TypeError as e:
 		logging.info('TypeError: {0}'.format(url))
-	except KeyError as e:
+	except (KeyError, IndexError) as e:
 		message_markdown(bot, chat_id, lang_text('account_invalid', lang_id))
 	#except Exception as e:
 	#	account = False
