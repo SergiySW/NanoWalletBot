@@ -1311,7 +1311,7 @@ def faucet_text(bot, update, args):
 	except TypeError as e:
 		logging.info('TypeError: {0}'.format(url))
 	except (KeyError, IndexError) as e:
-		message_markdown(bot, chat_id, lang_text('account_invalid', lang_id))
+		message_markdown(bot, chat_id, lang_text('faucet_invalid', lang_id))
 	#except Exception as e:
 	#	account = False
 
