@@ -60,10 +60,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://raiblockscommunity.net/account/index.php?acc='
-hash_url = 'https://raiblockscommunity.net/block/index.php?h='
+account_url = 'https://raiblocks.net/account/index.php?acc='
+hash_url = 'https://raiblocks.net/block/index.php?h='
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php'
-summary_url = 'https://raiblockscommunity.net/page/summary.php?json=1'
+summary_url = 'https://raiblocks.net/page/summary.php?json=1'
 
 # MySQL requests
 from common_mysql import *

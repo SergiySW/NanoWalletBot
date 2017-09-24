@@ -40,9 +40,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-peers_url = 'https://raiblockscommunity.net/page/peers.php?json=1'
-summary_url = 'https://raiblockscommunity.net/page/summary.php?json=1'
-known_ips_url = 'https://raiblockscommunity.net/page/knownips.php?json=1'
+peers_url = 'https://raiblocks.net/page/peers.php?json=1'
+summary_url = 'https://raiblocks.net/page/summary.php?json=1'
+known_ips_url = 'https://raiblocks.net/page/knownips.php?json=1'
 block_count_url = 'https://raiwallet.info/api/block_count.php'
 
 # Request to node
@@ -88,12 +88,16 @@ def monitoring_block_count():
 	# set bot
 	bot = Bot(api_key)
 	count = int(rpc({"action": "block_count"}, 'count'))
+	reference_count = int(reference_block_count())
+	
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	response = http.request('GET', summary_url, timeout=20.0)
-	json_data = json.loads(response.data)
-	community_count = int(json_data['blocks'])
+	try:
+		json_data = json.loads(response.data)
+		community_count = int(json_data['blocks'])
+	except ValueError as e:
+		community_count = reference_count
 	difference = int(math.fabs(community_count - count))
-	reference_count = reference_block_count()
 	
 	response = http.request('GET', block_count_url, timeout=20.0)
 	raiwallet_count = int(response.data)

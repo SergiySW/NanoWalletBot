@@ -14,7 +14,7 @@ wallet = config.get('main', 'wallet')
 password = config.get('main', 'password')
 reference_url = config.get('main', 'reference_url')
 
-hash_url = 'https://raiblockscommunity.net/block/index.php?h='
+hash_url = 'https://raiblocks.net/block/index.php?h='
 
 def rpc(json, key):
 	try:
