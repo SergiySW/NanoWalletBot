@@ -60,6 +60,16 @@ def checker():
 				rpc_remote({"action":"republish","hash":frontier}, 'success')
 				print("Hash {0} republished remotely".format(frontier))
 				time.sleep(0.3)
+				# insert blocks
+				blocks = rpc_remote({"action":"successors","block":frontier,"count":128}, 'blocks')
+				for block in blocks:
+					if (not (frontier == block)):
+						content = rpc_remote({"action":"block","hash":block}, 'contents')
+						try:
+							rpc({"action":"process","block":content}, '')
+						except Exception as e:
+							time.sleep(0.1)
+						print("Block {0} processed".format(block))
 		except KeyError, IndexError:
 			# doesn't exist
 			blocks = rpc_remote({"action":"chain","block":remote_frontier,"count":32}, 'blocks')
