@@ -147,6 +147,13 @@ def custom_keyboard(bot, chat_id, buttons, text):
 					 parse_mode=ParseMode.MARKDOWN,
 					 disable_web_page_preview=True,
 					 reply_markup=reply_markup)
+	except TimedOut:
+		sleep(10)
+		bot.sendMessage(chat_id=chat_id, 
+					 text=text, 
+					 parse_mode=ParseMode.MARKDOWN,
+					 disable_web_page_preview=True,
+					 reply_markup=reply_markup)
 	except:
 		sleep(1)
 		bot.sendMessage(chat_id=chat_id, 

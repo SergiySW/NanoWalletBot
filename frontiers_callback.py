@@ -44,8 +44,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://raiblockscommunity.net/account/index.php?acc='
-hash_url = 'https://raiblockscommunity.net/block/index.php?h='
+account_url = 'https://raiblocks.net/account/index.php?acc='
+hash_url = 'https://raiblocks.net/block/index.php?h='
 faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
@@ -96,7 +96,16 @@ class POST_server(BaseHTTPRequestHandler):
 				bot = Bot(api_key)
 				raw_received = int(post['amount'])
 				received_amount = int(math.floor(raw_received / (10 ** 24)))
+				
 				balance = account_balance(xrb_account)
+				mysql_balance = int(account[3])
+				if (mysql_balance == balance): # workaround
+					time.sleep(1)
+					balance = account_balance(xrb_account)
+					if (mysql_balance == balance):
+						time.sleep(8)
+						balance = account_balance(xrb_account)
+				# workaround
 				frontier = post['hash']
 				# FEELESS
 				if ((account[0] in LIST_OF_FEELESS) or (mysql_select_send_time(account[0]) is not False)):
