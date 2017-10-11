@@ -33,7 +33,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-
+header = {'user-agent': 'RaiWalletBot/1.0'}
 
 
 # MySQL requests
@@ -58,7 +58,7 @@ def lang(user_id, text_id):
 def faucet():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1'
-	response = http.request('GET', url, timeout=120.0)
+	response = http.request('GET', url, headers=header, timeout=120.0)
 	json_paylist = json.loads(response.data)
 	#save it
 	with open('paylist.json', 'w') as outfile:  
@@ -91,7 +91,7 @@ def faucet_stats():
 	time.sleep(5)
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1'
-	response = http.request('GET', url, timeout=40.0)
+	response = http.request('GET', url, headers=header, timeout=40.0)
 	json_paylist = json.loads(response.data)
 	threshold = int(float(json_paylist['threshold']))
 	reward = int(float(json_paylist['reward']))

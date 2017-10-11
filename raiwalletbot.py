@@ -64,6 +64,7 @@ account_url = 'https://raiblocks.net/account/index.php?acc='
 hash_url = 'https://raiblocks.net/block/index.php?h='
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php'
 summary_url = 'https://raiblocks.net/page/summary.php?json=1'
+header = {'user-agent': 'RaiWalletBot/1.0'}
 
 # MySQL requests
 from common_mysql import *
@@ -329,7 +330,7 @@ def block_count_callback(bot, update):
 	# Admin block count check from raiblockscommunity.net
 	if (user_id in admin_list):
 		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-		response = http.request('GET', summary_url, timeout=20.0)
+		response = http.request('GET', summary_url, headers=header, timeout=20.0)
 		json_data = json.loads(response.data)
 		community_count = json_data['blocks']
 		if (math.fabs(int(community_count) - int(count)) > block_count_difference_threshold):
@@ -337,7 +338,7 @@ def block_count_callback(bot, update):
 			reference_count = int(reference_block_count())
 			sleep(1)
 			text_reply(update, 'Reference: {0}'.format("{:,}".format(reference_count)))
-			response = http.request('GET', 'https://raiwallet.info/api/block_count.php', timeout=20.0)
+			response = http.request('GET', 'https://raiwallet.info/api/block_count.php', headers=header, timeout=20.0)
 			raiwallet_count = int(response.data)
 			sleep(1)
 			text_reply(update, 'raiwallet.info: {0}'.format("{:,}".format(raiwallet_count)))
@@ -1302,7 +1303,7 @@ def faucet_text(bot, update, args):
 			time.sleep(1)
 			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 			url = 'https://faucet.raiblockscommunity.net/userpay.php?json=1&acc={0}'.format(account)
-			response = http.request('GET', url, timeout=10.0)
+			response = http.request('GET', url, headers=header, timeout=10.0)
 			json_paylist = json.loads(response.data)
 			user_mode = int(json_paylist['pending'][0]['delta'])
 			if (user_mode == 0):

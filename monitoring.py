@@ -44,6 +44,7 @@ peers_url = 'https://raiblocks.net/page/peers.php?json=1'
 summary_url = 'https://raiblocks.net/page/summary.php?json=1'
 known_ips_url = 'https://raiblocks.net/page/knownips.php?json=1'
 block_count_url = 'https://raiwallet.info/api/block_count.php'
+header = {'user-agent': 'RaiWalletBot/1.0'}
 
 # Request to node
 from common_rpc import *
@@ -64,14 +65,14 @@ def monitoring_peers():
 		if (peer not in rpc_peers):
 			# check peers from raiblockscommunity.net
 			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-			response = http.request('GET', peers_url, timeout=10.0)
+			response = http.request('GET', peers_url, headers=header, timeout=10.0)
 			json_data = json.loads(response.data)
 			json_peers = json_data['peers']
 			for (i, item) in enumerate(json_peers):
 				json_peers[i] = item['ip'].replace("::ffff:", "")
 			if (peer not in json_peers):
 				# possible peer names
-				response = http.request('GET', known_ips_url, timeout=10.0)
+				response = http.request('GET', known_ips_url, headers=header, timeout=10.0)
 				json_data = json.loads(response.data)
 				try:
 					peer_name = json_data['::ffff:{0}'.format(peer)][0]
@@ -91,7 +92,7 @@ def monitoring_block_count():
 	reference_count = int(reference_block_count())
 	
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	response = http.request('GET', summary_url, timeout=20.0)
+	response = http.request('GET', summary_url, headers=header, timeout=20.0)
 	try:
 		json_data = json.loads(response.data)
 		community_count = int(json_data['blocks'])
@@ -99,7 +100,7 @@ def monitoring_block_count():
 		community_count = reference_count
 	difference = int(math.fabs(community_count - count))
 	
-	response = http.request('GET', block_count_url, timeout=20.0)
+	response = http.request('GET', block_count_url, headers=header, timeout=20.0)
 	raiwallet_count = int(response.data)
 	
 	if (difference > block_count_difference_threshold):

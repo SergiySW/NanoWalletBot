@@ -15,6 +15,7 @@ password = config.get('main', 'password')
 reference_url = config.get('main', 'reference_url')
 
 hash_url = 'https://raiblocks.net/block/index.php?h='
+header = {'user-agent': 'RaiWalletBot/1.0'}
 
 def rpc(json, key):
 	try:
@@ -117,7 +118,7 @@ def peers_ip():
 def check_block_community(block):
 	try:
 		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, block), timeout=15.0)
+		response = http.request('GET', '{0}{1}&json=1'.format(hash_url, block), headers=header, timeout=15.0)
 		json_data = json.loads(response.data)
 		if ('error' not in json_data):
 			return True

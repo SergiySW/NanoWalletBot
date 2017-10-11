@@ -26,6 +26,8 @@ config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 bitgrail_price = config.get('monitoring', 'bitgrail_price')
 
+header = {'user-agent': 'RaiWalletBot/1.0'}
+
 # MySQL requests
 from common_mysql import *
 
@@ -49,6 +51,7 @@ def lang_text(text_id, lang_id):
 def mercatox():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	url = 'https://mercatox.com/public/json24'
+	#response = http.request('GET', url, headers=header, timeout=20.0)
 	response = http.request('GET', url, timeout=20.0)
 	json_mercatox = json.loads(response.data)
 	json_array = json_mercatox['pairs']['XRB_BTC']
@@ -68,6 +71,7 @@ def mercatox():
 
 def bitgrail():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+	#response = http.request('GET', bitgrail_price, headers=header, timeout=20.0)
 	response = http.request('GET', bitgrail_price, timeout=20.0)
 	json_bitgrail = json.loads(response.data)
 	json_array = json_bitgrail['response']
