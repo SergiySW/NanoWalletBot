@@ -1277,7 +1277,7 @@ def version_text(bot, update):
 	text_reply(update, version)
 
 
-@run_async
+'''@run_async
 def faucet(bot, update, args):
 	info_log(update)
 	ddos_protection_args(bot, update, args, faucet_text)
@@ -1322,7 +1322,7 @@ def faucet_text(bot, update, args):
 		message_markdown(bot, chat_id, lang_text('faucet_invalid', lang_id))
 	#except Exception as e:
 	#	account = False
-
+'''
 
 @run_async
 def text_result(text, bot, update):
@@ -1394,8 +1394,8 @@ def text_result(text, bot, update):
 		price_text(bot, update)
 	elif ('version' in text):
 		version_text(bot, update)
-	elif (text in language['commands']['faucet']):
-		faucet_text(bot, update, [])
+	#elif (text in language['commands']['faucet']):
+	#	faucet_text(bot, update, [])
 	# back
 	elif ('back' in text):
 		lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('ping', lang_id))
@@ -1657,8 +1657,8 @@ def main():
 	for command in language['common']['lang']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
 	dp.add_handler(CommandHandler("seed", seed, pass_args=True))
-	for command in language['commands']['faucet']:
-		dp.add_handler(CommandHandler(command, faucet, pass_args=True))
+	#for command in language['commands']['faucet']:
+	#	dp.add_handler(CommandHandler(command, faucet, pass_args=True))
 
 	
 	# admin commands

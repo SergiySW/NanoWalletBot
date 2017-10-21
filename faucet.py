@@ -10,6 +10,7 @@
 # Released under the BSD 3-Clause License
 # 
 # 
+# Legacy 
 # Run by cron every minute 
 # 
 
