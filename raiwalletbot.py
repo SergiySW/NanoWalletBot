@@ -47,6 +47,9 @@ welcome_amount = int(config.get('main', 'welcome_amount'))
 raw_welcome_amount = welcome_amount * (10 ** 24)
 incoming_fee_text = '\n'
 min_send = int(config.get('main', 'min_send'))
+min_receive = int(config.get('main', 'min_receive'))
+feeless_seconds = int(config.get('main', 'feeless_seconds'))
+feeless_hours = int(feeless_seconds / 3600)
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
 admin_list = json.loads(config.get('main', 'admin_list'))
 extra_limit = int(config.get('main', 'extra_limit'))
@@ -274,7 +277,7 @@ def start_text(bot, update):
 			lang_id = mysql_select_language(user_id)
 	text_reply(update, lang_text('start_introduce', lang_id))
 	sleep(1)
-	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
+	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text, mrai_text(min_receive), feeless_hours))
 	sleep(1)
 	message_markdown(bot, chat_id, lang_text('start_learn_more', lang_id))
 	# Check user existance in database
@@ -295,7 +298,7 @@ def help_callback(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
-	lang_keyboard(lang_id, bot, chat_id, lang_text('help_advanced_usage', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
+	lang_keyboard(lang_id, bot, chat_id, lang_text('help_advanced_usage', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text, mrai_text(min_receive), feeless_hours))
 	sleep(1)
 	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
@@ -305,7 +308,7 @@ def help_text(bot, update):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
-	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text))
+	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text, mrai_text(min_receive), feeless_hours))
 	sleep(1)
 	message_markdown(bot, chat_id, lang_text('help_learn_more', lang_id))
 
