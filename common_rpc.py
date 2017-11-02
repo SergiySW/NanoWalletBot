@@ -160,14 +160,17 @@ def reference_block_count():
 		return 0
 
 def rpc_remote(json, key):
-	req = requests.post(reference_url, json=json).json()
 	try:
+		req = requests.post(reference_url, json=json, timeout=30.0).json()
 		if 'error' not in req:
 			return(req[key])
 		else:
 			print(req['error'])
 			return(req['error'])
 	except KeyError as e:
+		return False
+	except requests.exceptions.Timeout as e:
+		print("Timeout remote RPC")
 		return False
 
 def bootstrap_multi():
