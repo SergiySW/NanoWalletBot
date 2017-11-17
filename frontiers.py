@@ -86,14 +86,21 @@ def frontiers():
 				# update frontier
 				balance = account_balance(account[1])
 				# check if balance changed
+				updated_mysql = True
 				try:
 					z = account[5]
-					mysql_update_frontier_extra(account[1], frontier)
+					frontier_mysql = mysql_select_by_account_extra(account[1])
+					if (account[2] == frontier_mysql): # no changes in MySQL
+						mysql_update_frontier_extra(account[1], frontier)
+						updated_mysql = False
 				except IndexError as e:
-					mysql_update_frontier(account[1], frontier)
+					frontier_mysql = mysql_select_by_account(account[1])
+					if (account[2] == frontier_mysql): # no changes in MySQL
+						mysql_update_frontier(account[1], frontier)
+						updated_mysql = False
 				logging.info('{0} --> {1}	{2}'.format(mrai_text(account[3]), mrai_text(balance), frontier))
 				#print(balance)
-				if (int(account[3]) < balance):
+				if ((int(account[3]) < balance) and (not updated_mysql)):
 					received_amount = balance - int(account[3])
 					# FEELESS
 					if ((account[0] in LIST_OF_FEELESS) or (mysql_select_send_time(account[0]) is not False)):
