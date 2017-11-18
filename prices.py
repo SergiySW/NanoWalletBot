@@ -98,6 +98,9 @@ def bitflip():
 	low_price = int(float(json_array['low']) * (10 ** 8))
 	volume = int(float(json_array['volume']))
 	btc_volume = 0
+	if (last_price == 0):
+		price = mysql_select_price()
+		last_price = int(price[2][0])
 	
 	url = 'https://api.bitflip.cc/method/market.getRates'
 	json_data = json.dumps({"version": "1.0", "pair": "XRB:BTC"})
