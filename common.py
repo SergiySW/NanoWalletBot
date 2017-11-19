@@ -165,13 +165,13 @@ def mrai_text(rai):
 			floating_text = '0{0}'.format(floating)
 		else:
 			floating_text = '{0}'.format(floating)
-		if (floating_text.endswith('0',1,2) and floating_text.endswith('0')):
+		if (floating_text.endswith('00000')):
 			floating_text = floating_text[:-5]
-		elif (floating_text.endswith('0',2,3) and floating_text.endswith('0')):
+		elif (floating_text.endswith('0000')):
 			floating_text = floating_text[:-4]
-		elif (floating_text.endswith('0',3,4) and floating_text.endswith('0')):
+		elif (floating_text.endswith('000')):
 			floating_text = floating_text[:-3]
-		elif (floating_text.endswith('0',4,5) and floating_text.endswith('0')):
+		elif (floating_text.endswith('00')):
 			floating_text = floating_text[:-2]
 		elif (floating_text.endswith('0')):
 			floating_text = floating_text[:-1]
