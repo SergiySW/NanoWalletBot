@@ -963,7 +963,7 @@ def send_destination_username(bot, update, text):
 
 
 @run_async
-def send_amount(bot, update, text):
+def send_amount(bot, update, text, raw = False):
 	user_id = update.message.from_user.id
 	lang_id = mysql_select_language(user_id)
 	# FEELESS
@@ -984,6 +984,8 @@ def send_amount(bot, update, text):
 				balance = account_balance(account)
 			max_send = balance - final_fee_amount
 			send_amount = int(float(text) * (10 ** 6))
+			if ((raw is not False) and (int(text) >= (10 ** 24))):
+				send_amount = int(int(text) / (10 ** 24))
 			# if less, set 0
 			if (max_send < min_send):
 				mysql_update_send_clean_extra_user(user_id)
@@ -1457,7 +1459,7 @@ def photo_filter_callback(bot, update):
 			if (len(qr) > 1):
 				send_destination(bot, update, account, True)
 				print(qr[1])
-				send_amount(bot, update, qr[1])
+				send_amount(bot, update, qr[1], True)
 			else:
 				send_destination(bot, update, account)
 		elif (('NULL' in account) or (account is None) or (account is False)):

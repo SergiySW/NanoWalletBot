@@ -22,6 +22,7 @@ import pyqrcode
 import os.path
 #@run_async
 def qr_by_account(account):
+	account = 'xrb:{0}'.format(account)
 	path = '{1}{0}.png'.format(account, qr_folder_path)
 	if (not os.path.isfile(path)):
 		qr = pyqrcode.create(account, error='L', version=4, mode=None, encoding='iso-8859-1')
@@ -42,10 +43,10 @@ def account_by_qr(qr_file):
 		qr2.decode('{0}'.format(qr_file.replace('.jpg', '_.jpg')))
 		#print(qr2.data)
 		qr = qr2
-	returning = qr.data.replace('raiblocks://', '').replace('raiblocks:', '').split('?')
+	returning = qr.data.replace('xrb:', '').replace('raiblocks://', '').replace('raiblocks:', '').split('?')
 	# parsing amount
 	if (len(returning) > 1):
-		if 'amount=' in returning[1]:
+		if ('amount=' in returning[1]):
 			returning[1] = returning[1].replace('amount=', '')
 			# don't use empty
 			if (len(returning[1]) == 0):
