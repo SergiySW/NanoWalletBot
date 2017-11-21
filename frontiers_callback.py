@@ -98,8 +98,12 @@ class POST_server(BaseHTTPRequestHandler):
 				received_amount = int(math.floor(raw_received / (10 ** 24)))
 				
 				balance = account_balance(xrb_account)
-				mysql_balance = int(account[3])
+				try:
+					mysql_balance = int(account[3])
+				except Exception as e:
+					mysql_balance = 0
 				if (mysql_balance == balance): # workaround
+					logging.warn('Warning receive balance change. Old: {0}, new: {1}'.format(mysql_balance, balance))
 					time.sleep(1)
 					balance = account_balance(xrb_account)
 					if (mysql_balance == balance):

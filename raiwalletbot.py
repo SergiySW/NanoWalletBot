@@ -504,16 +504,16 @@ def account_text(bot, update, list = False):
 			# list
 			#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
 			try:
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
 			except (urllib3.exceptions.ProtocolError) as e:
 				sleep(3)
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
 			except TimedOut as e:
 				sleep(10)
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
 			except NetworkError as e:
 				sleep(20)
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
 			seed = mysql_select_seed(user_id)
 			check = mysql_check_password(user_id)
 			if ((seed is False) and (check is False)):
@@ -754,9 +754,10 @@ def send_callback(bot, update, args, from_account = 0):
 							else:
 								fee = send_hash
 							# FEELESS
-							sleep(0.5) # workaround
+							# sleep(0.5) # workaround
 							new_balance = account_balance(account)
 							if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
+								logging.warn('Warning send balance change. Old: {0}, new: {1}, hash: {2}'.format(balance, new_balance, fee))
 								hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
 								sleep(2)
 								new_balance = account_balance(account)
