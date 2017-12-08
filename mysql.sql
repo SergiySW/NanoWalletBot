@@ -210,8 +210,7 @@ CREATE TABLE `rai_frontiers` (
   `json` mediumtext NOT NULL,
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-INSERT INTO `rai_frontiers` (`id`, `json`) VALUES
-(1, '{}')
+INSERT INTO `rai_frontiers` (`id`, `json`) VALUES (1, '{}');
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -283,7 +282,7 @@ DROP TABLE IF EXISTS `rai_send_list`;
 CREATE TABLE `rai_send_list` (
   `id` int(8) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
-  `text` text DEFAULT NOT NULL
+  `text` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
