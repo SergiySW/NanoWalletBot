@@ -544,20 +544,21 @@ def account_text(bot, update, list = False):
 			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
 			sleep(1)
 			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
-			try:
-				welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
-				sleep(0.5) # workaround
-				new_balance = account_balance(welcome_account)
-				if (new_balance == 0): # workaround
-					sleep(2)
-					new_balance = account_balance(account)
-					if (new_balance == 0):
-						sleep(16)
+			if (welcome_amount > 0):
+				try:
+					welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
+					sleep(0.5) # workaround
+					new_balance = account_balance(welcome_account)
+					if (new_balance == 0): # workaround
+						sleep(2)
 						new_balance = account_balance(account)
-				mysql_update_balance(welcome_account, new_balance)
-				mysql_update_frontier(welcome_account, welcome)
-			except Exception as e:
-				logging.exception("message")
+						if (new_balance == 0):
+							sleep(16)
+							new_balance = account_balance(account)
+					mysql_update_balance(welcome_account, new_balance)
+					mysql_update_frontier(welcome_account, welcome)
+				except Exception as e:
+					logging.exception("message")
 			logging.info('New user registered {0} {1}'.format(user_id, r))
 			sleep(2)
 			seed_callback(bot, update, [0])
