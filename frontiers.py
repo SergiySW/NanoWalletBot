@@ -35,6 +35,7 @@ LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 					level=logging.INFO, filename=log_file_frontiers)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -186,8 +187,8 @@ def frontiers_sendlist():
 def frontiers_usual():
 	frontiers_sendlist()
 	run_time = frontiers()
-	if (run_time < 30):
-		time.sleep(30-run_time)
+	if (run_time < 60):
+		time.sleep(60-run_time)
 		frontiers()
 
 

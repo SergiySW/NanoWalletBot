@@ -41,6 +41,7 @@ LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 					level=logging.INFO, filename=log_file_frontiers)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 

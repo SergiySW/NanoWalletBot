@@ -37,6 +37,7 @@ min_receive = int(config.get('main', 'min_receive'))
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 					level=logging.INFO, filename=log_file)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 

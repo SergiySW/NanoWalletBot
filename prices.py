@@ -119,9 +119,9 @@ def prices_above_below(bot, user_id, price, exchange, above):
 	lang_id = mysql_select_language(user_id)
 	btc_price = ('%.8f' % (float(price) / (10 ** 8)))
 	if (above == 1):
-		text = lang_text('prices_above', lang_id).format(exchange, btc_price)
+		text = lang_text('prices_above', lang_id).format(exchange, btc_price).encode("utf-8")
 	else:
-		text = lang_text('prices_below', lang_id).format(exchange, btc_price)
+		text = lang_text('prices_below', lang_id).format(exchange, btc_price).encode("utf-8")
 	try:
 		push(bot, user_id, text)
 	except Exception as e:
