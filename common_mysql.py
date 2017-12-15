@@ -586,7 +586,8 @@ def mysql_select_send_time(user_id):
 		if ((timestamp - old_timestamp) >= feeless_seconds):
 			returned = True
 		else:
-			returned = False
+			time.sleep (feeless_seconds - timestamp + old_timestamp)
+			returned = True
 	except TypeError:
 		add_timestamp = "REPLACE INTO rai_bot_send_time SET user_id = {0}, datetime = 0".format(user_id)
 		cursor.execute(add_timestamp)
