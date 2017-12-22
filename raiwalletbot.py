@@ -1461,6 +1461,7 @@ def photo_filter_callback(bot, update):
 			sleep(1)
 			if (len(qr) > 1):
 				send_destination(bot, update, account, True)
+				sleep(0.3)
 				print(qr[1])
 				send_amount(bot, update, qr[1], True)
 			else:
