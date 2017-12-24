@@ -1357,7 +1357,11 @@ def text_result(text, bot, update):
 			hex = False
 		# Check password protection
 		m = mysql_select_user(user_id)
-		if ((m[5] is not None) and (m[6] != 0) and (check == hex) and (check is not False)):
+		if (text.lower() in language['commands']['not']):
+			mysql_update_send_clean(m[2])
+			mysql_update_send_clean_extra_user(user_id)
+			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_cancelled', lang_id))
+		elif ((m[5] is not None) and (m[6] != 0) and (check == hex) and (check is not False)):
 			send_finish(bot, update)
 			#print(check)
 			#print(hex)
