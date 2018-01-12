@@ -451,7 +451,7 @@ def account_text(bot, update, list = False):
 		# price
 		price = mysql_select_price()
 		if (int(price[0][0]) > 0):
-			last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6]))) / (float(price[0][6]) + float(price[1][6]))
+			last_price = ((float(price[0][0]) * float(price[0][6])) + (float(price[1][0]) * float(price[1][6])) + (float(price[3][0]) * float(price[3][6]))) / (float(price[0][6]) + float(price[1][6]) + float(price[3][6]))
 		else:
 			last_price = int(price[1][0])
 		btc_price = last_price / (10 ** 14)
@@ -1151,15 +1151,15 @@ def price_text(bot, update):
 	last_price_grail = ('%.8f' % (float(price[1][0]) / (10 ** 8)))
 	ask_price_grail = ('%.8f' % (float(price[1][3]) / (10 ** 8)))
 	bid_price_grail = ('%.8f' % (float(price[1][4]) / (10 ** 8)))
-	last_price_flip = ('%.8f' % (float(price[2][0]) / (10 ** 8)))
-	ask_price_flip = ('%.8f' % (float(price[2][3]) / (10 ** 8)))
-	bid_price_flip = ('%.8f' % (float(price[2][4]) / (10 ** 8)))
+	last_price_kucoin = ('%.8f' % (float(price[3][0]) / (10 ** 8)))
+	ask_price_kucoin = ('%.8f' % (float(price[3][3]) / (10 ** 8)))
+	bid_price_kucoin = ('%.8f' % (float(price[3][4]) / (10 ** 8)))
 	
-	high_price = ('%.8f' % (max(float(price[0][1]), float(price[1][1]), float(price[0][0])) / (10 ** 8)))
-	low_price = ('%.8f' % (min(float(price[0][2]), float(price[1][2])) / (10 ** 8)))
-	volume = int(price[0][5]) + int(price[1][5]) + int(price[2][5])
-	volume_btc = ('%.2f' % ((float(price[0][6]) + float(price[1][6])) / (10 ** 8)))
-	text = lang_text('price', lang_id).format(last_price_merc, ask_price_merc, bid_price_merc, last_price_grail, ask_price_grail, bid_price_grail, high_price, low_price, "{:,}".format(volume), volume_btc, last_price_flip, ask_price_flip, bid_price_flip)
+	high_price = ('%.8f' % (max(float(price[0][1]), float(price[1][1]), float(price[3][1]), float(price[0][0])) / (10 ** 8)))
+	low_price = ('%.8f' % (min(float(price[0][2]), float(price[1][2]), float(price[3][2])) / (10 ** 8)))
+	volume = int(price[0][5]) + int(price[1][5]) + int(price[2][5]) + int(price[3][5])
+	volume_btc = ('%.2f' % ((float(price[0][6]) + float(price[1][6]) + float(price[3][6])) / (10 ** 8)))
+	text = lang_text('price', lang_id).format(last_price_merc, ask_price_merc, bid_price_merc, last_price_grail, ask_price_grail, bid_price_grail, high_price, low_price, "{:,}".format(volume), volume_btc, last_price_kucoin, ask_price_kucoin, bid_price_kucoin)
 	lang_keyboard(lang_id, bot, chat_id, text)
 	sleep(1)
 	message_markdown(bot, chat_id, lang_text('price_options', lang_id))
@@ -1189,7 +1189,8 @@ def price_above_callback(bot, update, args):
 		price = mysql_select_price()
 		price_high_bitgrail =  max(int(price[1][0]), int(price[1][4]))
 		price_high_mercatox =  max(int(price[0][0]), int(price[0][4]))
-		price_high = max(price_high_bitgrail, price_high_mercatox)
+		price_high_kucoin =  max(int(price[3][0]), int(price[3][4]))
+		price_high = max(price_high_bitgrail, price_high_mercatox, price_high_kucoin)
 		exchange = 0
 		if (len(args) > 1):
 			if (args[1].lower().startswith('bitgrail')):
@@ -1198,6 +1199,9 @@ def price_above_callback(bot, update, args):
 			elif (args[1].lower().startswith('mercatox')):
 				price_high = price_high_mercatox
 				exchange = 2
+			elif (args[1].lower().startswith('kucoin')):
+				price_high = price_high_kucoin
+				exchange = 3
 		if (value <= price_high):
 			btc_price = ('%.8f' % (float(price_high) / (10 ** 8)))
 			message_markdown(bot, chat_id, lang_text('prices_above', lang_id).format('exchanges', btc_price))
@@ -1237,7 +1241,8 @@ def price_below_callback(bot, update, args):
 		price = mysql_select_price()
 		price_low_bitgrail =  min(int(price[1][0]), int(price[1][3]))
 		price_low_mercatox =  min(int(price[0][0]), int(price[0][3]))
-		price_low = min(price_low_bitgrail, price_low_mercatox)
+		price_low_kucoin =  min(int(price[3][0]), int(price[3][3]))
+		price_low = min(price_low_bitgrail, price_low_mercatox, price_low_kucoin)
 		exchange = 0
 		if (len(args) > 1):
 			if (args[1].lower().startswith('bitgrail')):
@@ -1246,6 +1251,9 @@ def price_below_callback(bot, update, args):
 			elif (args[1].lower().startswith('mercatox')):
 				price_low = price_low_mercatox
 				exchange = 2
+			elif (args[1].lower().startswith('kucoin')):
+				price_low = price_low_kucoin
+				exchange = 3
 		if (value >= price_low):
 			btc_price = ('%.8f' % (float(price_low) / (10 ** 8)))
 			message_markdown(bot, chat_id, lang_text('prices_below', lang_id).format('exchanges', btc_price))

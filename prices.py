@@ -115,6 +115,25 @@ def bitflip():
 	mysql_set_price(3, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 
 
+
+def kucoin():
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+	url = 'https://api.kucoin.com/v1/open/tick'
+	response = http.request('GET', url, timeout=20.0)
+	json_kucoin = json.loads(response.data)
+	for pair in json_kucoin['data']:
+		if (pair['symbol'] in 'XRB-BTC'):
+			last_price = int(float(pair['lastDealPrice']) * (10 ** 8))
+			ask_price = int(float(pair['sell']) * (10 ** 8))
+			bid_price = int(float(pair['buy']) * (10 ** 8))
+			volume = int(float(pair['vol']))
+			btc_volume = int(float(pair['volValue']) * (10 ** 8))
+			high_price = int(float(pair['high']) * (10 ** 8))
+			low_price = int(float(pair['low']) * (10 ** 8))
+	
+	mysql_set_price(4, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
+
+
 def prices_above_below(bot, user_id, price, exchange, above):
 	lang_id = mysql_select_language(user_id)
 	btc_price = ('%.8f' % (float(price) / (10 ** 8)))
@@ -142,27 +161,27 @@ def price_check():
 	users_high = mysql_select_price_high()
 	price_high_bitgrail = max(int(price[1][0]), int(price[1][4]))
 	price_high_mercatox = max(int(price[0][0]), int(price[0][4]))
-	#price_high_bitflip = max(int(price[2][0]), int(price[2][4]))
+	price_high_kucoin = max(int(price[3][0]), int(price[3][4]))
 	for user in users_high:
 		if ((price_high_bitgrail >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price_high_bitgrail, "BitGrail.com", 1)
 		elif ((price_high_mercatox >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price_high_mercatox, "Mercatox.com", 1)
-		#elif ((price_high_bitflip >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
-		#	prices_above_below(bot, user[0], price_high_bitflip, "BitFlip.cc", 1)
+		elif ((price_high_kucoin >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
+			prices_above_below(bot, user[0], price_high_kucoin, "Kucoin.com", 1)
 	
 	# check if lower
 	users_low = mysql_select_price_low()
 	price_low_bitgrail = min(int(price[1][0]), int(price[1][3]))
 	price_low_mercatox = min(int(price[0][0]), int(price[0][3]))
-	#price_low_bitflip = min(int(price[2][0]), int(price[2][3]))
+	price_low_kucoin = min(int(price[3][0]), int(price[3][3]))
 	for user in users_low:
 		if ((price_low_bitgrail <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price_low_bitgrail, "BitGrail.com", 0)
 		elif ((price_low_mercatox <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price_low_mercatox, "Mercatox.com", 0)
-		#elif ((price_low_bitflip <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
-		#	prices_above_below(bot, user[0], price_low_bitflip, "BitFlip.cc", 0)
+		elif ((price_low_kucoin <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
+			prices_above_below(bot, user[0], price_low_kucoin, "Kucoin.com", 0)
 
 def prices_usual():
 	try:
@@ -177,6 +196,14 @@ def prices_usual():
 			bitgrail()
 		except:
 			time.sleep(1) # even BitGrail can fail
+	try:
+		kucoin()
+	except:
+		time.sleep(5)
+		try:
+			kucoin()
+		except:
+			time.sleep(1)
 	try:
 		bitflip()
 	except:
