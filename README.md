@@ -1,5 +1,5 @@
-# RaiWalletBot
-[@RaiWalletBot](https://t.me/RaiWalletBot) — Open source Telegram bot for [RaiBlocks](https://github.com/clemahieu/raiblocks) cryptocurrency   
+# NanoWalletBot
+[@NanoWalletBot](https://t.me/NanoWalletBot) — Open source Telegram bot for [Nano](https://github.com/clemahieu/raiblocks) cryptocurrency   
 
 # Python requirements
 **Required non-default Python libraries**   
@@ -20,7 +20,7 @@ Nginx config sample in nginx_site.conf
 # rai_node config.json tuning
 If you use docker node, set "address": "::0.0.0.0"   
 
-0.1 Mrai (XRB) incoming limit: "receive_minimum": "100000000000000000000000000000"   
+0.1 Nano incoming limit: "receive_minimum": "100000000000000000000000000000"   
 https://github.com/clemahieu/raiblocks/wiki/Distribution-and-Mining#Divider   
 
 # Start bot

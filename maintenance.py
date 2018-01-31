@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# RaiBlocks Telegram bot
-# @RaiWalletBot https://t.me/RaiWalletBot
+# Nano Telegram bot
+# @NanoWalletBot https://t.me/NanoWalletBot
 # 
 # Source code:
-# https://github.com/SergiySW/RaiWalletBot
+# https://github.com/SergiySW/NanoWalletBot
 # 
 # Released under the BSD 3-Clause License
 # 
@@ -48,9 +48,9 @@ def maintenance(bot, update):
 		time_remain = end_time - int(time.time())
 		sec_remain = time_remain % 60
 		min_remain = time_remain // 60
-		update.message.reply_text('@RaiWalletBot Maintenance\n{0}\n~{1}:{2} minutes remain'.format(text, min_remain, '{0:02d}'.format(sec_remain)))
+		update.message.reply_text('@NanoWalletBot Maintenance\n{0}\n~{1}:{2} minutes remain'.format(text, min_remain, '{0:02d}'.format(sec_remain)))
 	else:
-		update.message.reply_text('@RaiWalletBot Maintenance\n{0}'.format(text))
+		update.message.reply_text('@NanoWalletBot Maintenance\n{0}'.format(text))
 
 def error(bot, update, error):
 	logger.warn('Update "%s" caused error "%s"' % (update, error))

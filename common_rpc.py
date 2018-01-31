@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
+# Nano Telegram bot
+# @NanoWalletBot https://t.me/NanoWalletBot
+# 
+# Source code:
+# https://github.com/SergiySW/NanoWalletBot
+# 
+# Released under the BSD 3-Clause License
+# 
 # Request to node
 import requests, json, urllib3, certifi
 import math
@@ -14,7 +22,7 @@ wallet = config.get('main', 'wallet')
 password = config.get('main', 'password')
 reference_url = config.get('main', 'reference_url')
 
-hash_url = 'https://raiblocks.net/block/index.php?h='
+hash_url = 'http://nano.co/en/explore/block/'
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
 def rpc(json, key):
