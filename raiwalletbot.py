@@ -64,8 +64,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://raiblocks.net/account/index.php?acc='
-hash_url = 'https://raiblocks.net/block/index.php?h='
+account_url = 'https://nano.co/en/explore/account/'
+hash_url = 'http://nano.co/en/explore/block/'
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php'
 summary_url = 'https://raiblocks.net/page/summary.php?json=1'
 header = {'user-agent': 'RaiWalletBot/1.0'}
@@ -458,15 +458,15 @@ def account_text(bot, update, list = False):
 		btc_balance = ('%.8f' % (btc_price * total_balance))
 		# price
 		if (list is not False):
-			text = 'Total: *{0} XRB (Mrai)*\n~ {1} BTC\n/{3}\n{4}'.format(mrai_text(total_balance), btc_balance, '', lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('send_all', lang_id).encode("utf8"))
+			text = 'Total: *{0} Nano*\n~ {1} BTC\n/{3}\n{4}'.format(mrai_text(total_balance), btc_balance, '', lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('send_all', lang_id).encode("utf8"))
 			message_markdown(bot, chat_id, text)
 			sleep(1)
-			message_markdown(bot, chat_id, '*0.* {0} XRB (Mrai)'.format(mrai_text(balance)))
+			message_markdown(bot, chat_id, '*0.* {0} Nano'.format(mrai_text(balance)))
 			sleep(1)
 			message_markdown(bot, chat_id, '*{0}*'.format(r))
 			sleep(1)
 			for extra_account in extra_accounts:
-				message_markdown(bot, chat_id, '*{0}.* {1} XRB (Mrai)  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_")))
+				message_markdown(bot, chat_id, '*{0}.* {1} Nano  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_")))
 				sleep(1)
 				text_reply(update, extra_account[3])
 				sleep(1)
@@ -498,7 +498,7 @@ def account_text(bot, update, list = False):
 				for extra_account in extra_accounts:
 					n = n + 1
 					if (n <= 3):
-						message_markdown(bot, chat_id, '*{0}.* {1} XRB (Mrai)  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_")))
+						message_markdown(bot, chat_id, '*{0}.* {1} Nano  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_")))
 						sleep(1)
 						text_reply(update, extra_account[3])
 						sleep(1)
@@ -704,7 +704,7 @@ def send_callback(bot, update, args, from_account = 0):
 			else:
 				# Check destination address
 				destination = args[1]
-				if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb'))):
+				if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
 					destination = args[2]
 				# if destination is username
 				if (destination.startswith('@') and (len(destination) > 3 )):
@@ -722,7 +722,7 @@ def send_callback(bot, update, args, from_account = 0):
 				destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
 				# Check password protection
 				check = mysql_check_password(user_id)
-				if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb'))):
+				if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
 					password = args[3]
 					hex = password_check(update, password)
 				elif (len(args) > 2):
@@ -1394,13 +1394,13 @@ def text_result(text, bot, update):
 		send_text(bot, update)
 	elif ('default' in text):
 		send_text(bot, update, True)
-	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('()', '').isdigit()):
+	elif (text.replace(',', '').replace('.', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('nano', '').replace('()', '').isdigit()):
 		# check if digit is correct
-		digit_split = text.replace(' ', '').replace('mrai', '').replace('xrb', '').replace('()', '').split(',')
+		digit_split = text.replace(' ', '').replace('mrai', '').replace('xrb', '').replace('nano', '').replace('()', '').split(',')
 		if (text.startswith('0,') or (any(len(d) > 3 for d in digit_split) and (len(digit_split) > 1)) or any(d is None for d in digit_split) or ((len(digit_split[-1]) < 3) and (len(digit_split) > 1))):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
-			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('()', ''))
+			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('nano', '').replace('()', ''))
 	elif ('xrb_' in text):
 		extra_accounts = mysql_select_user_extra(user_id)
 		if ((len(extra_accounts) > 0) and (len(text.split()) > 1)):

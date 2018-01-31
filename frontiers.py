@@ -39,8 +39,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://raiblockscommunity.net/account/index.php?acc='
-hash_url = 'https://raiblockscommunity.net/block/index.php?h='
+account_url = 'https://nano.co/en/explore/account/'
+hash_url = 'http://nano.co/en/explore/block/'
 faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
