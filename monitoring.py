@@ -136,6 +136,8 @@ def monitoring_pending():
 				if (int(exists_2) == 1):
 					print('Pending hash {0}'.format(hash))
 					unlock(wallet, password)
+					time.sleep(10)
+					rpc({"action": "search_pending", "wallet": wallet}, 'success')
 					break
 
 monitoring_peers()

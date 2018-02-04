@@ -149,6 +149,21 @@ def bitz():
 	
 	mysql_set_price(5, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 
+def binance():
+	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+	url = 'https://api.binance.com/api/v1/ticker/24hr?symbol=NANOBTC'
+	response = http.request('GET', url, timeout=20.0)
+	json_binance = json.loads(response.data)
+	last_price = int(float(json_binance['lastPrice']) * (10 ** 8))
+	high_price = int(float(json_binance['highPrice']) * (10 ** 8))
+	low_price = int(float(json_binance['lowPrice']) * (10 ** 8))
+	ask_price = int(float(json_binance['askPrice']) * (10 ** 8))
+	bid_price = int(float(json_binance['bidPrice']) * (10 ** 8))
+	volume = int(float(json_binance['volume']))
+	btc_volume = int(float(json_binance['quoteVolume']) * (10 ** 8))
+	
+	mysql_set_price(6, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
+
 def prices_above_below(bot, user_id, price, exchange, above):
 	lang_id = mysql_select_language(user_id)
 	btc_price = ('%.8f' % (float(price) / (10 ** 8)))
@@ -177,6 +192,7 @@ def price_check():
 	price_high_bitgrail = max(int(price[1][0]), int(price[1][4]))
 	price_high_bitz = max(int(price[4][0]), int(price[4][4]))
 	price_high_kucoin = max(int(price[3][0]), int(price[3][4]))
+	price_high_binance = max(int(price[5][0]), int(price[5][4]))
 	for user in users_high:
 		if ((price_high_bitgrail >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price_high_bitgrail, "BitGrail.com", 1)
@@ -184,12 +200,15 @@ def price_check():
 			prices_above_below(bot, user[0], price_high_bitz, "Bit-Z.com.com", 1)
 		elif ((price_high_kucoin >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
 			prices_above_below(bot, user[0], price_high_kucoin, "Kucoin.com", 1)
+		elif ((price_high_binance >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 4))):
+			prices_above_below(bot, user[0], price_high_binance, "Binance.com", 1)
 	
 	# check if lower
 	users_low = mysql_select_price_low()
 	price_low_bitgrail = min(int(price[1][0]), int(price[1][3]))
 	price_low_bitz = min(int(price[4][0]), int(price[4][3]))
 	price_low_kucoin = min(int(price[3][0]), int(price[3][3]))
+	price_low_binance = min(int(price[5][0]), int(price[5][3]))
 	for user in users_low:
 		if ((price_low_bitgrail <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
 			prices_above_below(bot, user[0], price_low_bitgrail, "BitGrail.com", 0)
@@ -197,8 +216,18 @@ def price_check():
 			prices_above_below(bot, user[0], price_low_bitz, "Bit-Z.com", 0)
 		elif ((price_low_kucoin <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
 			prices_above_below(bot, user[0], price_low_kucoin, "Kucoin.com", 0)
+		elif ((price_low_binance <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 4))):
+			prices_above_below(bot, user[0], price_low_binance, "Binance.com", 0)
 
 def prices_usual():
+	try:
+		binance()
+	except:
+		time.sleep(5)
+		try:
+			binance()
+		except:
+			time.sleep(1)
 	try:
 		mercatox()
 	except:
@@ -239,5 +268,5 @@ def prices_usual():
 	price_check()
 
 
-time.sleep(15)
+time.sleep(10)
 prices_usual()
