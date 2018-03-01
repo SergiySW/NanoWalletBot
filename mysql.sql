@@ -207,7 +207,7 @@ DROP TABLE IF EXISTS `rai_frontiers`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rai_frontiers` (
   `id` int(2) NOT NULL,
-  `json` mediumtext NOT NULL,
+  `json` longtext NOT NULL,
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 INSERT INTO `rai_frontiers` (`id`, `json`) VALUES (1, '{}');
