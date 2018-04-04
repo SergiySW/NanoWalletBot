@@ -108,12 +108,16 @@ def monitoring_block_count():
 	response = http.request('GET', block_count_url, headers=header, timeout=20.0)
 	raiwallet_count = int(response.data)
 	
-	if (difference > block_count_difference_threshold):
-		# Warning to admins
+	if (difference > block_count_difference_threshold*3):
+		# Warning admins
 		for user_id in admin_list:
 			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}\nraiwallet.info: {4}'.format(count, community_count, difference, reference_count, raiwallet_count))
 		# trying to fix
 		bootstrap_multi()
+	elif (difference > block_count_difference_threshold):
+		# trying to fix
+		bootstrap_multi()
+		
 
 def monitoring_password():
 	valid = rpc({"action": "password_valid", "wallet": wallet}, 'valid')
