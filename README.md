@@ -1,5 +1,5 @@
 # NanoWalletBot
-[@NanoWalletBot](https://t.me/NanoWalletBot) — Open source Telegram bot for [Nano](https://github.com/clemahieu/raiblocks) cryptocurrency   
+[@NanoWalletBot](https://t.me/NanoWalletBot) — Open source Telegram bot for [Nano](https://github.com/nanocurrency/raiblocks) cryptocurrency   
 
 # Python requirements
 **Required non-default Python libraries**   
@@ -36,5 +36,6 @@ Set cron job for `python frontiers.py` and other scripts if required
 * [Mike Row](https://github.com/mikerow), [HostFat](https://github.com/hostfat),  [James Coxon](https://github.com/jamescoxon) for alpha testing and great advices
 * gotowerdown for Indonesian translation
 * reee for Italian translation
-* Freddynic159 for Spanish translation
+* [Freddy Morán Jr.](https://github.com/Freddynic159) for Spanish translation
 * zzSunShinezz for Vietnamese translation
+* [George Mamar](https://github.com/georgem3) for German translation
