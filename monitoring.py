@@ -59,31 +59,35 @@ from common import push
 def monitoring_peers():
 	# set bot
 	bot = Bot(api_key)
-	# list of available peers
-	rpc_peers = peers_ip()
-	# check in the list of available peers
-	for peer in peer_list:
-		if (peer not in rpc_peers):
-			# check peers from raiblockscommunity.net
-			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-			response = http.request('GET', peers_url, headers=header, timeout=10.0)
-			json_data = json.loads(response.data)
-			json_peers = json_data['peers']
-			for (i, item) in enumerate(json_peers):
-				json_peers[i] = item['ip'].replace("::ffff:", "")
-			if (peer not in json_peers):
-				# possible peer names
-				response = http.request('GET', known_ips_url, headers=header, timeout=10.0)
+	try:
+		# list of available peers
+		rpc_peers = peers_ip()
+		# check in the list of available peers
+		for peer in peer_list:
+			if (peer not in rpc_peers):
+				# check peers from raiblockscommunity.net
+				http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
+				response = http.request('GET', peers_url, headers=header, timeout=10.0)
 				json_data = json.loads(response.data)
-				try:
-					peer_name = json_data['::ffff:{0}'.format(peer)][0]
-					# Warning to admins
-					for user_id in admin_list:
-						push(bot, user_id, 'Peer *{0}* ({1}) is offline'.format(peer, peer_name))
-				except KeyError:
-					# Warning to admins
-					for user_id in admin_list:
-						push(bot, user_id, 'Peer *{0}* is offline'.format(peer))
+				json_peers = json_data['peers']
+				for (i, item) in enumerate(json_peers):
+					json_peers[i] = item['ip'].replace("::ffff:", "")
+				if (peer not in json_peers):
+					# possible peer names
+					response = http.request('GET', known_ips_url, headers=header, timeout=10.0)
+					json_data = json.loads(response.data)
+					try:
+						peer_name = json_data['::ffff:{0}'.format(peer)][0]
+						# Warning to admins
+						for user_id in admin_list:
+							push(bot, user_id, 'Peer *{0}* ({1}) is offline'.format(peer, peer_name))
+					except KeyError:
+						# Warning to admins
+						for user_id in admin_list:
+							push(bot, user_id, 'Peer *{0}* is offline'.format(peer))
+	except AttributeError as e:
+		for user_id in admin_list:
+			push(bot, user_id, 'Peers list is empty!')
 
 # Check block count
 def monitoring_block_count():
