@@ -30,6 +30,9 @@ url = config.get('main', 'url')
 log_file = config.get('main', 'log_file')
 domain = config.get('main', 'domain')
 listen_port = config.get('main', 'listen_port')
+proxy_url = config.get('proxy', 'url')
+proxy_user = config.get('proxy', 'user')
+proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -58,7 +61,10 @@ def error(bot, update, error):
 
 def main():
 	# Create the EventHandler and pass it your bot's token.
-	updater = Updater(api_key, workers=64)
+	if (proxy_url is None):
+		updater = Updater(api_key, workers=64)
+	else:
+		updater = Updater(token=api_key, workers=64, request_kwargs={'proxy_url': proxy_url, 'urllib3_proxy_kwargs': {'username': proxy_user, 'password': proxy_pass}})
 
 	# Get the dispatcher to register handlers
 	dp = updater.dispatcher

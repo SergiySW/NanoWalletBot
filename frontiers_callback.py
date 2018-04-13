@@ -16,6 +16,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the ser
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
+from telegram.utils.request import Request
 import logging
 import socket, json
 import time, math
@@ -37,6 +38,9 @@ raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
 callback_port = int(config.get('main', 'callback_port'))
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
+proxy_url = config.get('proxy', 'url')
+proxy_user = config.get('proxy', 'user')
+proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -94,7 +98,11 @@ class POST_server(BaseHTTPRequestHandler):
 		if (account is not False):
 			block = json.loads(post['block'])
 			if ((block['type'] == 'receive') or (block['type'] == 'open')):
-				bot = Bot(api_key)
+				if (proxy_url is None):
+					bot = Bot(api_key)
+				else:
+					proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+					bot = Bot(token=api_key, request = proxy)
 				raw_received = int(post['amount'])
 				received_amount = int(math.floor(raw_received / (10 ** 24)))
 				

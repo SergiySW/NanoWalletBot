@@ -15,6 +15,7 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
+from telegram.utils.request import Request
 import logging
 import urllib3, certifi, socket, json
 import time, math
@@ -25,6 +26,9 @@ config = ConfigParser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 bitgrail_price = config.get('monitoring', 'bitgrail_price')
+proxy_url = config.get('proxy', 'url')
+proxy_user = config.get('proxy', 'user')
+proxy_pass = config.get('proxy', 'password')
 
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
@@ -184,7 +188,11 @@ def prices_above_below(bot, user_id, price, exchange, above):
 
 
 def price_check():
-	bot = Bot(api_key)
+	if (proxy_url is None):
+		bot = Bot(api_key)
+	else:
+		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+		bot = Bot(token=api_key, request = proxy)
 	price = mysql_select_price()
 	
 	# check if higher

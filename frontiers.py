@@ -15,6 +15,7 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
+from telegram.utils.request import Request
 import logging
 import urllib3, certifi, socket, json
 import time, math
@@ -31,6 +32,9 @@ fee_amount = int(config.get('main', 'fee_amount'))
 raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
+proxy_url = config.get('proxy', 'url')
+proxy_user = config.get('proxy', 'user')
+proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -169,7 +173,11 @@ def frontiers():
 
 # send old data
 def frontiers_sendlist():
-	bot = Bot(api_key)
+	if (proxy_url is None):
+		bot = Bot(api_key)
+	else:
+		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+		bot = Bot(token=api_key, request = proxy)
 	sendlist = mysql_select_sendlist()
 	for send in sendlist:
 		time.sleep(5) # if long push to user

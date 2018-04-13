@@ -15,6 +15,7 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
+from telegram.utils.request import Request
 import logging
 import urllib3, certifi, socket, json
 import time, math
@@ -33,6 +34,9 @@ peer_list = json.loads(config.get('monitoring', 'peer_list'))
 block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
 pending_threshold = int(config.get('monitoring', 'pending_action_threshold'))
 min_receive = int(config.get('main', 'min_receive'))
+proxy_url = config.get('proxy', 'url')
+proxy_user = config.get('proxy', 'user')
+proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -58,7 +62,11 @@ from common import push
 # Check peers
 def monitoring_peers():
 	# set bot
-	bot = Bot(api_key)
+	if (proxy_url is None):
+		bot = Bot(api_key)
+	else:
+		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+		bot = Bot(token=api_key, request = proxy)
 	try:
 		# list of available peers
 		rpc_peers = peers_ip()
@@ -92,7 +100,11 @@ def monitoring_peers():
 # Check block count
 def monitoring_block_count():
 	# set bot
-	bot = Bot(api_key)
+	if (proxy_url is None):
+		bot = Bot(api_key)
+	else:
+		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+		bot = Bot(token=api_key, request = proxy)
 	count = int(rpc({"action": "block_count"}, 'count'))
 	reference_count = int(reference_block_count())
 	
