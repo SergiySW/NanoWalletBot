@@ -1616,6 +1616,23 @@ def stats(bot, update):
 	default_keyboard(bot, update.message.chat_id, stats)
 
 @restricted
+def check(bot, update, args):
+	info_log(update)
+	user_info = mysql_select_by_account(args[0])
+	if (user_info is not False):
+		text_reply(update, 'User ID: {0}'.format(user_info[0]))
+		text = 'Your @NanoWalletBot account: {0}. Do not forget to save your bot /seed !'.format(user_info[1])
+		sleep(1)
+		try:
+			push(bot, user_info[0], text)
+			sleep(1)
+			text_reply(update, 'Status: Valid')
+		except BadRequest as e:
+			text_reply(update, 'Status: Bad Request')
+	else:
+		text_reply(update, 'Status: User not found in bot')
+
+@restricted
 def unlock_command(bot, update):
 	info_log(update)
 	unlock(wallet, wallet_password)
@@ -1643,6 +1660,9 @@ def unknown_ddos(bot, update):
 
 def error(bot, update, error):
 	logger.warn('Update "%s" caused error "%s"' % (update, error))
+	error_text = ('%s' % (error))
+	if ("Forbidden" in error_text):
+		text_reply(update, ('%s' % (error)))
 
 
 def main():
@@ -1698,6 +1718,7 @@ def main():
 	for command in language['common']['lang']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
 	dp.add_handler(CommandHandler("seed", seed, pass_args=True))
+	dp.add_handler(CommandHandler("check", check, pass_args=True))
 	#for command in language['commands']['faucet']:
 	#	dp.add_handler(CommandHandler(command, faucet, pass_args=True))
 
