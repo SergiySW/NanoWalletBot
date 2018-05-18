@@ -150,7 +150,8 @@ def monitoring_pending():
 		for hash in hash_list:
 			exists = rpc({"action": "pending_exists", "hash": hash}, 'exists')
 			if (int(exists) == 1):
-				# wait & check again
+				# confirm, wait & check again
+				rpc({"action": "block_confirm", "hash": hash}, 'started')
 				time.sleep(30)
 				exists_2 = rpc({"action": "pending_exists", "hash": hash}, 'exists')
 				if (int(exists_2) == 1):
