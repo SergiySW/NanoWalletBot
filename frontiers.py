@@ -119,7 +119,10 @@ def frontiers():
 						max_send = 0
 					# retrieve sender
 					send_tx = json.loads(rpc({"action":"block","hash":frontier}, 'contents'))
-					send_source = send_tx['source']
+					if (send_tx['type'] == 'state'):
+						send_source = send_tx['link']
+					else:
+						send_source = send_tx['source']
 					block_account = rpc({"action":"block_account","hash":send_source}, 'account')
 					lang_id = mysql_select_language(account[0])
 					sender = lang_text('frontiers_sender_account', lang_id).format(block_account)
