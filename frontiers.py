@@ -163,7 +163,7 @@ def frontiers():
 					mysql_delete_sendlist(account[0])
 					time.sleep(0.25)
 		# no frontier. No transactions
-		except KeyError:
+		except KeyError as e:
 			# doesn't exist
 			x = 0 # do something
 	time_end = int(time.time())

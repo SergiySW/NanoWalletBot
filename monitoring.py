@@ -158,7 +158,7 @@ def monitoring_pending():
 					print('Pending hash {0}'.format(hash))
 					unlock(wallet, password)
 					time.sleep(10)
-					rpc({"action": "search_pending", "wallet": wallet}, 'success')
+					rpc({"action": "search_pending", "wallet": wallet}, 'started')
 					break
 
 monitoring_peers()
