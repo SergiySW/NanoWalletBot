@@ -43,8 +43,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://nano.co/en/explore/account/'
-hash_url = 'http://nano.co/en/explore/block/'
+account_url = 'https://www.nanode.co/account/'
+hash_url = 'https://www.nanode.co/block/'
 faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests

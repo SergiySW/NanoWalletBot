@@ -67,8 +67,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://nano.co/en/explore/account/'
-hash_url = 'http://nano.co/en/explore/block/'
+account_url = 'https://www.nanode.co/account/'
+hash_url = 'https://www.nanode.co/block/'
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php'
 summary_url = 'https://raiblocks.net/page/summary.php?json=1'
 header = {'user-agent': 'RaiWalletBot/1.0'}
