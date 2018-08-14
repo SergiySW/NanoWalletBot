@@ -109,16 +109,19 @@ def monitoring_block_count():
 	reference_count = int(reference_block_count())
 	
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	response = http.request('GET', summary_url, headers=header, timeout=20.0)
 	try:
+		response = http.request('GET', summary_url, headers=header, timeout=20.0)
 		json_data = json.loads(response.data)
 		community_count = int(json_data['blocks'])
-	except ValueError as e:
+	except (ValueError, urllib3.exceptions.ReadTimeoutError, urllib3.exceptions.MaxRetryError) as e:
 		community_count = reference_count
 	difference = int(math.fabs(community_count - count))
 	
-	response = http.request('GET', block_count_url, headers=header, timeout=20.0)
-	raiwallet_count = int(response.data)
+	try:
+		response = http.request('GET', block_count_url, headers=header, timeout=20.0)
+		raiwallet_count = int(response.data)
+	except (urllib3.exceptions.ReadTimeoutError, urllib3.exceptions.MaxRetryError) as e:
+		raiwallet_count = reference_count
 	
 	if (difference > block_count_difference_threshold*3):
 		# Warning admins
