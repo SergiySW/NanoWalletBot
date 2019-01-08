@@ -73,7 +73,11 @@ def lang_text(text_id, lang_id):
 def frontiers():
 	time_start = int(time.time())
 	# set bot
-	bot = Bot(api_key)
+	if (proxy_url is None):
+		bot = Bot(api_key)
+	else:
+		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+		bot = Bot(token=api_key, request = proxy)
 	# list from MySQL
 	accounts_list_orig = mysql_select_accounts_list()
 	accounts_list_extra = mysql_select_accounts_list_extra()
