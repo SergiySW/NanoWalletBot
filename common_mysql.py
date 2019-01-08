@@ -741,3 +741,12 @@ def mysql_set_faucet(threshold, reward, claimers):
 	cnx.commit()
 	cursor.close()
 	cnx.close()
+
+def mysql_query(query):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	for result in cursor.execute(query, multi=True):
+		pass
+	cnx.commit()
+	cursor.close()
+	cnx.close()
