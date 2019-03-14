@@ -28,10 +28,7 @@ api_key = config.get('main', 'api_key')
 log_file_frontiers = config.get('main', 'log_file_frontiers')
 wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
-fee_amount = int(config.get('main', 'fee_amount'))
-raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
-LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 proxy_url = config.get('proxy', 'url')
 proxy_user = config.get('proxy', 'user')
 proxy_pass = config.get('proxy', 'password')
@@ -111,61 +108,8 @@ def frontiers():
 				logging.info('{0} --> {1}	{2}'.format(mrai_text(account[3]), mrai_text(balance), frontier))
 				#print(balance)
 				if (int(account[3]) < balance):
-					received_amount = balance - int(account[3])
-					# FEELESS
-					if ((account[0] in LIST_OF_FEELESS) or (mysql_select_send_time(account[0]) is not False)):
-						final_fee_amount = 0
-					else:
-						final_fee_amount = fee_amount
-					# FEELESS
-					max_send = balance - final_fee_amount
-					if (max_send < 0):
-						max_send = 0
-					# retrieve sender
-					send_tx = json.loads(rpc({"action":"block","hash":frontier}, 'contents'))
-					if (send_tx['type'] == 'state'):
-						send_source = send_tx['link']
-					else:
-						send_source = send_tx['source']
-					block_account = rpc({"action":"block_account","hash":send_source}, 'account')
-					lang_id = mysql_select_language(account[0])
-					sender = lang_text('frontiers_sender_account', lang_id).format(block_account)
-					# Sender info
-					if (block_account == faucet_account):
-						sender = lang_text('frontiers_sender_faucet', lang_id)
-					elif ((block_account == fee_account) or (block_account == welcome_account)):
-						sender = lang_text('frontiers_sender_bot', lang_id)
-					elif (block_account == account[1]):
-						sender = lang_text('frontiers_sender_self', lang_id)
-					else:
-						for sender_account in accounts_list_orig:
-							if (sender_account[1] == block_account):
-								if ((sender_account[4] is not None) and (sender_account[4])):
-									sender = lang_text('frontiers_sender_username', lang_id).format(sender_account[4])
-								else:
-									sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
-						for sender_account in accounts_list_extra:
-							if (sender_account[1] == block_account):
-								user_sender = mysql_select_user(sender_account[0])
-								if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != sender_account[0])):
-									sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
-								elif (account[0] != sender_account[0]):
-									sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
-					try:
-						z = account[5]
-						sender = lang_text('frontiers_sender_by', lang_id).format(sender, account[1].replace("_", "\_"))
-						mysql_update_balance_extra(account[1], balance)
-					except IndexError as e:
-						mysql_update_balance(account[1], balance)
-					logging.info(sender)
-					logging.info(block_account)
-					logging.warning('NoCallback {0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
-					text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
-					mysql_set_sendlist(account[0], text.encode("utf8"))
-					#print(text)
-					push(bot, account[0], text)
-					mysql_delete_sendlist(account[0])
-					time.sleep(0.25)
+					receive_messages(bot, account, balance)
+					
 		# no frontier. No transactions
 		except KeyError as e:
 			# doesn't exist
@@ -177,6 +121,60 @@ def frontiers():
 		logging.warning(('WARNING!!! \nMore than 15 seconds execution time!!!'))
 	return total_time
 
+def receive_messages(bot, account, balance):
+	print("receiving history")
+	history = rpc({"action":"account_history","account":account[1], "count": "50"}, 'history')
+	for item in history:
+		if (item['hash'] == account[2]):
+			print("break")
+			break
+		if (item['type'] == 'receive'):
+			print("receive type")
+			received_amount = int(math.floor(int(item['amount']) / (10 ** 24)))
+			# retrieve sender
+			block_account = item['account']
+			lang_id = mysql_select_language(account[0])
+			sender = lang_text('frontiers_sender_account', lang_id).format(block_account)
+			# Sender info
+			if (block_account == faucet_account):
+				sender = lang_text('frontiers_sender_faucet', lang_id)
+			elif ((block_account == fee_account) or (block_account == welcome_account)):
+				sender = lang_text('frontiers_sender_bot', lang_id)
+			elif (block_account == account[1]):
+				sender = lang_text('frontiers_sender_self', lang_id)
+			else:
+				# Sender from bot
+				account_mysql = mysql_select_by_account_extra(block_account)
+				if (account_mysql is False):
+					# sender from users accounts
+					account_mysql = mysql_select_by_account(block_account)
+					if (account_mysql is not False):
+						if ((account_mysql[4] is not None) and (account_mysql[4])):
+							sender = lang_text('frontiers_sender_username', lang_id).format(account_mysql[4])
+						elif (block_account != account[1]):
+							sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
+				else:
+					# sender from extra accounts
+					user_sender = mysql_select_user(account_mysql[0])
+					if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != sender_account[0])):
+						sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
+					elif (block_account != account[1]):
+						sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
+			try:
+				z = account[5]
+				sender = lang_text('frontiers_sender_by', lang_id).format(sender, account[1].replace("_", "\_"))
+				mysql_update_balance_extra(account[1], balance)
+			except IndexError as e:
+				mysql_update_balance(account[1], balance)
+			logging.info(sender)
+			logging.info(block_account)
+			logging.warning('NoCallback {0} Nano (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], item['hash']))
+			text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(0), item['hash'], hash_url, sender)
+			mysql_set_sendlist(account[0], text.encode("utf8"))
+			#print(text)
+			push(bot, account[0], text)
+			mysql_delete_sendlist(account[0])
+			time.sleep(0.25)
 
 # send old data
 def frontiers_sendlist():
