@@ -122,14 +122,11 @@ def frontiers():
 	return total_time
 
 def receive_messages(bot, account, balance):
-	print("receiving history")
 	history = rpc({"action":"account_history","account":account[1], "count": "50"}, 'history')
 	for item in history:
 		if (item['hash'] == account[2]):
-			print("break")
 			break
 		if (item['type'] == 'receive'):
-			print("receive type")
 			received_amount = int(math.floor(int(item['amount']) / (10 ** 24)))
 			# retrieve sender
 			block_account = item['account']
