@@ -122,20 +122,19 @@ def bitflip():
 
 def kucoin():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	url = 'https://api.kucoin.com/v1/open/tick'
+	url = 'https://api.kucoin.com/api/v1/market/stats?symbol=NANO-BTC'
 	response = http.request('GET', url, timeout=20.0)
 	json_kucoin = json.loads(response.data)
-	for pair in json_kucoin['data']:
-		if (pair['symbol'] in 'XRB-BTC'):
-			last_price = int(float(pair['lastDealPrice']) * (10 ** 8))
-			ask_price = int(float(pair['sell']) * (10 ** 8))
-			bid_price = int(float(pair['buy']) * (10 ** 8))
-			volume = int(float(pair['vol']))
-			btc_volume = int(float(pair['volValue']) * (10 ** 8))
-			high_price = int(float(pair['high']) * (10 ** 8))
-			low_price = int(float(pair['low']) * (10 ** 8))
-	
-	mysql_set_price(4, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
+	pair = json_kucoin['data']
+	if (pair['symbol'] in 'NANO-BTC'):
+		last_price = int(float(pair['last']) * (10 ** 8))
+		ask_price = int(float(pair['sell']) * (10 ** 8))
+		bid_price = int(float(pair['buy']) * (10 ** 8))
+		volume = int(float(pair['vol']))
+		btc_volume = int(float(pair['volValue']) * (10 ** 8))
+		high_price = int(float(pair['high']) * (10 ** 8))
+		low_price = int(float(pair['low']) * (10 ** 8))
+		mysql_set_price(4, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 
 def bitz():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
