@@ -70,7 +70,7 @@ logger = logging.getLogger(__name__)
 account_url = 'https://www.nanode.co/account/'
 hash_url = 'https://www.nanode.co/block/'
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php'
-summary_url = 'https://raiblocks.net/page/summary.php?json=1'
+summary_url = 'https://www.raiblocks.net/page/summary.php?json=1'
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
 # MySQL requests

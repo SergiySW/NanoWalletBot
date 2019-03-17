@@ -45,9 +45,9 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-peers_url = 'https://raiblocks.net/page/peers.php?json=1'
-summary_url = 'https://raiblocks.net/page/summary.php?json=1'
-known_ips_url = 'https://raiblocks.net/page/knownips.php?json=1'
+peers_url = 'https://www.raiblocks.net/page/peers.php?json=1'
+summary_url = 'https://www.raiblocks.net/page/summary.php?json=1'
+known_ips_url = 'https://www.raiblocks.net/page/knownips.php?json=1'
 block_count_url = 'https://raiwallet.info/api/block_count.php'
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
