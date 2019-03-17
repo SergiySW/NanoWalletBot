@@ -290,6 +290,10 @@ def start_text(bot, update):
 	if (exist is False):
 		sleep(1)
 		custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
+	sleep(2)
+	message_markdown(bot, chat_id, lang_text('start_recovery_policy', lang_id))
+	sleep(2)
+	message_markdown(bot, chat_id, lang_text('start_recovery_policy_2', lang_id))
 
 
 @run_async
@@ -530,7 +534,7 @@ def account_text(bot, update, list = False):
 	except (TypeError):
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
 		qr_by_account(r)
-		if ('xrb_' in r): # check for errors
+		if ('xrb_' in r or 'nano_' in r): # check for errors
 			insert_data = {
 			  'user_id': user_id,
 			  'account': r,
@@ -586,7 +590,7 @@ def account_add_callback(bot, update):
 	else:
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
 		extra_id = len(mysql_select_user_extra(user_id)) + 1
-		if ('xrb_' in r): # check for errors
+		if ('xrb_' in r or 'nano_' in r): # check for errors
 			insert_data = {
 			  'user_id': user_id,
 			  'account': r,
@@ -627,7 +631,7 @@ def send_from(bot, update, args):
 def send_from_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	if (len(args) > 0):
-		if ('xrb_' in args[0]):
+		if ('xrb_' in args[0] or 'nano_' in args[0]):
 			from_account = mysql_select_by_account_extra(args[0])
 		else:
 			try:
@@ -1415,7 +1419,7 @@ def text_result(text, bot, update):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
 			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('nano', '').replace('()', ''))
-	elif ('xrb_' in text):
+	elif ('xrb_' in text or 'nano_' in text):
 		extra_accounts = mysql_select_user_extra(user_id)
 		if ((len(extra_accounts) > 0) and (len(text.split()) > 1)):
 			send_extra(bot, update, text)
@@ -1482,7 +1486,7 @@ def photo_filter_callback(bot, update):
 		qr = account_by_qr(path)
 		account = qr[0]
 		print(account)
-		if ('xrb_' in account):
+		if ('xrb_' in account or 'nano_' in account):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('qr_send', lang_id).format(account))
 			sleep(1)
 			if (len(qr) > 1):
