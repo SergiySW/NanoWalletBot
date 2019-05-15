@@ -742,6 +742,20 @@ def mysql_set_faucet(threshold, reward, claimers):
 	cursor.close()
 	cnx.close()
 
+def mysql_select_nonce(user_id):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = "SELECT nonce FROM rai_bot_nonces WHERE user_id = {0}".format(user_id)
+	cursor.execute(query)
+	nonce = cursor.fetchone()
+	cursor.close()
+	cnx.close()
+	try:
+		nonce = nonce[0]
+	except Exception as e:
+		nonce = False
+	return(nonce)
+
 def mysql_query(query):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor(buffered=True)

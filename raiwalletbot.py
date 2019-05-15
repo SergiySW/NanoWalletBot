@@ -37,6 +37,7 @@ log_file_messages = config.get('main', 'log_file_messages')
 domain = config.get('main', 'domain')
 listen_port = config.get('main', 'listen_port')
 qr_folder_path = config.get('main', 'qr_folder_path')
+passport_folder_path = config.get('main', 'passport_folder_path')
 wallet = config.get('main', 'wallet')
 wallet_password = config.get('main', 'password')
 fee_account = config.get('main', 'fee_account')
@@ -55,6 +56,7 @@ admin_list = json.loads(config.get('main', 'admin_list'))
 extra_limit = int(config.get('main', 'extra_limit'))
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 salt = config.get('password', 'salt')
+private_key = config.get('password', 'private_key')
 block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
 proxy_url = config.get('proxy', 'url')
 proxy_user = config.get('proxy', 'user')
@@ -1592,6 +1594,71 @@ def seed_callback(bot, update, args):
 	else:
 		message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
 
+def passport_processor(bot, update):
+	info_log(update)
+	user_id = update.message.from_user.id
+	# If we received any passport data
+	passport_data = update.message.passport_data
+	if passport_data:
+		# If our nonce doesn't match what we think, this Update did not originate from us
+		# Ideally you would randomize the nonce on the server
+		nonce = mysql_select_nonce (user_id)
+		if nonce is False or passport_data.decrypted_credentials.nonce != nonce:
+			print("Invalid nonce")
+			return
+
+		# Print the decrypted credential data
+		# For all elements
+		# Print their decrypted data
+		# Files will be downloaded to current directory
+		for data in passport_data.decrypted_data:  # This is where the data gets decrypted
+			if data.type == 'phone_number':
+				logging.info('Phone for user {0}: {1}'.format(user_id, data.phone_number))
+			elif data.type == 'email':
+				logging.info('Email for user {0}: {1}'.format(user_id, data.email))
+			if data.type in ('personal_details', 'passport', 'driver_license', 'identity_card',
+							 'internal_passport', 'address'):
+				if data.data:
+					logging.info('{1} for user {0}: {2}'.format(user_id, data.type, data.data))
+			if data.type in ('utility_bill', 'bank_statement', 'rental_agreement',
+							 'passport_registration', 'temporary_registration'):
+				logging.info('{1} for user {0}: count {2}'.format(user_id, data.type, len(data.files)))
+				for file in data.files:
+					actual_file = file.get_file()
+					logging.info('File user {0}: {1}'.format(user_id, actual_file))
+					path = '{1}{0}.jpg'.format(actual_file.file_id, passport_folder_path)
+					actual_file.download(path)
+			if data.type in ('passport', 'driver_license', 'identity_card',
+							 'internal_passport'):
+				if data.front_side:
+					file = data.front_side.get_file()
+					logging.info('{1} user {0}: {2}'.format(user_id, data.type, file))
+					path = '{1}{0}.jpg'.format(file.file_id, passport_folder_path)
+					file.download(path)
+			if data.type in ('driver_license' and 'identity_card'):
+				if data.reverse_side:
+					file = data.reverse_side.get_file()
+					logging.info('{1} user {0}: {2}'.format(user_id, data.type, file))
+					path = '{1}{0}.jpg'.format(file.file_id, passport_folder_path)
+					file.download(path)
+			if data.type in ('passport', 'driver_license', 'identity_card',
+							 'internal_passport'):
+				if data.selfie:
+					file = data.selfie.get_file()
+					logging.info('{1} user {0}: {2}'.format(user_id, data.type, file))
+					path = '{1}{0}.jpg'.format(file.file_id, passport_folder_path)
+					file.download(path)
+			if data.type in ('passport', 'driver_license', 'identity_card',
+							 'internal_passport', 'utility_bill', 'bank_statement',
+							 'rental_agreement', 'passport_registration',
+							 'temporary_registration'):
+				if data.translation:
+					logging.info('Translation {1} for user {0}: count {2}'.format(user_id, data.type, len(data.translation)))
+					for file in data.translation:
+						actual_file = file.get_file()
+						logging.info('File user {0}: {1}'.format(user_id, actual_file))
+						path = '{1}{0}.jpg'.format(actual_file.file_id, passport_folder_path)
+						actual_file.download(path)
 
 @run_async
 def echo(bot, update):
@@ -1672,9 +1739,15 @@ def error(bot, update, error):
 def main():
 	# Create the EventHandler and pass it your bot's token.
 	if (proxy_url is None):
-		updater = Updater(api_key, workers=64)
+		if (private_key is None):
+			updater = Updater(api_key, workers=64)
+		else:
+			updater = Updater(api_key, private_key=open(private_key, 'rb').read(), workers=64)
 	else:
-		updater = Updater(token=api_key, workers=64, request_kwargs={'proxy_url': proxy_url, 'urllib3_proxy_kwargs': {'username': proxy_user, 'password': proxy_pass}})
+		if (private_key is None):
+			updater = Updater(token=api_key, workers=64, request_kwargs={'proxy_url': proxy_url, 'urllib3_proxy_kwargs': {'username': proxy_user, 'password': proxy_pass}})
+		else:
+			updater = Updater(api_key, private_key=open(private_key, 'rb').read(), workers=64, request_kwargs={'proxy_url': proxy_url, 'urllib3_proxy_kwargs': {'username': proxy_user, 'password': proxy_pass}})
 
 	# Get the dispatcher to register handlers
 	dp = updater.dispatcher
@@ -1738,6 +1811,9 @@ def main():
 	dp.add_handler(MessageHandler(Filters.text, text_filter))
 	dp.add_handler(MessageHandler(Filters.photo, photo_filter))
 	dp.add_handler(MessageHandler(Filters.command, unknown_ddos))
+
+	# On messages that include passport data call passport_processor
+	dp.add_handler(MessageHandler(Filters.passport_data, passport_processor))
 
 	# log all errors
 	dp.add_error_handler(error)
