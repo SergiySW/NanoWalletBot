@@ -45,8 +45,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-peers_url = 'https://www.raiblocks.net/page/peers.php?json=1'
-summary_url = 'https://www.raiblocks.net/page/summary.php?json=1'
+peers_url = 'https://api.nanocrawler.cc/peers'
+nanocrawler_url = 'https://api.nanocrawler.cc/block_count_by_type'
 known_ips_url = 'https://www.raiblocks.net/page/knownips.php?json=1'
 block_count_url = 'https://raiwallet.info/api/block_count.php'
 header = {'user-agent': 'RaiWalletBot/1.0'}
@@ -78,21 +78,10 @@ def monitoring_peers():
 				response = http.request('GET', peers_url, headers=header, timeout=10.0)
 				json_data = json.loads(response.data)
 				json_peers = json_data['peers']
-				for (i, item) in enumerate(json_peers):
-					json_peers[i] = item['ip'].replace("::ffff:", "")
-				if (peer not in json_peers):
-					# possible peer names
-					response = http.request('GET', known_ips_url, headers=header, timeout=10.0)
-					json_data = json.loads(response.data)
-					try:
-						peer_name = json_data['::ffff:{0}'.format(peer)][0]
-						# Warning to admins
-						for user_id in admin_list:
-							push(bot, user_id, 'Peer *{0}* ({1}) is offline'.format(peer, peer_name))
-					except KeyError:
-						# Warning to admins
-						for user_id in admin_list:
-							push(bot, user_id, 'Peer *{0}* is offline'.format(peer))
+				if (peer not in json_peers and '::ffff:{0}'.format(peer) not in json_peers):
+					# Warning to admins
+					for user_id in admin_list:
+						push(bot, user_id, 'Peer *{0}* is offline'.format(peer))
 	except AttributeError as e:
 		for user_id in admin_list:
 			push(bot, user_id, 'Peers list is empty!')
@@ -110,12 +99,12 @@ def monitoring_block_count():
 	
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	try:
-		response = http.request('GET', summary_url, headers=header, timeout=20.0)
+		response = http.request('GET', nanocrawler_url, headers=header, timeout=20.0)
 		json_data = json.loads(response.data)
-		community_count = int(json_data['blocks'])
+		nanocrawler_count = int(json_data['send']) + int(json_data['receive']) + int(json_data['open']) + int(json_data['change']) + int(json_data['state'])
 	except (ValueError, urllib3.exceptions.ReadTimeoutError, urllib3.exceptions.MaxRetryError) as e:
-		community_count = reference_count
-	difference = int(math.fabs(community_count - count))
+		nanocrawler_count = reference_count
+	difference = int(math.fabs(nanocrawler_count - count))
 	
 	try:
 		response = http.request('GET', block_count_url, headers=header, timeout=20.0)
@@ -126,7 +115,7 @@ def monitoring_block_count():
 	if (difference > block_count_difference_threshold*3):
 		# Warning admins
 		for user_id in admin_list:
-			push(bot, user_id, 'Block count: {0}\nCommunity: {1}\nDifference: *{2}*\nReference: {3}\nraiwallet.info: {4}'.format(count, community_count, difference, reference_count, raiwallet_count))
+			push(bot, user_id, 'Block count: {0}\nnanocrawler.cc: {1}\nDifference: *{2}*\nReference: {3}\nraiwallet.info: {4}'.format(count, nanocrawler_count, difference, reference_count, raiwallet_count))
 		# trying to fix
 		bootstrap_multi()
 	elif (difference > block_count_difference_threshold):

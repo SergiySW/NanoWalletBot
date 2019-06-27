@@ -69,10 +69,10 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://www.nanode.co/account/'
-hash_url = 'https://www.nanode.co/block/'
+account_url = 'https://nanocrawler.cc/explorer/account/'
+hash_url = 'https://nanocrawler.cc/explorer/block/'
 faucet_url = 'https://faucet.raiblockscommunity.net/form.php'
-summary_url = 'https://www.raiblocks.net/page/summary.php?json=1'
+nanocrawler_url = 'https://api.nanocrawler.cc/block_count_by_type'
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
 # MySQL requests
@@ -340,14 +340,14 @@ def block_count_callback(bot, update):
 	count = rpc({"action": "block_count"}, 'count')
 	text_reply(update, "{:,}".format(int(count)))
 #	default_keyboard(bot, update.message.chat_id, r)
-	# Admin block count check from raiblockscommunity.net
+	# Admin block count check from nanocrawler.cc
 	if (user_id in admin_list):
 		http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-		response = http.request('GET', summary_url, headers=header, timeout=20.0)
+		response = http.request('GET', nanocrawler_url, headers=header, timeout=20.0)
 		json_data = json.loads(response.data)
-		community_count = json_data['blocks']
-		if (math.fabs(int(community_count) - int(count)) > block_count_difference_threshold):
-			text_reply(update, 'Community: {0}'.format("{:,}".format(int(community_count))))
+		nanocrawler_count = int(json_data['send']) + int(json_data['receive']) + int(json_data['open']) + int(json_data['change']) + int(json_data['state'])
+		if (math.fabs(int(nanocrawler_count) - int(count)) > block_count_difference_threshold):
+			text_reply(update, 'nanocrawler.cc: {0}'.format("{:,}".format(int(nanocrawler_count))))
 			reference_count = int(reference_block_count())
 			sleep(1)
 			text_reply(update, 'Reference: {0}'.format("{:,}".format(reference_count)))
@@ -1605,6 +1605,7 @@ def passport_processor(bot, update):
 		nonce = mysql_select_nonce (user_id)
 		if nonce is False or passport_data.decrypted_credentials.nonce != nonce:
 			print("Invalid nonce")
+			logging.info('Invalid nonce user {0}'.format(user_id))
 			return
 
 		# Print the decrypted credential data

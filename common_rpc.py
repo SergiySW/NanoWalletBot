@@ -22,7 +22,7 @@ wallet = config.get('main', 'wallet')
 password = config.get('main', 'password')
 reference_url = config.get('main', 'reference_url')
 
-hash_url = 'https://www.nanode.co/block/'
+hash_url = 'https://nanocrawler.cc/explorer/block/'
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
 def rpc(json, key):
