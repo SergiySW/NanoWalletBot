@@ -1421,7 +1421,7 @@ def text_result(text, bot, update):
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_digits', lang_id))
 		else:
 			send_amount(bot, update, text.replace(',', '').replace(' ', '').replace('mrai', '').replace('xrb', '').replace('nano', '').replace('()', ''))
-	elif ('xrb_' in text or 'nano_' in text):
+	elif (text.startswith('xrb_') or text.startswith('nano_')):
 		extra_accounts = mysql_select_user_extra(user_id)
 		if ((len(extra_accounts) > 0) and (len(text.split()) > 1)):
 			send_extra(bot, update, text)
