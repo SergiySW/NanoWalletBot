@@ -183,3 +183,15 @@ def rpc_remote(json, key):
 
 def bootstrap_multi():
 	rpc({"action": "bootstrap_any"}, 'success')
+
+def validate_account_number(text):
+	xrb_account = text.encode("utf8").replace('­','').replace(' ','').replace('\r','').replace('\n','')
+	xrb_account = xrb_account.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
+	if (len(xrb_account) == 64 or len(xrb_account) == 65):
+		destination_check = rpc({"action": "validate_account_number", "account": xrb_account}, 'valid')
+		if (destination_check == '1'):
+			return xrb_account
+		else:
+			return False
+	else:
+		return False

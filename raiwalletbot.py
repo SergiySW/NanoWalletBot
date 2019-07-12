@@ -634,7 +634,11 @@ def send_from_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	if (len(args) > 0):
 		if ('xrb_' in args[0] or 'nano_' in args[0]):
-			from_account = mysql_select_by_account_extra(args[0])
+			xrb_account = validate_account_number(args[0])
+			if (xrb_account is not False):
+				from_account = mysql_select_by_account_extra(xrb_account)
+			else:
+				from_account = False
 		else:
 			try:
 				extra_id = int(args[0].replace('.',''))
@@ -716,8 +720,9 @@ def send_callback(bot, update, args, from_account = 0):
 				if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
 					destination = args[2]
 				# if destination is username
-				if (destination.startswith('@') and (len(destination) > 3 )):
-					username = destination.replace('@', '')
+				if (destination.startswith('@') and len(destination) >= 5 and len(destination) <= 32):
+					username = text.replace('@', '').replace(' ','').replace('\r','').replace('\n','')
+					username = username.replace(r'[^[0-9a-zA-Z_]+', '')
 					try:
 						dest_account = mysql_account_by_username(username)
 						if (dest_account is not False):
@@ -726,9 +731,7 @@ def send_callback(bot, update, args, from_account = 0):
 							text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
 					except UnicodeEncodeError as e:
 						text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
-				destination = destination.encode("utf8").replace('­','').replace('\r','').replace('\n','');
-				destination = destination.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
-				destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
+				destination = validate_account_number(destination)
 				# Check password protection
 				check = mysql_check_password(user_id)
 				if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
@@ -746,7 +749,7 @@ def send_callback(bot, update, args, from_account = 0):
 				else:
 					frontier = from_account[2]
 				check_frontier = check_block(frontier)
-				if ((destination_check == '1') and (check == hex) and (check_frontier)):
+				if ((destination is not False) and (check == hex) and (check_frontier)):
 					# Sending
 					try:
 						try:
@@ -944,10 +947,8 @@ def send_destination(bot, update, text, qr = False):
 	m = mysql_select_user(user_id)
 	try:
 		account = m[2]
-		destination = text.encode("utf8").replace('­','').replace('\r','').replace('\n','');
-		destination = destination.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
-		destination_check = rpc({"action": "validate_account_number", "account": destination}, 'valid')
-		if (destination_check == '1'):
+		destination = validate_account_number(text)
+		if (destination is not False):
 			mysql_update_send_destination(account, destination)
 			if (m[6] != 0):
 				custom_keyboard(bot, chat_id, lang_text('yes_no', lang_id), lang_text('send_confirm', lang_id).format(mrai_text(m[6]), mrai_text(m[6]+final_fee_amount), destination))
@@ -962,15 +963,19 @@ def send_destination(bot, update, text, qr = False):
 @run_async
 def send_destination_username(bot, update, text):
 	user_id = update.message.from_user.id
-	username = text.replace('@', '')
-	try:
-		account = mysql_account_by_username(username)
-		if (account is not False):
-			text_reply(update, lang(user_id, 'send_user').format(text, account))
-			send_destination(bot, update, account)
-		else:
+	username = text.replace('@', '').replace(' ','').replace('\r','').replace('\n','')
+	username = username.replace(r'[^[0-9a-zA-Z_]+', '')
+	if (len(username) >= 5 and len(username) <= 32):
+		try:
+			account = mysql_account_by_username(username)
+			if (account is not False):
+				text_reply(update, lang(user_id, 'send_user').format(text, account))
+				send_destination(bot, update, account)
+			else:
+				text_reply(update, lang(user_id, 'send_user_not_found').format(text))
+		except UnicodeEncodeError as e:
 			text_reply(update, lang(user_id, 'send_user_not_found').format(text))
-	except UnicodeEncodeError as e:
+	else:
 		text_reply(update, lang(user_id, 'send_user_not_found').format(text))
 
 
@@ -1027,7 +1032,11 @@ def send_extra(bot, update, text):
 	lang_id = mysql_select_language(user_id)
 	# Check user extra accounts in database
 	xrb_account = text.split()[0].encode("utf8").replace('­','').replace('\r','').replace('\n','')
-	account = mysql_select_by_account_extra(xrb_account)
+	xrb_account = validate_account_number(xrb_account)
+	if (xrb_account is not False):
+		account = mysql_select_by_account_extra(xrb_account)
+	else:
+		account = False
 	if ((account is not False) and (account[0] == user_id)):
 		m = mysql_select_user(user_id)
 		if (m[6] != 0):
