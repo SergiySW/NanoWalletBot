@@ -721,7 +721,7 @@ def send_callback(bot, update, args, from_account = 0):
 					destination = args[2]
 				# if destination is username
 				if (destination.startswith('@') and len(destination) >= 5 and len(destination) <= 32):
-					username = text.replace('@', '').replace(' ','').replace('\r','').replace('\n','')
+					username = destination.replace('@', '').replace(' ','').replace('\r','').replace('\n','')
 					username = username.replace(r'[^[0-9a-zA-Z_]+', '')
 					try:
 						dest_account = mysql_account_by_username(username)

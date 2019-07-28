@@ -683,7 +683,7 @@ def mysql_select_seed(user_id):
 def mysql_set_seed(user_id, seed):
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
-	query = ("INSERT INTO rai_bot_seeds SET user_id = %a, seed = %s")
+	query = ("INSERT INTO rai_bot_seeds SET user_id = %s, seed = %s")
 	cursor.execute(query, (int(user_id), seed,))
 	cnx.commit()
 	cursor.close()
