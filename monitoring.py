@@ -70,10 +70,12 @@ def monitoring_peers():
 	try:
 		# list of available peers
 		rpc_peers = peers_ip()
+		# remote peer peers list
+		remote_peers = reference_peers()
 		# check in the list of available peers
 		for peer in peer_list:
-			if (peer not in rpc_peers):
-				# check peers from raiblockscommunity.net
+			if (peer not in rpc_peers and peer not in remote_peers):
+				# check peers from nanocrawler.cc
 				http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 				response = http.request('GET', peers_url, headers=header, timeout=10.0)
 				json_data = json.loads(response.data)

@@ -88,7 +88,15 @@ def accounts_balances(accounts):
 		rpc_balances = r['balances']
 		balances = {}
 		for account in accounts:
-			balances[account] = int(math.floor(int(rpc_balances[account]['balance']) / (10 ** 24)))
+			try:
+				balances[account] = int(math.floor(int(rpc_balances[account]['balance']) / (10 ** 24)))
+			except KeyError as e:
+				account_text = account
+				if (account_text.startswith('nano_')):
+					account_text = account_text.replace('nano_', 'xrb_')
+				elif (account_text.startswith('xrb_')):
+					account_text = account_text.replace('xrb_', 'nano_')
+				balances[account] = int(math.floor(int(rpc_balances[account_text]['balance']) / (10 ** 24)))
 		return(balances)
 	else:
 		print(r['error'])
@@ -166,6 +174,14 @@ def reference_block_count():
 			return 0
 	else:
 		return 0
+
+def reference_peers():
+	peers = rpc_remote({"action":"peers"}, 'peers')
+	# only IP of peers
+	peers_list = []
+	for item, version in peers.items():
+		peers_list.append(item.split("]:")[0].replace("[", "").replace("::ffff:", ""))
+	return peers_list
 
 def rpc_remote(json, key):
 	try:
