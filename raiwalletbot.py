@@ -828,7 +828,7 @@ def send_callback(bot, update, args, from_account = 0):
 	except (TypeError):
 		message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
 	except (IndexError):
-		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), m[2]))
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), 'nano\\_accountsample'))
 
 
 @run_async
