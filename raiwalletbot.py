@@ -665,7 +665,7 @@ def send_from_callback(bot, update, args):
 		m = mysql_select_user(user_id)
 		chat_id = update.message.chat_id
 		lang_id = mysql_select_language(user_id)
-		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), m[2]))
+		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), 'nano\\_accountsample'))
 
 
 # Instant receiving
@@ -685,152 +685,155 @@ def send_callback(bot, update, args, from_account = 0):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
-	try:
-		# Check user existance in database
-		m = mysql_select_user(user_id)
-		if (from_account == 0):
-			account = m[2]
-		else:
-			account = from_account[1]
-		# Check balance to send
+	if (len(args) >= 2):
 		try:
-			balance = account_balance(account)
-			# FEELESS
-			if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
-				final_fee_amount = 0
+			# Check user existance in database
+			m = mysql_select_user(user_id)
+			if (from_account == 0):
+				account = m[2]
 			else:
-				final_fee_amount = fee_amount
-			# FEELESS
-			max_send = balance - final_fee_amount
-			if ((args[0].lower() == 'all') or (args[0].lower() == 'everything')):
-				send_amount = max_send
-			else:
-				send_amount = int(float(args[0]) * (10 ** 6))
-			raw_send_amount = send_amount * (10 ** 24)
-			if (max_send < min_send):
-				text_reply(update, lang_text('send_low_balance', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
-			elif (send_amount > max_send):
-				text_reply(update, lang_text('send_limit_max', lang_id).format(mrai_text(final_fee_amount), mrai_text(max_send)))
-			elif (send_amount < min_send):
-				text_reply(update, lang_text('send_limit_min', lang_id).format(mrai_text(min_send)))
-				
-			else:
-				# Check destination address
-				destination = args[1]
-				if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
-					destination = args[2]
-				# if destination is username
-				if (destination.startswith('@') and len(destination) >= 5 and len(destination) <= 32):
-					username = destination.replace('@', '').replace(' ','').replace('\r','').replace('\n','')
-					username = username.replace(r'[^[0-9a-zA-Z_]+', '')
-					try:
-						dest_account = mysql_account_by_username(username)
-						if (dest_account is not False):
-							destination = dest_account
-						else:
-							text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
-					except UnicodeEncodeError as e:
-						text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
-				destination = validate_account_number(destination)
-				# Check password protection
-				check = mysql_check_password(user_id)
-				if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
-					password = args[3]
-					hex = password_check(update, password)
-				elif (len(args) > 2):
-					password = args[2]
-					hex = password_check(update, password)
+				account = from_account[1]
+			# Check balance to send
+			try:
+				balance = account_balance(account)
+				# FEELESS
+				if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
+					final_fee_amount = 0
 				else:
-					hex = False
-				# typing_illusion(bot, update.message.chat_id) # typing illusion
-				# Check password protection and frontier existance
-				if (from_account == 0):
-					frontier = m[3]
+					final_fee_amount = fee_amount
+				# FEELESS
+				max_send = balance - final_fee_amount
+				if ((args[0].lower() == 'all') or (args[0].lower() == 'everything')):
+					send_amount = max_send
 				else:
-					frontier = from_account[2]
-				check_frontier = check_block(frontier)
-				if ((destination is not False) and (check == hex) and (check_frontier) and (m[1] == user_id)):
-					# Sending
-					try:
+					send_amount = int(float(args[0]) * (10 ** 6))
+				raw_send_amount = send_amount * (10 ** 24)
+				if (max_send < min_send):
+					text_reply(update, lang_text('send_low_balance', lang_id).format(mrai_text(final_fee_amount), mrai_text(min_send)))
+				elif (send_amount > max_send):
+					text_reply(update, lang_text('send_limit_max', lang_id).format(mrai_text(final_fee_amount), mrai_text(max_send)))
+				elif (send_amount < min_send):
+					text_reply(update, lang_text('send_limit_min', lang_id).format(mrai_text(min_send)))
+					
+				else:
+					# Check destination address
+					destination = args[1]
+					if ((len(args) > 2) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
+						destination = args[2]
+					# if destination is username
+					if (destination.startswith('@') and len(destination) >= 5 and len(destination) <= 32):
+						username = destination.replace('@', '').replace(' ','').replace('\r','').replace('\n','')
+						username = username.replace(r'[^[0-9a-zA-Z_]+', '')
 						try:
-							send_hash = rpc_send(wallet, account, destination, raw_send_amount)
-						except Exception as e:
-							send_hash = '00000000000000000000000000000000000000000000000000000000000000'
-							logging.exception("message")
-						if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-							# FEELESS
-							if (final_fee_amount > 0):
-								try:
-									fee = rpc_send(wallet, account, fee_account, raw_fee_amount)
-								except Exception as e:
-									fee = '00000000000000000000000000000000000000000000000000000000000000'
-									logging.exception("message")
+							dest_account = mysql_account_by_username(username)
+							if (dest_account is not False):
+								destination = dest_account
 							else:
-								fee = send_hash
-							# FEELESS
-							# sleep(0.5) # workaround
-							new_balance = account_balance(account)
-							if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-								logging.warn('Warning send balance change. Old: {0}, new: {1}, hash: {2}'.format(balance, new_balance, fee))
-								hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
-								sleep(2)
+								text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
+						except UnicodeEncodeError as e:
+							text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
+					destination = validate_account_number(destination)
+					# Check password protection
+					check = mysql_check_password(user_id)
+					if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
+						password = args[3]
+						hex = password_check(update, password)
+					elif (len(args) > 2):
+						password = args[2]
+						hex = password_check(update, password)
+					else:
+						hex = False
+					# typing_illusion(bot, update.message.chat_id) # typing illusion
+					# Check password protection and frontier existance
+					if (from_account == 0):
+						frontier = m[3]
+					else:
+						frontier = from_account[2]
+					check_frontier = check_block(frontier)
+					if ((destination is not False) and (check == hex) and (check_frontier) and (m[1] == user_id)):
+						# Sending
+						try:
+							try:
+								send_hash = rpc_send(wallet, account, destination, raw_send_amount)
+							except Exception as e:
+								send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+								logging.exception("message")
+							if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+								# FEELESS
+								if (final_fee_amount > 0):
+									try:
+										fee = rpc_send(wallet, account, fee_account, raw_fee_amount)
+									except Exception as e:
+										fee = '00000000000000000000000000000000000000000000000000000000000000'
+										logging.exception("message")
+								else:
+									fee = send_hash
+								# FEELESS
+								# sleep(0.5) # workaround
 								new_balance = account_balance(account)
-								if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-									sleep(4)
+								if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
+									logging.warn('Warning send balance change. Old: {0}, new: {1}, hash: {2}'.format(balance, new_balance, fee))
+									hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
+									sleep(2)
 									new_balance = account_balance(account)
 									if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-										hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
-										sleep(8)
+										sleep(4)
 										new_balance = account_balance(account)
-							 # workaround
-							if (from_account == 0):
-								mysql_update_balance(account, new_balance)
-								mysql_update_frontier(account, fee)
+										if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
+											hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
+											sleep(8)
+											new_balance = account_balance(account)
+								 # workaround
+								if (from_account == 0):
+									mysql_update_balance(account, new_balance)
+									mysql_update_frontier(account, fee)
+								else:
+									mysql_update_balance_extra(account, new_balance)
+									mysql_update_frontier_extra(account, fee)
+								lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
+								mysql_update_send_time(user_id)
+								sleep(1)
+								message_markdown(bot, chat_id, '[{0}]({1}{0})'.format(send_hash, hash_url))
+								logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
+								# update username
+								if (from_account == 0):
+									old_username = m[8]
+									username=update.message.from_user.username
+									if (username is None):
+										username = ''
+									if (not (username == old_username)):
+										username_text = 'Username updated: @{0} --> @{1}'.format(old_username, username)
+										mysql_update_username(user_id, username)
+										print(username_text)
+										logging.info(username_text)
+								# update username
+								receive(destination, send_hash)
 							else:
-								mysql_update_balance_extra(account, new_balance)
-								mysql_update_frontier_extra(account, fee)
-							lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
-							mysql_update_send_time(user_id)
-							sleep(1)
-							message_markdown(bot, chat_id, '[{0}]({1}{0})'.format(send_hash, hash_url))
-							logging.info('Send from {0} to {1}  amount {2}  hash {3}'.format(account, destination, mrai_text(send_amount), send_hash))
-							# update username
-							if (from_account == 0):
-								old_username = m[8]
-								username=update.message.from_user.username
-								if (username is None):
-									username = ''
-								if (not (username == old_username)):
-									username_text = 'Username updated: @{0} --> @{1}'.format(old_username, username)
-									mysql_update_username(user_id, username)
-									print(username_text)
-									logging.info(username_text)
-							# update username
-							receive(destination, send_hash)
-						else:
-							logging.warn('Transaction FAILURE! Account {0}'.format(account))
-							sleep(0.5) # workaround
-							new_balance = account_balance(account)
-							lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
-							unlock(wallet, wallet_password) # try to unlock wallet
-					except (GeneratorExit, ValueError):
-						lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
-				elif (not (check == hex)):
-					text_reply(update, lang_text('password_error', lang_id))
-					logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
-				elif (not (check_frontier)):
-					text_reply(update, lang_text('send_frontier', lang_id))
-					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
-				elif (not (destination.startswith('@'))):
-					message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
-				elif (not (m[1] == user_id)):
-					message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
-					logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
-		except (ValueError):
-			text_reply(update, lang_text('send_digits', lang_id))
-	except (TypeError):
-		message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
-	except (IndexError):
+								logging.warn('Transaction FAILURE! Account {0}'.format(account))
+								sleep(0.5) # workaround
+								new_balance = account_balance(account)
+								lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
+								unlock(wallet, wallet_password) # try to unlock wallet
+						except (GeneratorExit, ValueError):
+							lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
+					elif (not (check == hex)):
+						text_reply(update, lang_text('password_error', lang_id))
+						logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
+					elif (not (check_frontier)):
+						text_reply(update, lang_text('send_frontier', lang_id))
+						logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
+					elif (not (destination.startswith('@'))):
+						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
+					elif (not (m[1] == user_id)):
+						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
+						logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
+			except (ValueError):
+				text_reply(update, lang_text('send_digits', lang_id))
+		except (TypeError):
+			message_markdown(bot, chat_id, lang_text('send_no_account', lang_id))
+		except (IndexError):
+			lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), 'nano\\_accountsample'))
+	else:
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_wrong_command', lang_id).format(mrai_text(min_send), 'nano\\_accountsample'))
 
 
