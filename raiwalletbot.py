@@ -749,7 +749,7 @@ def send_callback(bot, update, args, from_account = 0):
 				else:
 					frontier = from_account[2]
 				check_frontier = check_block(frontier)
-				if ((destination is not False) and (check == hex) and (check_frontier)):
+				if ((destination is not False) and (check == hex) and (check_frontier) and (m[1] == user_id)):
 					# Sending
 					try:
 						try:
@@ -823,6 +823,9 @@ def send_callback(bot, update, args, from_account = 0):
 					logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 				elif (not (destination.startswith('@'))):
 					message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
+				elif (not (m[1] == user_id)):
+					message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
+					logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 		except (ValueError):
 			text_reply(update, lang_text('send_digits', lang_id))
 	except (TypeError):
@@ -851,7 +854,7 @@ def send_all_callback(bot, update):
 		extra_array.append(extra_account[3])
 	reply = 0
 	active = mysql_select_send_all(user_id)
-	if ((len(extra_accounts) > 0) and (active is False)):
+	if ((len(extra_accounts) > 0) and (active is False) and (m[1] == user_id)):
 		balances = accounts_balances(extra_array)
 		mysql_set_send_all(user_id)
 		for account, balance in balances.items():
@@ -890,6 +893,8 @@ def send_all_callback(bot, update):
 		mysql_delete_send_all(user_id)
 	if (reply == 0):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_all_min_error', lang_id).format(mrai_text(min_send)))
+		if (not (m[1] == user_id)):
+			logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 
 
 @run_async
@@ -1143,9 +1148,12 @@ def send_finish(bot, update):
 				new_balance = account_balance(account)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 				unlock(wallet, wallet_password) # try to unlock wallet
-		else:
+		elif (not (check_frontier)):
 			text_reply(update, lang_text('send_frontier', lang_id))
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
+		elif (not (m[1] == user_id)):
+			message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
+			logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 	except (GeneratorExit, ValueError) as e:
 		logging.error(e)
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
