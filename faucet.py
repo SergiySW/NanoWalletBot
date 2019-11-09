@@ -23,7 +23,7 @@ import time, math
 
 # Parse config
 import ConfigParser
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 log_file_faucet = config.get('main', 'log_file_faucet')
@@ -81,7 +81,7 @@ def faucet():
 				try:
 					push_simple(bot, account[0], text)
 				except Exception as e:
-					logging.warn('Push failed for {0}\n{1}'.format(account[0], text))
+					logging.warning('Push failed for {0}\n{1}'.format(account[0], text))
 				#print(text)
 				logging.info('{0}\n{1}'.format(account[0], text))
 				time.sleep(1.25)

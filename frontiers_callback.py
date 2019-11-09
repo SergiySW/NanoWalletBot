@@ -27,8 +27,8 @@ import threading
 
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 log_file_frontiers = config.get('main', 'log_file_frontiers')
@@ -113,7 +113,7 @@ class POST_server(BaseHTTPRequestHandler):
 				except Exception as e:
 					mysql_balance = 0
 				if (mysql_balance == balance): # workaround
-					logging.warn('Warning receive balance change. Old: {0}, new: {1}'.format(mysql_balance, balance))
+					logging.warning('Warning receive balance change. Old: {0}, new: {1}'.format(mysql_balance, balance))
 					time.sleep(1)
 					balance = account_balance(xrb_account)
 					if (mysql_balance == balance):
@@ -173,7 +173,7 @@ class POST_server(BaseHTTPRequestHandler):
 				logging.info(block_account)
 				logging.info('{0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
 				text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
-				mysql_set_sendlist(account[0], text.encode("utf8"))
+				mysql_set_sendlist(account[0], text)
 				#print(text)
 				try:
 					push(bot, account[0], text)

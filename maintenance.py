@@ -22,8 +22,8 @@ import logging
 import time
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 url = config.get('main', 'url')
@@ -40,8 +40,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-text = raw_input("Please enter text: ")
-minutes = int(raw_input("Please enter ETA (minutes): "))
+text = input("Please enter text: ")
+minutes = int(input("Please enter ETA (minutes): "))
 time_start = int(time.time())
 end_time = time_start + (minutes * 60)
 

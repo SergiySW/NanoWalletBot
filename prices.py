@@ -21,8 +21,8 @@ import urllib3, certifi, socket, json
 import time, math
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 bitgrail_price = config.get('monitoring', 'bitgrail_price')

@@ -27,8 +27,8 @@ from time import sleep
 import os, sys
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 url = config.get('main', 'url')
@@ -204,10 +204,10 @@ def ddos_protection(bot, update, callback):
 	message_id = int(update.message.message_id)
 	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
-		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
+		logging.warning('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
 		text_reply(update, lang(user_id, 'ddos_error').format(ddos_protect_seconds))
-		logging.warn('Too fast request by user {0}'.format(user_id))
+		logging.warning('Too fast request by user {0}'.format(user_id))
 	else:
 		callback(bot, update)
 
@@ -217,10 +217,10 @@ def ddos_protection_args(bot, update, args, callback):
 	message_id = int(update.message.message_id)
 	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
-		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
+		logging.warning('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
 		text_reply(update, lang(user_id, 'ddos_error').format(ddos_protect_seconds))
-		logging.warn('Too fast request by user {0}'.format(user_id))
+		logging.warning('Too fast request by user {0}'.format(user_id))
 	else:
 		callback(bot, update, args)
 
@@ -467,7 +467,7 @@ def account_text(bot, update, list = False):
 		btc_balance = ('%.8f' % (btc_price * total_balance))
 		# price
 		if (list is not False):
-			text = 'Total: *{0} Nano*\n~ {1} BTC\n/{3}\n{4}'.format(mrai_text(total_balance), btc_balance, '', lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('send_all', lang_id).encode("utf8"))
+			text = 'Total: *{0} Nano*\n~ {1} BTC\n/{3}\n{4}'.format(mrai_text(total_balance), btc_balance, '', lang_text('account_add', lang_id).replace("_", "\_"), lang_text('send_all', lang_id))
 			message_markdown(bot, chat_id, text)
 			sleep(1)
 			message_markdown(bot, chat_id, '*0.* {0} Nano'.format(mrai_text(balance)))
@@ -475,7 +475,7 @@ def account_text(bot, update, list = False):
 			message_markdown(bot, chat_id, '*{0}*'.format(r))
 			sleep(1)
 			for extra_account in extra_accounts:
-				message_markdown(bot, chat_id, '*{0}.* {1} Nano  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_")))
+				message_markdown(bot, chat_id, '*{0}.* {1} Nano  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).replace("_", "\_")))
 				sleep(1)
 				text_reply(update, extra_account[3])
 				sleep(1)
@@ -489,17 +489,17 @@ def account_text(bot, update, list = False):
 					text = lang_text('account_balance', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send))
 				else:
 					text = lang_text('account_balance_total', lang_id).format(mrai_text(balance), btc_balance, mrai_text(max_send), mrai_text(total_balance))
-			text = '{0}\n\n{1}'.format(text.encode("utf8"), lang_text('account_your', lang_id).encode("utf8"))
+			text = '{0}\n\n{1}'.format(text, lang_text('account_your', lang_id))
 			message_markdown(bot, chat_id, text)
 			sleep(1)
 			message_markdown(bot, chat_id, '*{0}*'.format(r))
 			sleep(1)
 			if ((num > 3) and (hide == 0)):
-				message_markdown(bot, chat_id, lang_text('account_history', lang_id).encode("utf8").format(r, account_url, faucet_url, '').replace(lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('account_list', lang_id).encode("utf8").replace("_", "\_"))) # full accounts list
+				message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url, '').replace(lang_text('account_add', lang_id).replace("_", "\_"), lang_text('account_list', lang_id).replace("_", "\_"))) # full accounts list
 			elif (hide == 1):
-				message_markdown(bot, chat_id, lang_text('account_history', lang_id).encode("utf8").format(r, account_url, faucet_url, '').replace(lang_text('account_add', lang_id).encode("utf8").replace("_", "\_"), lang_text('account_list', lang_id).encode("utf8").replace("_", "\_")).replace(lang_text('accounts_hide', lang_id).encode("utf8").replace("_", "\_"), lang_text('accounts_expand', lang_id).encode("utf8").replace("_", "\_"))) # hide-expand
+				message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url, '').replace(lang_text('account_add', lang_id).replace("_", "\_"), lang_text('account_list', lang_id).replace("_", "\_")).replace(lang_text('accounts_hide', lang_id).replace("_", "\_"), lang_text('accounts_expand', lang_id).replace("_", "\_"))) # hide-expand
 			else:
-				message_markdown(bot, chat_id, lang_text('account_history', lang_id).encode("utf8").format(r, account_url, faucet_url, ''))
+				message_markdown(bot, chat_id, lang_text('account_history', lang_id).format(r, account_url, faucet_url, ''))
 			sleep(1)
 			# list
 			if (hide == 0):
@@ -507,23 +507,23 @@ def account_text(bot, update, list = False):
 				for extra_account in extra_accounts:
 					n = n + 1
 					if (n <= 3):
-						message_markdown(bot, chat_id, '*{0}.* {1} Nano  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).encode("utf8").replace("_", "\_")))
+						message_markdown(bot, chat_id, '*{0}.* {1} Nano  /{2} {0}'.format(extra_account[2], mrai_text(balances[extra_account[3]]), lang_text('send_from_command', lang_id).replace("_", "\_")))
 						sleep(1)
 						text_reply(update, extra_account[3])
 						sleep(1)
 			# list
 			#bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}{0}.png'.format(r, qr_folder_path), 'rb'), caption=r)
 			try:
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}nano:{0}.png'.format(r, qr_folder_path), 'rb'))
 			except (urllib3.exceptions.ProtocolError) as e:
 				sleep(3)
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}nano:{0}.png'.format(r, qr_folder_path), 'rb'))
 			except TimedOut as e:
 				sleep(10)
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}nano:{0}.png'.format(r, qr_folder_path), 'rb'))
 			except NetworkError as e:
 				sleep(20)
-				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}xrb:{0}.png'.format(r, qr_folder_path), 'rb'))
+				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}nano:{0}.png'.format(r, qr_folder_path), 'rb'))
 			seed = mysql_select_seed(user_id)
 			check = mysql_check_password(user_id)
 			if ((seed is False) and (check is False)):
@@ -610,11 +610,11 @@ def password_check(update, password):
 	user_id = update.message.from_user.id
 	dk = '0000'
 	try:
-		dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
+		dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 112000)
 	except UnicodeEncodeError as e:
 		text_reply(update, lang(user_id, 'encoding_error'))
 		sleep(0.5)
-	hex = binascii.hexlify(dk)
+	hex = binascii.hexlify(dk).decode()
 	return hex
 
 @run_async
@@ -653,7 +653,7 @@ def send_from_callback(bot, update, args):
 					send_callback(bot, update, args, from_account)
 				else:
 					text_reply(update, lang(user_id, 'send_from_id_error').format(args[0]))
-					logging.warn('User {0} trying to steal funds from {1}'.format(user_id, args[0]))
+					logging.warning('User {0} trying to steal funds from {1}'.format(user_id, args[0]))
 			elif ((int(args[0]) == 0) or (args[0] == 'default')):
 				args = args[1:]
 				send_callback(bot, update, args)
@@ -677,7 +677,7 @@ def receive(destination, send_hash):
 	if (destination_local is not False):
 		receive = rpc({"action": "receive", "wallet": wallet, "account": destination, "block": send_hash}, 'block')
 		if ('receive' not in receive):
-			logging.warn('Block already received {0}'.format(send_hash))
+			logging.warning('Block already received {0}'.format(send_hash))
 
 
 @run_async
@@ -772,7 +772,7 @@ def send_callback(bot, update, args, from_account = 0):
 								# sleep(0.5) # workaround
 								new_balance = account_balance(account)
 								if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-									logging.warn('Warning send balance change. Old: {0}, new: {1}, hash: {2}'.format(balance, new_balance, fee))
+									logging.warning('Warning send balance change. Old: {0}, new: {1}, hash: {2}'.format(balance, new_balance, fee))
 									hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
 									sleep(2)
 									new_balance = account_balance(account)
@@ -809,7 +809,7 @@ def send_callback(bot, update, args, from_account = 0):
 								# update username
 								receive(destination, send_hash)
 							else:
-								logging.warn('Transaction FAILURE! Account {0}'.format(account))
+								logging.warning('Transaction FAILURE! Account {0}'.format(account))
 								sleep(0.5) # workaround
 								new_balance = account_balance(account)
 								lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
@@ -826,7 +826,7 @@ def send_callback(bot, update, args, from_account = 0):
 						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 					elif (not (m[1] == user_id)):
 						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
-						logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
+						logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 			except (ValueError):
 				text_reply(update, lang_text('send_digits', lang_id))
 		except (TypeError):
@@ -890,14 +890,14 @@ def send_all_callback(bot, update):
 					receive(destination, send_hash)
 					sleep(4)
 				else:
-					logging.warn('Transaction FAILURE! Account {0}'.format(account))
+					logging.warning('Transaction FAILURE! Account {0}'.format(account))
 					new_balance = account_balance(account)
 					lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
 		mysql_delete_send_all(user_id)
 	if (reply == 0):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_all_min_error', lang_id).format(mrai_text(min_send)))
 		if (not (m[1] == user_id)):
-			logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
+			logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 
 
 @run_async
@@ -1039,7 +1039,7 @@ def send_extra(bot, update, text):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	# Check user extra accounts in database
-	xrb_account = text.split()[0].encode("utf8").replace('­','').replace('\r','').replace('\n','')
+	xrb_account = text.split()[0].replace('­','').replace('\r','').replace('\n','')
 	xrb_account = validate_account_number(xrb_account)
 	if (xrb_account is not False):
 		account = mysql_select_by_account_extra(xrb_account)
@@ -1146,7 +1146,7 @@ def send_finish(bot, update):
 				# update username
 				receive(destination, send_hash)
 			else:
-				logging.warn('Transaction FAILURE! Account {0}'.format(account))
+				logging.warning('Transaction FAILURE! Account {0}'.format(account))
 				sleep(0.5) # workaround
 				new_balance = account_balance(account)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
@@ -1156,7 +1156,7 @@ def send_finish(bot, update):
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 		elif (not (m[1] == user_id)):
 			message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
-			logging.warn('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
+			logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 	except (GeneratorExit, ValueError) as e:
 		logging.error(e)
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
@@ -1217,7 +1217,7 @@ def price_above_callback(bot, update, args):
 			except ValueError as e:
 				lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
 				sleep(1)
-				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).encode("utf8").replace("_", "\_")))
+				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).replace("_", "\_")))
 		price = mysql_select_price()
 		#price_high_bitgrail =  max(int(price[1][0]), int(price[1][4]))
 		price_high_mercatox =  max(int(price[0][0]), int(price[0][4]))
@@ -1250,7 +1250,7 @@ def price_above_callback(bot, update, args):
 	else:
 		lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
 		sleep(1)
-		message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).encode("utf8").replace("_", "\_")))
+		message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).replace("_", "\_")))
 
 
 @run_async
@@ -1273,7 +1273,7 @@ def price_below_callback(bot, update, args):
 			except ValueError as e:
 				lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
 				sleep(1)
-				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).encode("utf8").replace("_", "\_")))
+				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).replace("_", "\_")))
 		price = mysql_select_price()
 		#price_low_bitgrail =  min(int(price[1][0]), int(price[1][3]))
 		price_low_mercatox =  min(int(price[0][0]), int(price[0][3]))
@@ -1306,7 +1306,7 @@ def price_below_callback(bot, update, args):
 	else:
 		lang_keyboard(lang_id, bot, chat_id, lang_text('prices_digits', lang_id))
 		sleep(1)
-		message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).encode("utf8").replace("_", "\_")))
+		message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).replace("_", "\_")))
 
 		
 @run_async
@@ -1354,7 +1354,7 @@ def faucet_text(bot, update, args):
 	m = mysql_select_user(user_id)
 	try:
 		if (len(args) > 0):
-			account = args[0].lower().encode("utf8").replace('­','').replace('\r','').replace('\n','');
+			account = args[0].lower().replace('­','').replace('\r','').replace('\n','');
 			account = account.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
 		else:
 			account = m[2]
@@ -1397,8 +1397,8 @@ def text_result(text, bot, update):
 			#print(text)
 			password = text
 			try:
-				dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-				hex = binascii.hexlify(dk)
+				dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 112000)
+				hex = binascii.hexlify(dk).decode()
 			except UnicodeEncodeError:
 				hex = False
 		else:
@@ -1543,8 +1543,8 @@ def password_callback(bot, update, args):
 				password = args[0]
 				if ((len(set(string.digits).intersection(password)) > 0) and (len(set(string.ascii_uppercase).intersection(password))> 0) and (len(set(string.ascii_lowercase).intersection(password)) > 0)):
 					try:
-						dk = hashlib.pbkdf2_hmac('sha256', password, salt, 112000)
-						hex = binascii.hexlify(dk)
+						dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 112000)
+						hex = binascii.hexlify(dk).decode()
 						mysql_set_password(user_id, hex)
 						message_markdown(bot, chat_id, lang(user_id, 'password_success'))
 						logging.info('Password added for user {0}'.format(user_id))
@@ -1581,7 +1581,7 @@ def password_delete_callback(bot, update, args):
 			logging.info('Password deletion for user {0}'.format(user_id))
 		else:
 			text_reply(update, lang(user_id, 'password_error'))
-			logging.info('Password deletion failed for user {0}. Reason: Wrong password'.format(user_id))
+			logging.info('Password deletion failed for user {0}. Reason: Wrong password {1} {2}'.format(user_id, check, hex))
 	else:
 		text_reply(update, lang(user_id, 'password_delete_command'))
 
@@ -1744,9 +1744,9 @@ def unknown_ddos(bot, update):
 	message_id = int(update.message.message_id)
 	ddos = mysql_ddos_protector(user_id, message_id)
 	if (ddos == True):
-		logging.warn('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
+		logging.warning('DDoS or double message by user {0} message {1}'.format(user_id, message_id))
 	elif (ddos == False):
-		logging.warn('Too fast request by user {0}'.format(user_id))
+		logging.warning('Too fast request by user {0}'.format(user_id))
 	lang_id = mysql_select_language(user_id)
 	lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('command_not_found', lang_id))
 
@@ -1774,18 +1774,18 @@ def main():
 	dp = updater.dispatcher
 
 	# on different commands - answer in Telegram
-	for command in language['commands']['start']:
+	for command in language['commands']['start_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), start))
-	for command in language['commands']['help']:
+	for command in language['commands']['help_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), help))
 	dp.add_handler(CommandHandler("info", start))
 
 	# my custom commands
 	dp.add_handler(CommandHandler("user_id", user_id))
-	for command in language['commands']['block_count']:
+	for command in language['commands']['block_count_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), block_count))
 	dp.add_handler(CommandHandler("ping", ping))
-	for command in language['commands']['account']:
+	for command in language['commands']['account_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), account))
 	for command in language['commands']['account_add']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), account_add))
@@ -1793,7 +1793,7 @@ def main():
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), account_list))
 	for command in (language['commands']['accounts_hide'] + language['commands']['accounts_expand']):
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), accounts_hide))
-	for command in language['commands']['send']:
+	for command in language['commands']['send_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), send, pass_args=True))
 	for command in language['commands']['send_from']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), send_from, pass_args=True))
@@ -1804,7 +1804,7 @@ def main():
 	dp.add_handler(CommandHandler("secret", password, pass_args=True)) # symlink
 	dp.add_handler(CommandHandler("password_delete", password_delete, pass_args=True))
 	dp.add_handler(CommandHandler("secret_delete", password_delete, pass_args=True)) # symlink
-	for command in language['commands']['price']:
+	for command in language['commands']['price_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), price))
 	for command in language['commands']['price_above']:
 		dp.add_handler(CommandHandler(command, price_above, pass_args=True))
@@ -1813,7 +1813,7 @@ def main():
 	for command in language['commands']['price_flush']:
 		dp.add_handler(CommandHandler(command, price_flush))
 	dp.add_handler(CommandHandler("version", version))
-	for command in language['common']['lang']:
+	for command in language['common']['lang_command']:
 		dp.add_handler(CommandHandler(command.replace(" ", "_"), language_select, pass_args=True))
 	dp.add_handler(CommandHandler("seed", seed, pass_args=True))
 	dp.add_handler(CommandHandler("check", check, pass_args=True))

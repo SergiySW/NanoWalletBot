@@ -12,8 +12,8 @@
 
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 url = config.get('main', 'url')
 wallet = config.get('main', 'wallet')

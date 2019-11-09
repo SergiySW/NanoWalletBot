@@ -15,8 +15,8 @@ import urllib3, socket, json
 import time, math
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 wallet = config.get('main', 'wallet')
 

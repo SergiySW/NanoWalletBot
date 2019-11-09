@@ -11,9 +11,8 @@
 # 
 
 # QR code handler
-import ConfigParser
-
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 qr_folder_path = config.get('main', 'qr_folder_path')
 
@@ -22,7 +21,7 @@ import pyqrcode
 import os.path
 #@run_async
 def qr_by_account(account):
-	account = 'xrb:{0}'.format(account)
+	account = 'nano:{0}'.format(account)
 	path = '{1}{0}.png'.format(account, qr_folder_path)
 	if (not os.path.isfile(path)):
 		qr = pyqrcode.create(account, error='L', version=4, mode=None, encoding='iso-8859-1')

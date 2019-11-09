@@ -21,8 +21,8 @@ import urllib3, certifi, socket, json
 import time, math
 
 # Parse config
-import ConfigParser
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
 log_file_frontiers = config.get('main', 'log_file_frontiers')
@@ -167,7 +167,7 @@ def receive_messages(bot, account, balance):
 			logging.info(block_account)
 			logging.warning('NoCallback {0} Nano (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], item['hash']))
 			text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(0), item['hash'], hash_url, sender)
-			mysql_set_sendlist(account[0], text.encode("utf8"))
+			mysql_set_sendlist(account[0], text)
 			#print(text)
 			push(bot, account[0], text)
 			mysql_delete_sendlist(account[0])
@@ -187,9 +187,9 @@ def frontiers_sendlist():
 		if (send in sendlist_new):
 			try:
 				push(bot, send[0], send[1].replace("_", "\_"))
-				logging.warning('NoCallback From sendlist: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
+				logging.warning('NoCallback From sendlist: {0} :: {1}'.format(send[0], send[1]))
 			except Exception as e:
-				logging.warning('NoCallback From sendlist + exception: {0} :: {1}'.format(send[0], send[1].encode("utf8")))
+				logging.warning('NoCallback From sendlist + exception: {0} :: {1}'.format(send[0], send[1]))
 				logging.error(e)
 			mysql_delete_sendlist(send[0])
 

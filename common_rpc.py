@@ -12,10 +12,10 @@
 # Request to node
 import requests, json, urllib3, certifi
 import math
-import ConfigParser
 from time import sleep
 
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 url = config.get('main', 'url')
 wallet = config.get('main', 'wallet')
@@ -201,7 +201,7 @@ def bootstrap_multi():
 	rpc({"action": "bootstrap_any"}, 'success')
 
 def validate_account_number(text):
-	xrb_account = text.encode("utf8").replace('­','').replace(' ','').replace('\r','').replace('\n','')
+	xrb_account = text.replace('­','').replace(' ','').replace('\r','').replace('\n','')
 	xrb_account = xrb_account.replace(r'[^[13456789abcdefghijkmnopqrstuwxyz_]+', '')
 	if (len(xrb_account) == 64 or len(xrb_account) == 65):
 		destination_check = rpc({"action": "validate_account_number", "account": xrb_account}, 'valid')

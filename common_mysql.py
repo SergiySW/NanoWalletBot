@@ -10,10 +10,10 @@
 # Released under the BSD 3-Clause License
 # 
 
-import ConfigParser
 import mysql.connector
 
-config = ConfigParser.ConfigParser()
+from six.moves import configparser
+config = configparser.ConfigParser()
 config.read('bot.cfg')
 mysql_server = config.get('mysql', 'mysql_server')
 mysql_database = config.get('mysql', 'mysql_database')
@@ -532,10 +532,10 @@ def mysql_select_frontiers():
 	cursor = cnx.cursor(buffered=True)
 	query = ("SELECT json FROM rai_frontiers")
 	cursor.execute(query)
-	price = cursor.fetchone()[0]
+	frontiers = cursor.fetchone()[0]
 	cursor.close()
 	cnx.close()
-	return(price)
+	return(frontiers)
 
 def mysql_set_frontiers(json):
 	cnx = mysql.connector.connect(**mysql_config)

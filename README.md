@@ -2,15 +2,18 @@
 [@NanoWalletBot](https://t.me/NanoWalletBot) — Open source Telegram bot for [Nano](https://github.com/nanocurrency/raiblocks) cryptocurrency   
 
 # Python requirements
-**Required non-default Python libraries**   
-python-urllib3   
-python-requests   
-python-mysql.connector   
-python-qrtools   
-**Installed with pip (pip install)**   
+**Required non-default Python3 libraries**   
+python3-urllib3   
+python3-requests   
+python3-mysql.connector   
+python3-pil   
+python3-qrtools   
+python3-socks   
+**Installed with pip (pip3 install)**   
 pypng   
 PyQRCode   
 python-telegram-bot   
+six   
 
 # Other software configurations
 rai_node config sample in config.json   
@@ -27,9 +30,9 @@ https://github.com/clemahieu/raiblocks/wiki/Distribution-and-Mining#Divider
 Create wallet with `curl -g -d '{ "action": "wallet_create" }' http://localhost:7076`   
 Set password with `curl -g -d '{ "action": "password_change", "wallet": "WALLETID", "password": "WalletPassword123" }' http://localhost:7076`   
 Edit bot.cfg with your preferences   
-Start bot `python raiwalletbot.py`   
-Start callback incoming transactions server `python frontiers_callback.py`   
-Set cron job for `python frontiers.py` and other scripts if required   
+Start bot `python3 raiwalletbot.py`   
+Start callback incoming transactions server `python3 frontiers_callback.py`   
+Set cron job for `python3 frontiers.py` and other scripts if required   
 
 # Thanks
 * [clemahieu](https://github.com/clemahieu) for RaiBlocks creation and development
