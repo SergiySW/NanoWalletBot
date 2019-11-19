@@ -1597,7 +1597,7 @@ def seed_callback(bot, update, args):
 	lang_id = mysql_select_language(user_id)
 	seed = mysql_select_seed(user_id)
 	if (seed is False):
-		seed = binascii.b2a_hex(os.urandom(8)).upper()
+		seed = binascii.b2a_hex(os.urandom(8)).decode().upper()
 		mysql_set_seed(user_id, seed)
 	seed_split = [seed[i:i+4] for i in range(0, len(seed), 4)]
 	seed_text = seed_split[0] + '-' + seed_split[1] + '-' + seed_split[2] + '-' + seed_split[3]
