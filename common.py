@@ -148,7 +148,7 @@ def text_reply(update, text):
 
 
 def mrai_text(rai):
-	mrai = rai / (10 ** 6)
+	mrai = int(rai / (10 ** 6))
 	floating = int(rai - (mrai * (10 ** 6)))
 	if (floating == 0):
 		mrai_text = "{:,}".format(mrai)
