@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 account_url = 'https://nanocrawler.cc/explorer/account/'
 hash_url = 'https://nanocrawler.cc/explorer/block/'
-faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
+faucet_account = 'nano_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
 from common_mysql import *

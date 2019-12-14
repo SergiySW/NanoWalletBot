@@ -35,10 +35,9 @@ log_file_frontiers = config.get('main', 'log_file_frontiers')
 wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
-raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
+large_amount_warning = int(config.get('main', 'large_amount_warning'))
 callback_port = int(config.get('main', 'callback_port'))
-LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 proxy_url = config.get('proxy', 'url')
 proxy_user = config.get('proxy', 'user')
 proxy_pass = config.get('proxy', 'password')
@@ -52,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 account_url = 'https://nanocrawler.cc/explorer/account/'
 hash_url = 'https://nanocrawler.cc/explorer/block/'
-faucet_account = 'xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
+faucet_account = 'nano_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
 from common_mysql import *
@@ -98,7 +97,7 @@ class POST_server(BaseHTTPRequestHandler):
 			account = mysql_select_by_account_extra(xrb_account)
 		if (account is not False):
 			block = json.loads(post['block'])
-			if ((block['type'] == 'receive') or (block['type'] == 'open')):
+			if ((block['type'] == 'state') and (block['subtype'] == 'receive')):
 				if (proxy_url is None):
 					bot = Bot(api_key)
 				else:
@@ -121,15 +120,6 @@ class POST_server(BaseHTTPRequestHandler):
 						balance = account_balance(xrb_account)
 				# workaround
 				frontier = post['hash']
-				# FEELESS
-				if ((account[0] in LIST_OF_FEELESS) or (mysql_select_send_time(account[0]) is not False)):
-					final_fee_amount = 0
-				else:
-					final_fee_amount = fee_amount
-				# FEELESS
-				max_send = balance - final_fee_amount
-				if (max_send < 0):
-					max_send = 0
 				try:
 					z = account[5]
 					mysql_update_frontier_extra(account[1], frontier)
@@ -137,7 +127,7 @@ class POST_server(BaseHTTPRequestHandler):
 					mysql_update_frontier(account[1], frontier)
 				logging.info('{0} --> {1}	{2}'.format(mrai_text(account[3]), mrai_text(balance), frontier))
 				# retrieve sender
-				send_source = block['source']
+				send_source = block['link']
 				block_account = rpc({"action":"block_account","hash":send_source}, 'account')
 				lang_id = mysql_select_language(account[0])
 				sender = lang_text('frontiers_sender_account', lang_id).format(block_account)
@@ -171,12 +161,15 @@ class POST_server(BaseHTTPRequestHandler):
 					mysql_update_balance(account[1], balance)
 				logging.info(sender)
 				logging.info(block_account)
-				logging.info('{0} Mrai (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
-				text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(max_send), frontier, hash_url, sender)
+				logging.info('{0} Nano (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], frontier))
+				text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(0), frontier, hash_url, sender)
 				mysql_set_sendlist(account[0], text)
 				#print(text)
 				try:
 					push(bot, account[0], text)
+					if (received_amount >= large_amount_warning):
+						time.sleep(0.25)
+						push(bot, account[0], lang_text('frontiers_large_amount_warning', lang_id))
 				except BadRequest as e:
 					logging.exception('Bad request account {0}'.format(account[0]))
 				mysql_delete_sendlist(account[0])
