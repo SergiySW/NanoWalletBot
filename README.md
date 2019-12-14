@@ -1,5 +1,5 @@
 # NanoWalletBot
-[@NanoWalletBot](https://t.me/NanoWalletBot) — Open source Telegram bot for [Nano](https://github.com/nanocurrency/raiblocks) cryptocurrency   
+[@NanoWalletBot](https://t.me/NanoWalletBot) — Open source Telegram bot for [Nano](https://github.com/nanocurrency/nano-node) cryptocurrency   
 
 # Python requirements
 **Required non-default Python3 libraries**   
@@ -16,15 +16,19 @@ python-telegram-bot
 six   
 
 # Other software configurations
-rai_node config sample in config.json   
+nano_node config sample in config-node.toml   
+RPC config sample in config-rpc.toml   
 MySQL database structure in mysql.sql   
 Nginx config sample in nginx_site.conf   
 
-# rai_node config.json tuning
-If you use docker node, set "address": "::0.0.0.0"   
+# RPC config tuning
+If you use docker node, set `address = "::0.0.0.0"`   
 
-0.1 Nano incoming limit: "receive_minimum": "100000000000000000000000000000"   
-https://github.com/clemahieu/raiblocks/wiki/Distribution-and-Mining#Divider   
+# nano_node config tuning
+0.1 Nano incoming limit:
+```[node]
+receive_minimum = "100000000000000000000000000000"```   
+https://docs.nano.org/protocol-design/distribution-and-units/#unit-dividers   
 
 # Start bot
 Create wallet with `curl -g -d '{ "action": "wallet_create" }' http://localhost:7076`   

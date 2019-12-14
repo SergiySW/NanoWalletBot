@@ -1,0 +1,12 @@
+
+[node.logging]
+
+# Maximum log file size in bytes
+# type:uint64
+max_size = 67108864
+
+[rpc]
+
+# Enable or disable RPC
+# type:bool
+enable = true
