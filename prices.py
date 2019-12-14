@@ -25,7 +25,6 @@ from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
 api_key = config.get('main', 'api_key')
-bitgrail_price = config.get('monitoring', 'bitgrail_price')
 proxy_url = config.get('proxy', 'url')
 proxy_user = config.get('proxy', 'user')
 proxy_pass = config.get('proxy', 'password')
@@ -51,7 +50,6 @@ def lang_text(text_id, lang_id):
 	except KeyError:
 		return language['en'][text_id]
 
-
 def mercatox():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	url = 'https://mercatox.com/public/json24'
@@ -71,24 +69,6 @@ def mercatox():
 	btc_volume = int(float(json_array['quoteVolume']) * (10 ** 8))
 	
 	mysql_set_price(1, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
-
-
-def bitgrail():
-	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-	#response = http.request('GET', bitgrail_price, headers=header, timeout=20.0)
-	response = http.request('GET', bitgrail_price, timeout=20.0)
-	json_bitgrail = json.loads(response.data)
-	json_array = json_bitgrail['response']
-	last_price = int(float(json_array['last']) * (10 ** 8))
-	high_price = int(float(json_array['high']) * (10 ** 8))
-	low_price = int(float(json_array['low']) * (10 ** 8))
-	ask_price = int(float(json_array['ask']) * (10 ** 8))
-	bid_price = int(float(json_array['bid']) * (10 ** 8))
-	volume = int(float(json_array['coinVolume']))
-	btc_volume = int(float(json_array['volume']) * (10 ** 8))
-	
-	mysql_set_price(2, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
-
 
 def bitflip():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
@@ -117,8 +97,6 @@ def bitflip():
 			bid_price = int(float(pair['buy']) * (10 ** 8))
 	
 	mysql_set_price(3, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
-
-
 
 def kucoin():
 	http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
@@ -167,6 +145,7 @@ def binance():
 	
 	mysql_set_price(6, last_price, high_price, low_price, ask_price, bid_price, volume, btc_volume)
 
+
 def prices_above_below(bot, user_id, price, exchange, above):
 	lang_id = mysql_select_language(user_id)
 	btc_price = ('%.8f' % (float(price) / (10 ** 8)))
@@ -196,13 +175,10 @@ def price_check():
 	
 	# check if higher
 	users_high = mysql_select_price_high()
-	#price_high_bitgrail = max(int(price[1][0]), int(price[1][4]))
 	price_high_mercatox = max(int(price[0][0]), int(price[0][4]))
 	price_high_kucoin = max(int(price[3][0]), int(price[3][4]))
 	price_high_binance = max(int(price[5][0]), int(price[5][4]))
 	for user in users_high:
-		#if ((price_high_bitgrail >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
-		#	prices_above_below(bot, user[0], price_high_bitgrail, "BitGrail.com", 1)
 		if ((price_high_mercatox >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price_high_mercatox, "Mercatox.com", 1)
 		elif ((price_high_kucoin >= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
@@ -212,13 +188,10 @@ def price_check():
 	
 	# check if lower
 	users_low = mysql_select_price_low()
-	#price_low_bitgrail = min(int(price[1][0]), int(price[1][3]))
 	price_low_mercatox = min(int(price[0][0]), int(price[0][3]))
 	price_low_kucoin = min(int(price[3][0]), int(price[3][3]))
 	price_low_binance = min(int(price[5][0]), int(price[5][3]))
 	for user in users_low:
-		#if ((price_low_bitgrail <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 1))):
-		#	prices_above_below(bot, user[0], price_low_bitgrail, "BitGrail.com", 0)
 		if ((price_low_mercatox <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 2))):
 			prices_above_below(bot, user[0], price_low_mercatox, "Mercatox.com", 0)
 		elif ((price_low_kucoin <= int(user[1])) and ((int(user[2]) == 0) or (int(user[2]) == 3))):
@@ -239,14 +212,6 @@ def prices_usual():
 		mercatox()
 	except:
 		time.sleep(1) # too many errors from Mercatox API
-	#try:
-	#	bitgrail()
-	#except:
-	#	time.sleep(5)
-	#	try:
-	#		bitgrail()
-	#	except:
-	#		time.sleep(1) # even BitGrail can fail
 	try:
 		kucoin()
 	except:

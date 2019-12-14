@@ -1219,16 +1219,12 @@ def price_above_callback(bot, update, args):
 				sleep(1)
 				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_above', lang_id).replace("_", "\_")))
 		price = mysql_select_price()
-		#price_high_bitgrail =  max(int(price[1][0]), int(price[1][4]))
 		price_high_mercatox =  max(int(price[0][0]), int(price[0][4]))
 		price_high_kucoin =  max(int(price[3][0]), int(price[3][4]))
 		price_high_binance =  max(int(price[5][0]), int(price[5][4]))
 		price_high = max( price_high_mercatox, price_high_kucoin, price_high_binance)
 		exchange = 0
 		if (len(args) > 1):
-			#if (args[1].lower().startswith('bitgrail')):
-			#	price_high = price_high_bitgrail
-			#	exchange = 1
 			if (args[1].lower().startswith('mercatox')):
 				price_high = price_high_mercatox
 				exchange = 2
@@ -1275,16 +1271,12 @@ def price_below_callback(bot, update, args):
 				sleep(1)
 				message_markdown(bot, chat_id, '/{0} 10000\n/{0} 0.001'.format(lang_text('price_below', lang_id).replace("_", "\_")))
 		price = mysql_select_price()
-		#price_low_bitgrail =  min(int(price[1][0]), int(price[1][3]))
 		price_low_mercatox =  min(int(price[0][0]), int(price[0][3]))
 		price_low_kucoin =  min(int(price[3][0]), int(price[3][3]))
 		price_low_binance =  min(int(price[5][0]), int(price[5][3]))
 		price_low = min(price_low_mercatox, price_low_kucoin, price_low_binance)
 		exchange = 0
 		if (len(args) > 1):
-			#if (args[1].lower().startswith('bitgrail')):
-			#	price_low = price_low_bitgrail
-			#	exchange = 1
 			if (args[1].lower().startswith('mercatox')):
 				price_low = price_low_mercatox
 				exchange = 2
