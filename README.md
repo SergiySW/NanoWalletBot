@@ -25,9 +25,11 @@ Nginx config sample in nginx_site.conf
 If you use docker node, set `address = "::0.0.0.0"`   
 
 # nano_node config tuning
-0.1 Nano incoming limit:
-```[node]
-receive_minimum = "100000000000000000000000000000"```   
+0.1 Nano incoming limit:   
+```   
+[node]   
+receive_minimum = "100000000000000000000000000000"   
+```   
 https://docs.nano.org/protocol-design/distribution-and-units/#unit-dividers   
 
 # Start bot
