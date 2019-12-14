@@ -130,6 +130,7 @@
 		"frontiers_sender_users": " from one of our users {0}",
 		"frontiers_sender_by": " by account {1}{0}",
 		"frontiers_receive": "*{0} Nano* received{5}. Transaction hash: [{3}]({4}{3})\nYour current balance: *{1} Nano*",
+		"frontiers_large_amount_warning": "@NanoWalletBot is not designed to store a large amount of Nano currency.\nPlease use wallets where you have full control over your own private keys and seeds: https://nano.org/pay",
 		"prices_above": "Nano prices at {0} reach *{1}* BTC",
 		"prices_below": "Nano prices at {0} drop below *{1}* BTC",
 		"prices_digits": "Command supports integers for satoshi and float for Bitcoin. Example:",

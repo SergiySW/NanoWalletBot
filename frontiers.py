@@ -29,6 +29,7 @@ log_file_frontiers = config.get('main', 'log_file_frontiers')
 wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
 welcome_account = config.get('main', 'welcome_account')
+large_amount_warning = config.get('main', 'large_amount_warning')
 proxy_url = config.get('proxy', 'url')
 proxy_user = config.get('proxy', 'user')
 proxy_pass = config.get('proxy', 'password')
@@ -172,6 +173,9 @@ def receive_messages(bot, account, balance):
 			push(bot, account[0], text)
 			mysql_delete_sendlist(account[0])
 			time.sleep(0.25)
+			if (received_amount >= large_amount_warning):
+				push_simple(bot, account[0], lang_text('frontiers_large_amount_warning', lang_id))
+				time.sleep(0.25)
 
 # send old data
 def frontiers_sendlist():
