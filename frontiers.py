@@ -154,7 +154,7 @@ def receive_messages(bot, account, balance):
 				else:
 					# sender from extra accounts
 					user_sender = mysql_select_user(account_mysql[0])
-					if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != sender_account[0])):
+					if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != account_mysql[0])):
 						sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
 					elif (block_account != account[1]):
 						sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
