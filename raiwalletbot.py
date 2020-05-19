@@ -56,6 +56,7 @@ admin_list = json.loads(config.get('main', 'admin_list'))
 extra_limit = int(config.get('main', 'extra_limit'))
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
 salt = config.get('password', 'salt')
+pbkdf2_iterations = int(config.get('password', 'pbkdf2_iterations'))
 private_key = config.get('password', 'private_key')
 block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
 proxy_url = config.get('proxy', 'url')
@@ -610,7 +611,7 @@ def password_check(update, password):
 	user_id = update.message.from_user.id
 	dk = '0000'
 	try:
-		dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 112000)
+		dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
 	except UnicodeEncodeError as e:
 		text_reply(update, lang(user_id, 'encoding_error'))
 		sleep(0.5)
@@ -1389,7 +1390,7 @@ def text_result(text, bot, update):
 			#print(text)
 			password = text
 			try:
-				dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 112000)
+				dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
 				hex = binascii.hexlify(dk).decode()
 			except UnicodeEncodeError:
 				hex = False
@@ -1535,7 +1536,7 @@ def password_callback(bot, update, args):
 				password = args[0]
 				if ((len(set(string.digits).intersection(password)) > 0) and (len(set(string.ascii_uppercase).intersection(password))> 0) and (len(set(string.ascii_lowercase).intersection(password)) > 0)):
 					try:
-						dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 112000)
+						dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
 						hex = binascii.hexlify(dk).decode()
 						mysql_set_password(user_id, hex)
 						message_markdown(bot, chat_id, lang(user_id, 'password_success'))
