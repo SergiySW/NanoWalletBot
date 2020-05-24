@@ -1590,22 +1590,28 @@ def seed_callback(bot, update, args):
 	lang_id = mysql_select_language(user_id)
 	seed = mysql_select_seed(user_id)
 	if (seed is False):
-		seed = binascii.b2a_hex(os.urandom(8)).decode().upper()
+		seed = binascii.b2a_hex(os.urandom(16)).decode().upper()
 		mysql_set_seed(user_id, seed)
-	seed_split = [seed[i:i+4] for i in range(0, len(seed), 4)]
-	seed_text = seed_split[0] + '-' + seed_split[1] + '-' + seed_split[2] + '-' + seed_split[3]
-	check = mysql_check_password(user_id)
-	if ((len(args) > 0) and (check is not False)):
-		password = args[0]
-		hex = password_check(update, password)
-		if (check == hex):
-			message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
-		else:
+	if (len(seed) == 16 or len(seed) == 32):
+		seed_split = [seed[i:i+4] for i in range(0, len(seed), 4)]
+		seed_text = ''
+		for seed_part in seed_split:
+			seed_text += seed_part + '-'
+		seed_text = seed_text[:-1]
+		check = mysql_check_password(user_id)
+		if ((len(args) > 0) and (check is not False)):
+			password = args[0]
+			hex = password_check(update, password)
+			if (check == hex):
+				message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
+			else:
+				text_reply(update, lang_text('password_error', lang_id))
+		elif (check is not False):
 			text_reply(update, lang_text('password_error', lang_id))
-	elif (check is not False):
-		text_reply(update, lang_text('password_error', lang_id))
+		else:
+			message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
 	else:
-		message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
+		logging.error('Incorrect seed length for user {0} : {1}'.format(user_id, len(seed)))
 
 def passport_processor(bot, update):
 	info_log(update)

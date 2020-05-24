@@ -148,7 +148,7 @@ DROP TABLE IF EXISTS `rai_bot_seeds`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rai_bot_seeds` (
   `user_id` int(10) NOT NULL,
-  `seed` char(16) NOT NULL,
+  `seed` varchar(96) NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `seed` (`seed`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

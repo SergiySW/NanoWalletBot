@@ -11,6 +11,8 @@
 # 
 
 import mysql.connector
+import hashlib, binascii
+from Cryptodome.Cipher import AES
 
 from six.moves import configparser
 config = configparser.ConfigParser()
@@ -21,6 +23,9 @@ mysql_user = config.get('mysql', 'mysql_user')
 mysql_pass = config.get('mysql', 'mysql_pass')
 ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
 feeless_seconds = int(config.get('main', 'feeless_seconds'))
+
+salt = config.get('password', 'salt')
+aes_password = config.get('password', 'aes_password')
 
 # MySQL requests
 
@@ -671,20 +676,36 @@ def mysql_select_seed(user_id):
 	cursor = cnx.cursor(buffered=True)
 	query = ("SELECT seed FROM rai_bot_seeds WHERE user_id = %s")
 	cursor.execute(query, (int(user_id),))
-	seed = cursor.fetchone()
+	select_seed = cursor.fetchone()
 	cursor.close()
 	cnx.close()
+	seed = False
 	try:
-		seed = seed[0]
+		# Decryption
+		encrypted_seed = select_seed[0]
+		bin = binascii.unhexlify(encrypted_seed)
+		nonce = bin[:16]
+		tag = bin[16:32]
+		ciphertext = bin[32:]
+		private_key = hashlib.scrypt(aes_password.encode('utf-8'), salt=(str(user_id)+salt).encode('utf-8'), n=2**16, r=16, p=1, maxmem=2**28, dklen=32)
+		cipher = AES.new(private_key, AES.MODE_EAX, nonce)
+		data = cipher.decrypt_and_verify(ciphertext, tag)
+		seed = binascii.hexlify(data).decode().upper()
 	except Exception as e:
 		seed = False
 	return(seed)
 
 def mysql_set_seed(user_id, seed):
+	# Encryption
+	private_key = hashlib.scrypt(aes_password.encode('utf-8'), salt=(str(user_id)+salt).encode('utf-8'), n=2**16, r=16, p=1, maxmem=2**28, dklen=32)
+	cipher = AES.new(private_key, AES.MODE_EAX)
+	ciphertext, tag = cipher.encrypt_and_digest(binascii.unhexlify(seed))
+	hex_data = binascii.hexlify(cipher.nonce+tag+ciphertext).decode()
+	# MySQL record
 	cnx = mysql.connector.connect(**mysql_config)
 	cursor = cnx.cursor()
 	query = ("INSERT INTO rai_bot_seeds SET user_id = %s, seed = %s")
-	cursor.execute(query, (int(user_id), seed,))
+	cursor.execute(query, (int(user_id), hex_data,))
 	cnx.commit()
 	cursor.close()
 	cnx.close()
@@ -764,3 +785,12 @@ def mysql_query(query):
 	cnx.commit()
 	cursor.close()
 	cnx.close()
+
+def mysql_query_select(query):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	cursor.execute(query)
+	array = cursor.fetchall()
+	cursor.close()
+	cnx.close()
+	return(array)

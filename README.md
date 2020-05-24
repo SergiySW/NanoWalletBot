@@ -10,6 +10,7 @@ python3-pil
 python3-qrtools   
 python3-socks   
 **Installed with pip (pip3 install)**   
+pycryptodomex   
 pypng   
 PyQRCode   
 python-telegram-bot   
@@ -35,7 +36,7 @@ https://docs.nano.org/protocol-design/distribution-and-units/#unit-dividers
 # Start bot
 Create wallet with `curl -g -d '{ "action": "wallet_create" }' http://localhost:7076`   
 Set password with `curl -g -d '{ "action": "password_change", "wallet": "WALLETID", "password": "WalletPassword123" }' http://localhost:7076`   
-Edit `sample.bot.cfg` with your preferences and save as `bot.cfg`   
+Edit `sample.bot.cfg` with your preferences and save as `bot.cfg` (don't forget to change `salt`, `aes_password`, `private_key` & other passwords)   
 Start bot `python3 raiwalletbot.py`   
 Start callback incoming transactions server `python3 frontiers_callback.py`   
 Set cron job for `python3 frontiers.py` and other scripts if required   
