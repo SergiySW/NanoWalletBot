@@ -15,6 +15,7 @@ pypng
 PyQRCode   
 python-telegram-bot   
 six   
+websockets   
 
 # Other software configurations
 nano_node config sample in config-node.toml   
@@ -38,7 +39,7 @@ Create wallet with `curl -g -d '{ "action": "wallet_create" }' http://localhost:
 Set password with `curl -g -d '{ "action": "password_change", "wallet": "WALLETID", "password": "WalletPassword123" }' http://localhost:7076`   
 Edit `sample.bot.cfg` with your preferences and save as `bot.cfg` (don't forget to change `salt`, `aes_password`, `private_key` & other passwords)   
 Start bot `python3 raiwalletbot.py`   
-Start callback incoming transactions server `python3 frontiers_callback.py`   
+Start websockets incoming transactions server `python3 frontiers_websockets.py`   
 Set cron job for `python3 frontiers.py` and other scripts if required   
 
 # Thanks

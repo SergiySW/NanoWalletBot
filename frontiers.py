@@ -41,9 +41,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-account_url = 'https://nanocrawler.cc/explorer/account/'
 hash_url = 'https://nanocrawler.cc/explorer/block/'
-faucet_account = 'nano_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo'
 
 # MySQL requests
 from common_mysql import *
@@ -52,6 +50,8 @@ from common_mysql import *
 # Request to node
 from common_rpc import *
 
+# Frontiers functions
+from common_sender import *
 
 # Common functions
 from common import push, mrai_text
@@ -128,44 +128,10 @@ def receive_messages(bot, account, balance):
 		if (item['hash'] == account[2]):
 			break
 		if (item['type'] == 'receive'):
-			received_amount = int(math.floor(int(item['amount']) / (10 ** 24)))
-			# retrieve sender
-			block_account = item['account']
 			lang_id = mysql_select_language(account[0])
-			sender = lang_text('frontiers_sender_account', lang_id).format(block_account)
-			# Sender info
-			if (block_account == faucet_account):
-				sender = lang_text('frontiers_sender_faucet', lang_id)
-			elif ((block_account == fee_account) or (block_account == welcome_account)):
-				sender = lang_text('frontiers_sender_bot', lang_id)
-			elif (block_account == account[1]):
-				sender = lang_text('frontiers_sender_self', lang_id)
-			else:
-				# Sender from bot
-				account_mysql = mysql_select_by_account_extra(block_account)
-				if (account_mysql is False):
-					# sender from users accounts
-					account_mysql = mysql_select_by_account(block_account)
-					if (account_mysql is not False):
-						if ((account_mysql[4] is not None) and (account_mysql[4])):
-							sender = lang_text('frontiers_sender_username', lang_id).format(account_mysql[4])
-						elif (block_account != account[1]):
-							sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
-				else:
-					# sender from extra accounts
-					user_sender = mysql_select_user(account_mysql[0])
-					if ((user_sender[8] is not None) and (user_sender[8]) and (account[0] != account_mysql[0])):
-						sender = lang_text('frontiers_sender_username', lang_id).format(user_sender[8])
-					elif (block_account != account[1]):
-						sender = lang_text('frontiers_sender_users', lang_id).format(block_account)
-			try:
-				z = account[5]
-				sender = lang_text('frontiers_sender_by', lang_id).format(sender, account[1].replace("_", "\_"))
-				mysql_update_balance_extra(account[1], balance)
-			except IndexError as e:
-				mysql_update_balance(account[1], balance)
-			logging.info(sender)
-			logging.info(block_account)
+			sender_account = item['account']
+			sender = find_sender (item, account, sender_account, balance, lang_text)
+			received_amount = int(math.floor(int(item['amount']) / (10 ** 24)))
 			logging.warning('NoCallback {0} Nano (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account[0], item['hash']))
 			text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(0), item['hash'], hash_url, sender)
 			mysql_set_sendlist(account[0], text)
