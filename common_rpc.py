@@ -74,9 +74,22 @@ def raw_account_balance(account):
 		balance = 0
 	return(balance)
 
-
 def account_balance(account):
 	raw_balance = raw_account_balance(account)
+	balance = int(math.floor(raw_balance / (10 ** 24)))
+	return(balance)
+
+
+def raw_block_balance(hash):
+	r = rpc({"action": "block_info", "hash": hash}, 'balance')
+	try:
+		balance = int(r)
+	except ValueError as e:
+		balance = 0
+	return(balance)
+
+def block_balance(hash):
+	raw_balance = raw_block_balance(hash)
 	balance = int(math.floor(raw_balance / (10 ** 24)))
 	return(balance)
 

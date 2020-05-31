@@ -42,7 +42,6 @@ wallet = config.get('main', 'wallet')
 wallet_password = config.get('main', 'password')
 fee_account = config.get('main', 'fee_account')
 fee_amount = int(config.get('main', 'fee_amount'))
-raw_fee_amount = fee_amount * (10 ** 24)
 welcome_account = config.get('main', 'welcome_account')
 welcome_amount = int(config.get('main', 'welcome_amount'))
 raw_welcome_amount = welcome_amount * (10 ** 24)
@@ -760,37 +759,15 @@ def send_callback(bot, update, args, from_account = 0):
 								send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 								logging.exception("message")
 							if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-								# FEELESS
-								if (final_fee_amount > 0):
-									try:
-										fee = rpc_send(wallet, account, fee_account, raw_fee_amount)
-									except Exception as e:
-										fee = '00000000000000000000000000000000000000000000000000000000000000'
-										logging.exception("message")
-								else:
-									fee = send_hash
-								# FEELESS
-								# sleep(0.5) # workaround
-								new_balance = account_balance(account)
-								if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-									logging.warning('Warning send balance change. Old: {0}, new: {1}, hash: {2}'.format(balance, new_balance, fee))
-									hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
-									sleep(2)
-									new_balance = account_balance(account)
-									if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-										sleep(4)
-										new_balance = account_balance(account)
-										if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-											hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
-											sleep(8)
-											new_balance = account_balance(account)
-								 # workaround
+								new_balance = block_balance(send_hash)
+								if (new_balance != balance - send_amount - final_fee_amount):
+									logging.error('Unexpected balance for send block {0}, account {1}. Result {2}, expected {3}'.format(send_hash, account, mrai_text(new_balance), mrai_text(balance - send_amount - final_fee_amount)))
 								if (from_account == 0):
 									mysql_update_balance(account, new_balance)
-									mysql_update_frontier(account, fee)
+									mysql_update_frontier(account, send_hash)
 								else:
 									mysql_update_balance_extra(account, new_balance)
-									mysql_update_frontier_extra(account, fee)
+									mysql_update_frontier_extra(account, send_hash)
 								lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
 								mysql_update_send_time(user_id)
 								sleep(1)
@@ -875,14 +852,9 @@ def send_all_callback(bot, update):
 					send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 					logging.exception("message")
 				if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-					sleep(0.5) # workaround
-					new_balance = account_balance(account)
-					if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-						sleep(2)
-						new_balance = account_balance(account)
-						if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-							sleep(16)
-							new_balance = account_balance(account)
+					new_balance = block_balance(send_hash)
+					if (new_balance != balance - send_amount - final_fee_amount):
+						logging.error('Unexpected balance for send block {0}, account {1}. Result {2}, expected {3}'.format(send_hash, account, mrai_text(new_balance), mrai_text(balance - send_amount - final_fee_amount)))
 					mysql_update_balance_extra(account, new_balance)
 					mysql_update_frontier_extra(account, send_hash)
 					mysql_update_send_time(user_id)
@@ -1098,36 +1070,16 @@ def send_finish(bot, update):
 				send_hash = '00000000000000000000000000000000000000000000000000000000000000'
 				logging.exception("message")
 			if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
-				# FEELESS
-				if (final_fee_amount > 0):
-					try:
-						fee = rpc_send(wallet, account, fee_account, raw_fee_amount)
-					except Exception as e:
-						fee = '00000000000000000000000000000000000000000000000000000000000000'
-						logging.exception("message")
-				else:
-					fee = send_hash
-				# FEELESS
-				sleep(0.5) # workaround
-				new_balance = account_balance(account)
+				new_balance = block_balance(send_hash)
 				balance = int(m[4])
-				if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)): # workaround
-					sleep(2)
-					new_balance = account_balance(account)
-					if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-						sleep(4)
-						new_balance = account_balance(account)
-						if ((new_balance == balance) or (new_balance != balance - send_amount - final_fee_amount)):
-							hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
-							sleep(8)
-							new_balance = account_balance(account)
-				# workaround
+				if (new_balance != balance - send_amount - final_fee_amount):
+					logging.error('Unexpected balance for send block {0}, account {1}. Result {2}, expected {3}'.format(send_hash, account, mrai_text(new_balance), mrai_text(balance - send_amount - final_fee_amount)))
 				if (len(extra_account) > 0):
 					mysql_update_balance_extra(account, new_balance)
-					mysql_update_frontier_extra(account, fee)
+					mysql_update_frontier_extra(account, send_hash)
 				else:
 					mysql_update_balance(account, new_balance)
-					mysql_update_frontier(account, fee)
+					mysql_update_frontier(account, send_hash)
 				sleep(1)
 				lang_keyboard(lang_id, bot, chat_id, lang_text('send_completed', lang_id).format(mrai_text(final_fee_amount), mrai_text(new_balance)))
 				mysql_update_send_time(user_id)
