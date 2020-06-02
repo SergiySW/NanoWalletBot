@@ -1043,6 +1043,7 @@ def send_finish(bot, update):
 	lang_id = mysql_select_language(user_id)
 	m = mysql_select_user(user_id)
 	account = m[2]
+	balance = int(m[4])
 	send_amount = int(m[6])
 	raw_send_amount = send_amount * (10 ** 24)
 	destination = m[5]
@@ -1050,6 +1051,7 @@ def send_finish(bot, update):
 	extra_account = mysql_select_user_extra(user_id, True)
 	if (len(extra_account) > 0):
 		account = extra_account[0][3]
+		balance = int(extra_account[0][5])
 		mysql_update_send_clean_extra(account)
 	# FEELESS
 	if ((user_id in LIST_OF_FEELESS) or (mysql_select_send_time(user_id) is not False)):
@@ -1071,7 +1073,6 @@ def send_finish(bot, update):
 				logging.exception("message")
 			if (('0000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 				new_balance = block_balance(send_hash)
-				balance = int(m[4])
 				if (new_balance != balance - send_amount - final_fee_amount):
 					logging.error('Unexpected balance for send block {0}, account {1}. Result {2}, expected {3}'.format(send_hash, account, mrai_text(new_balance), mrai_text(balance - send_amount - final_fee_amount)))
 				if (len(extra_account) > 0):
