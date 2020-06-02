@@ -756,9 +756,9 @@ def send_callback(bot, update, args, from_account = 0):
 							try:
 								send_hash = rpc_send(wallet, account, destination, raw_send_amount)
 							except Exception as e:
-								send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+								send_hash = '0000000000000000000000000000000000000000000000000000000000000000'
 								logging.exception("message")
-							if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+							if (('0000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 								new_balance = block_balance(send_hash)
 								if (new_balance != balance - send_amount - final_fee_amount):
 									logging.error('Unexpected balance for send block {0}, account {1}. Result {2}, expected {3}'.format(send_hash, account, mrai_text(new_balance), mrai_text(balance - send_amount - final_fee_amount)))
@@ -849,9 +849,9 @@ def send_all_callback(bot, update):
 					raw_send_amount = send_amount * (10 ** 24)
 					send_hash = rpc_send(wallet, account, destination, raw_send_amount)
 				except Exception as e:
-					send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+					send_hash = '0000000000000000000000000000000000000000000000000000000000000000'
 					logging.exception("message")
-				if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+				if (('0000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 					new_balance = block_balance(send_hash)
 					if (new_balance != balance - send_amount - final_fee_amount):
 						logging.error('Unexpected balance for send block {0}, account {1}. Result {2}, expected {3}'.format(send_hash, account, mrai_text(new_balance), mrai_text(balance - send_amount - final_fee_amount)))
@@ -1067,9 +1067,9 @@ def send_finish(bot, update):
 			try:
 				send_hash = rpc_send(wallet, account, destination, raw_send_amount)
 			except Exception as e:
-				send_hash = '00000000000000000000000000000000000000000000000000000000000000'
+				send_hash = '0000000000000000000000000000000000000000000000000000000000000000'
 				logging.exception("message")
-			if (('000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
+			if (('0000000000000000000000000000000000000000000000000000000000000000' not in send_hash) and ('locked' not in send_hash)):
 				new_balance = block_balance(send_hash)
 				balance = int(m[4])
 				if (new_balance != balance - send_amount - final_fee_amount):

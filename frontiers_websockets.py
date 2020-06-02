@@ -131,7 +131,8 @@ async def websockets_receive():
 								if (balance != int(account_mysql[3])):
 									logging.error('Balance change: {0} --> {1}'.format(mrai_text(balance), mrai_text(int(account_mysql[3]))))
 							# Previous block check
-							if (item['block']['previous'] != '000000000000000000000000000000000000000000000000000000000000000' and item['block']['previous'] != account_mysql[2]):
+							previous_zero = (item['block']['previous'] == '0000000000000000000000000000000000000000000000000000000000000000' and account_mysql[2] is None)
+							if ((previous_zero is False) and item['block']['previous'] != account_mysql[2]):
 								logging.error('Mismatch for previous block. Expected {0}, received {1}'.format(account_mysql[2], item['block']['previous']))
 								if (item['type'] == 'receive'):
 									time.sleep(0.1)
