@@ -30,9 +30,9 @@ url = config.get('main', 'url')
 log_file = config.get('main', 'log_file')
 domain = config.get('main', 'domain')
 listen_port = config.get('main', 'listen_port')
-proxy_url = config.get('proxy', 'url')
-proxy_user = config.get('proxy', 'user')
-proxy_pass = config.get('proxy', 'password')
+proxy_url = config.has_option('proxy', 'url') and config.get('proxy', 'url') or None
+proxy_user = config.has_option('proxy', 'user') and config.get('proxy', 'user') or None
+proxy_pass = config.has_option('proxy', 'password') and config.get('proxy', 'password') or None
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
