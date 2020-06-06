@@ -13,8 +13,17 @@
 
 from telegram import Bot, ParseMode
 from telegram.error import BadRequest, RetryAfter, TimedOut, Unauthorized, NetworkError
+from telegram.utils.request import Request
 from time import sleep
 
+# Parse config
+from six.moves import configparser
+config = configparser.ConfigParser()
+config.read('bot.cfg')
+api_key = config.get('main', 'api_key')
+proxy_url = config.get('proxy', 'url')
+proxy_user = config.get('proxy', 'user')
+proxy_pass = config.get('proxy', 'password')
 
 def replace_unsafe(text):
 	text = text.replace("xrb_1", "xrb\_1").replace("xrb_3", "xrb\_3")
@@ -178,3 +187,11 @@ def mrai_text(rai):
 		mrai_text = '{0}.{1}'.format("{:,}".format(mrai), floating_text)
 	return mrai_text
 
+def bot_start():
+	# set bot
+	if (proxy_url is None):
+		bot = Bot(api_key)
+	else:
+		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
+		bot = Bot(token=api_key, request = proxy)
+	return bot

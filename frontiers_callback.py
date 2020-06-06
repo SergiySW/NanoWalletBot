@@ -30,7 +30,6 @@ import threading
 from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
 log_file_frontiers = config.get('main', 'log_file_frontiers')
 wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
@@ -38,9 +37,6 @@ fee_amount = int(config.get('main', 'fee_amount'))
 welcome_account = config.get('main', 'welcome_account')
 large_amount_warning = int(config.get('main', 'large_amount_warning'))
 callback_port = int(config.get('main', 'callback_port'))
-proxy_url = config.get('proxy', 'url')
-proxy_user = config.get('proxy', 'user')
-proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -62,7 +58,7 @@ from common_rpc import *
 
 
 # Common functions
-from common import push, mrai_text
+from common import push, mrai_text, bot_start
 
 
 # Translation
@@ -98,11 +94,7 @@ class POST_server(BaseHTTPRequestHandler):
 		if (account is not False):
 			block = json.loads(post['block'])
 			if ((block['type'] == 'state') and (block['subtype'] == 'receive')):
-				if (proxy_url is None):
-					bot = Bot(api_key)
-				else:
-					proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-					bot = Bot(token=api_key, request = proxy)
+				bot = bot_start()
 				raw_received = int(post['amount'])
 				received_amount = int(math.floor(raw_received / (10 ** 24)))
 				

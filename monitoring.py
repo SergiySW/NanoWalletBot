@@ -25,7 +25,6 @@ from requests.utils import quote
 from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
 wallet = config.get('main', 'wallet')
 password = config.get('main', 'password')
 log_file = config.get('main', 'log_file')
@@ -34,9 +33,6 @@ peer_list = json.loads(config.get('monitoring', 'peer_list'))
 block_count_difference_threshold = int(config.get('monitoring', 'block_count_difference_threshold'))
 pending_threshold = int(config.get('monitoring', 'pending_action_threshold'))
 min_receive = int(config.get('main', 'min_receive'))
-proxy_url = config.get('proxy', 'url')
-proxy_user = config.get('proxy', 'user')
-proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -56,17 +52,13 @@ from common_rpc import *
 
 
 # Common functions
-from common import push
+from common import push, bot_start
 
 
 # Check peers
 def monitoring_peers():
 	# set bot
-	if (proxy_url is None):
-		bot = Bot(api_key)
-	else:
-		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-		bot = Bot(token=api_key, request = proxy)
+	bot = bot_start()
 	try:
 		# list of available peers
 		rpc_peers = peers_ip()
@@ -91,11 +83,7 @@ def monitoring_peers():
 # Check block count
 def monitoring_block_count():
 	# set bot
-	if (proxy_url is None):
-		bot = Bot(api_key)
-	else:
-		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-		bot = Bot(token=api_key, request = proxy)
+	bot = bot_start()
 	count = int(rpc({"action": "block_count"}, 'count'))
 	reference_count = int(reference_block_count())
 	

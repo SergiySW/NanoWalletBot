@@ -28,12 +28,8 @@ import asyncio, websockets
 from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
 log_file_frontiers = config.get('main', 'log_file_frontiers')
 large_amount_warning = int(config.get('main', 'large_amount_warning'))
-proxy_url = config.get('proxy', 'url')
-proxy_user = config.get('proxy', 'user')
-proxy_pass = config.get('proxy', 'password')
 
 ws_url = config.get('main', 'ws_url')
 
@@ -58,7 +54,7 @@ from common_sender import *
 
 
 # Common functions
-from common import push, mrai_text
+from common import push, mrai_text, bot_start
 
 # Translation
 with open('language.json') as lang_file:    
@@ -78,11 +74,7 @@ def subscription(topic: str, ack: bool=False, options: dict=None):
 
 async def websockets_receive():
 	async with websockets.connect(ws_url) as websocket:
-		if (proxy_url is None):
-			bot = Bot(api_key)
-		else:
-			proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-			bot = Bot(token=api_key, request = proxy)
+		bot = bot_start()
 		
 		await websocket.send(json.dumps(subscription("confirmation", options={"include_election_info": "false", "include_block":"true", "all_local_accounts": "true"}, ack=True)))
 		connect = json.loads(await websocket.recv()) # ack

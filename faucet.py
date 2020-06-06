@@ -25,7 +25,6 @@ import time, math
 import ConfigParser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
 log_file_faucet = config.get('main', 'log_file_faucet')
 
 # Enable logging
@@ -42,7 +41,7 @@ from common_mysql import mysql_select_accounts_list, mysql_select_blacklist, mys
 
 
 # Common functions
-from common import push_simple
+from common import push_simple, bot_start
 
 
 # Translation
@@ -66,7 +65,7 @@ def faucet():
 		json.dump(json_paylist, outfile)
 	json_array = json_paylist['pending']
 	
-	bot = Bot(api_key)
+	bot = bot_start()
 	# list from MySQL
 	accounts_list_orig = mysql_select_accounts_list()
 	accounts_list_extra = mysql_select_accounts_list_extra()

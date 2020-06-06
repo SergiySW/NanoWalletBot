@@ -20,15 +20,6 @@ import logging
 import urllib3, certifi, socket, json
 import time, math
 
-# Parse config
-from six.moves import configparser
-config = configparser.ConfigParser()
-config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
-proxy_url = config.get('proxy', 'url')
-proxy_user = config.get('proxy', 'user')
-proxy_pass = config.get('proxy', 'password')
-
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
 # MySQL requests
@@ -37,7 +28,7 @@ from common_mysql import *
 
 
 # Common functions
-from common import push, mrai_text
+from common import push, mrai_text, bot_start
 
 
 # Translation
@@ -166,11 +157,7 @@ def prices_above_below(bot, user_id, price, exchange, above):
 
 
 def price_check():
-	if (proxy_url is None):
-		bot = Bot(api_key)
-	else:
-		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-		bot = Bot(token=api_key, request = proxy)
+	bot = bot_start()
 	price = mysql_select_price()
 	
 	# check if higher

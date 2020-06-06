@@ -24,15 +24,11 @@ import time, math
 from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
 log_file_frontiers = config.get('main', 'log_file_frontiers')
 wallet = config.get('main', 'wallet')
 fee_account = config.get('main', 'fee_account')
 welcome_account = config.get('main', 'welcome_account')
 large_amount_warning = int(config.get('main', 'large_amount_warning'))
-proxy_url = config.get('proxy', 'url')
-proxy_user = config.get('proxy', 'user')
-proxy_pass = config.get('proxy', 'password')
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -54,7 +50,7 @@ from common_rpc import *
 from common_sender import *
 
 # Common functions
-from common import push, mrai_text
+from common import push, mrai_text, bot_start
 
 
 # Translation
@@ -71,11 +67,7 @@ def lang_text(text_id, lang_id):
 def frontiers():
 	time_start = int(time.time())
 	# set bot
-	if (proxy_url is None):
-		bot = Bot(api_key)
-	else:
-		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-		bot = Bot(token=api_key, request = proxy)
+	bot = bot_start()
 	# list from MySQL
 	accounts_list_orig = mysql_select_accounts_list()
 	accounts_list_extra = mysql_select_accounts_list_extra()
@@ -145,11 +137,7 @@ def receive_messages(bot, account, balance):
 
 # send old data
 def frontiers_sendlist():
-	if (proxy_url is None):
-		bot = Bot(api_key)
-	else:
-		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-		bot = Bot(token=api_key, request = proxy)
+	bot = bot_start()
 	sendlist = mysql_select_sendlist()
 	for send in sendlist:
 		time.sleep(5) # if long push to user
