@@ -525,11 +525,11 @@ def account_text(bot, update, list = False):
 				sleep(20)
 				bot.sendPhoto(chat_id=update.message.chat_id, photo=open('{1}nano:{0}.png'.format(r, qr_folder_path), 'rb'))
 			seed = mysql_select_seed(user_id)
-			check = mysql_check_password(user_id)
-			if ((seed is False) and (check is False)):
+			password_hash = mysql_check_password(user_id)
+			if ((seed is False) and (password_hash is False)):
 				sleep(1)
 				seed_callback(bot, update, [0])
-			elif (check is not False):
+			elif (password_hash is not False):
 				sleep(1)
 				text_reply(update, lang_text('seed_protected', lang_id))
 	
@@ -608,14 +608,28 @@ def account_add_callback(bot, update):
 
 def password_check(update, password):
 	user_id = update.message.from_user.id
-	dk = '0000'
-	try:
-		dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
-	except UnicodeEncodeError as e:
-		text_reply(update, lang(user_id, 'encoding_error'))
-		sleep(0.5)
-	hex = binascii.hexlify(dk).decode()
-	return hex
+	password_hash = mysql_check_password(user_id)
+	if (password_hash is not False):
+		dk = '0000'
+		try:
+			if (len(password_hash) == 128):
+				# New Scrypt KDF
+				dk = hashlib.scrypt(password.encode('utf-8'), salt=(hashlib.sha3_224(user_id.to_bytes(6, byteorder='little')).hexdigest()+salt).encode('utf-8'), n=2**15, r=8, p=1, maxmem=2**26, dklen=64)
+			else:
+				# Old PBKDF2 KDF
+				dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
+		except UnicodeEncodeError as e:
+			text_reply(update, lang(user_id, 'encoding_error'))
+			sleep(0.5)
+		hex = binascii.hexlify(dk).decode()
+		if (hex == password_hash):
+			valid = True
+		else:
+			valid = False
+			logging.info('Wrong password for user {0}. Expected: {1}, given: {2}'.format(user_id, password_hash, hex))
+	else:
+		valid = True
+	return valid
 
 @run_async
 def send(bot, update, args):
@@ -734,15 +748,17 @@ def send_callback(bot, update, args, from_account = 0):
 							text_reply(update, lang_text('send_user_not_found', lang_id).format(destination))
 					destination = validate_account_number(destination)
 					# Check password protection
-					check = mysql_check_password(user_id)
+					valid_password = False
 					if ((len(args) > 3) and ((args[1].lower() == 'mrai') or (args[1].lower() == 'xrb') or (args[1].lower() == 'nano'))):
 						password = args[3]
-						hex = password_check(update, password)
+						valid_password = password_check(update, password)
 					elif (len(args) > 2):
 						password = args[2]
-						hex = password_check(update, password)
+						valid_password = password_check(update, password)
 					else:
-						hex = False
+						password_hash = mysql_check_password(user_id)
+						if (password_hash is False):
+							valid_password = True
 					# typing_illusion(bot, update.message.chat_id) # typing illusion
 					# Check password protection and frontier existance
 					if (from_account == 0):
@@ -750,7 +766,7 @@ def send_callback(bot, update, args, from_account = 0):
 					else:
 						frontier = from_account[2]
 					check_frontier = check_block(frontier)
-					if ((destination is not False) and (check == hex) and (check_frontier) and (m[1] == user_id)):
+					if ((destination is not False) and (valid_password) and (check_frontier) and (m[1] == user_id)):
 						# Sending
 						try:
 							try:
@@ -794,7 +810,7 @@ def send_callback(bot, update, args, from_account = 0):
 								unlock(wallet, wallet_password) # try to unlock wallet
 						except (GeneratorExit, ValueError):
 							lang_keyboard(lang_id, bot, chat_id, lang_text('send_error', lang_id))
-					elif (not (check == hex)):
+					elif (not valid_password):
 						text_reply(update, lang_text('password_error', lang_id))
 						logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
 					elif (not (check_frontier)):
@@ -1338,33 +1354,26 @@ def text_result(text, bot, update):
 	# Check if ready to pay
 	if (exist is not False):
 		# Check password protection
-		check = mysql_check_password(user_id)
-		if (check is not False):
+		password_hash = mysql_check_password(user_id)
+		valid_password = True
+		if (password_hash is not False):
 			#print(text)
 			password = text
-			try:
-				dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
-				hex = binascii.hexlify(dk).decode()
-			except UnicodeEncodeError:
-				hex = False
-		else:
-			hex = False
+			valid_password = password_check(update, password)
 		# Check password protection
 		m = mysql_select_user(user_id)
 		if (text.lower() in language['commands']['not']):
 			mysql_update_send_clean(m[2])
 			mysql_update_send_clean_extra_user(user_id)
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_cancelled', lang_id))
-		elif ((m[5] is not None) and (m[6] != 0) and (check == hex) and (check is not False)):
+		elif ((m[5] is not None) and (m[6] != 0) and (valid_password) and (password_hash is not False)):
 			send_finish(bot, update)
-			#print(check)
-			#print(hex)
-		elif ((m[5] is not None) and (m[6] != 0) and (not (check == hex)) and (check is not False)):
+			#print(password_hash)
+		elif ((m[5] is not None) and (m[6] != 0) and (not valid_password) and (password_hash is not False)):
 			text_reply(update, lang_text('send_password', lang_id))
-			#print(check)
-			#print(hex)
+			#print(password_hash)
 			logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
-		elif ((m[5] is not None) and (m[6] != 0) and (check is False) and (text.lower() in language['commands']['yes'])):
+		elif ((m[5] is not None) and (m[6] != 0) and (password_hash is False) and (text.lower() in language['commands']['yes'])):
 			send_finish(bot, update)
 		elif ((m[5] is not None) and (m[6] != 0)):
 			mysql_update_send_clean(m[2])
@@ -1483,13 +1492,13 @@ def password_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	if (len(args) > 0):
-		check = mysql_check_password(user_id)
-		if (check is False):
+		password_hash = mysql_check_password(user_id)
+		if (password_hash is False):
 			if (len(args[0]) >= 8):
 				password = args[0]
 				if ((len(set(string.digits).intersection(password)) > 0) and (len(set(string.ascii_uppercase).intersection(password))> 0) and (len(set(string.ascii_lowercase).intersection(password)) > 0)):
 					try:
-						dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), pbkdf2_iterations)
+						dk = hashlib.scrypt(password.encode('utf-8'), salt=(hashlib.sha3_224(user_id.to_bytes(6, byteorder='little')).hexdigest()+salt).encode('utf-8'), n=2**15, r=8, p=1, maxmem=2**26, dklen=64)
 						hex = binascii.hexlify(dk).decode()
 						mysql_set_password(user_id, hex)
 						message_markdown(bot, chat_id, lang(user_id, 'password_success'))
@@ -1518,16 +1527,15 @@ def password_delete_callback(bot, update, args):
 	user_id = update.message.from_user.id
 	chat_id = update.message.chat_id
 	if (len(args) > 0):
-		check = mysql_check_password(user_id)
 		password = args[0]
-		hex = password_check(update, password)
-		if (check == hex):
+		valid_password = password_check(update, password)
+		if (valid_password):
 			mysql_delete_password(user_id)
 			text_reply(update, lang(user_id, 'password_delete_success'))
 			logging.info('Password deletion for user {0}'.format(user_id))
 		else:
 			text_reply(update, lang(user_id, 'password_error'))
-			logging.info('Password deletion failed for user {0}. Reason: Wrong password {1} {2}'.format(user_id, check, hex))
+			logging.info('Password deletion failed for user {0}. Reason: Wrong password'.format(user_id))
 	else:
 		text_reply(update, lang(user_id, 'password_delete_command'))
 
@@ -1551,15 +1559,15 @@ def seed_callback(bot, update, args):
 		for seed_part in seed_split:
 			seed_text += seed_part + '-'
 		seed_text = seed_text[:-1]
-		check = mysql_check_password(user_id)
-		if ((len(args) > 0) and (check is not False)):
+		password_hash = mysql_check_password(user_id)
+		if ((len(args) > 0) and (password_hash is not False)):
 			password = args[0]
-			hex = password_check(update, password)
-			if (check == hex):
+			valid_password = password_check(update, password)
+			if (valid_password):
 				message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
 			else:
 				text_reply(update, lang_text('password_error', lang_id))
-		elif (check is not False):
+		elif (password_hash is not False):
 			text_reply(update, lang_text('password_error', lang_id))
 		else:
 			message_markdown(bot, chat_id, lang_text('seed_creation', lang_id).format(seed_text))
