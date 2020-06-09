@@ -1353,29 +1353,31 @@ def text_result(text, bot, update):
 	exist = mysql_user_existance(user_id)
 	# Check if ready to pay
 	if (exist is not False):
+		m = mysql_select_user(user_id)
+		send_destination_defined = (m[5] is not None)
 		# Check password protection
 		password_hash = mysql_check_password(user_id)
 		valid_password = True
-		if (password_hash is not False):
+		# Check only if send-destination is defined
+		if ((password_hash is not False) and send_destination_defined):
 			#print(text)
 			password = text
 			valid_password = password_check(update, password)
 		# Check password protection
-		m = mysql_select_user(user_id)
 		if (text.lower() in language['commands']['not']):
 			mysql_update_send_clean(m[2])
 			mysql_update_send_clean_extra_user(user_id)
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_cancelled', lang_id))
-		elif ((m[5] is not None) and (m[6] != 0) and (valid_password) and (password_hash is not False)):
+		elif (send_destination_defined and (m[6] != 0) and valid_password and (password_hash is not False)):
 			send_finish(bot, update)
 			#print(password_hash)
-		elif ((m[5] is not None) and (m[6] != 0) and (not valid_password) and (password_hash is not False)):
+		elif (send_destination_defined and (m[6] != 0) and (not valid_password) and (password_hash is not False)):
 			text_reply(update, lang_text('send_password', lang_id))
 			#print(password_hash)
 			logging.info('Send failure for user {0}. Reason: Wrong password'.format(user_id))
-		elif ((m[5] is not None) and (m[6] != 0) and (password_hash is False) and (text.lower() in language['commands']['yes'])):
+		elif (send_destination_defined and (m[6] != 0) and (password_hash is False) and (text.lower() in language['commands']['yes'])):
 			send_finish(bot, update)
-		elif ((m[5] is not None) and (m[6] != 0)):
+		elif (send_destination_defined and (m[6] != 0)):
 			mysql_update_send_clean(m[2])
 			mysql_update_send_clean_extra_user(user_id)
 			lang_keyboard(lang_id, bot, update.message.chat_id, lang_text('send_cancelled', lang_id))
