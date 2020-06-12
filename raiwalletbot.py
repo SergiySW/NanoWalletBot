@@ -226,9 +226,24 @@ def ddos_protection_args(bot, update, args, callback):
 
 
 @run_async
-def info_log(update):
+def info_log(update, protected = False):
 	result = {}
-	result['text'] = update.message.text
+	full_text = True
+	if (protected is True):
+		password_hash = mysql_check_password(update.message.from_user.id) # Check password protection
+		if (password_hash is not False):
+			split_text = update.message.text.rsplit(' ', 1) # split text in 2 parts
+			if(len(split_text) > 1):
+				full_text = False
+				result['text'] = update.message.text.rsplit(' ', 1)[0]+' PossiblePassword'
+			elif ((update.message.text.lower() not in language['commands']['yes']) and (update.message.text.lower() not in language['commands']['not'])):
+				m = mysql_select_user(update.message.from_user.id)
+				# Only if send destination is defined
+				if (m[5] is not None):
+					full_text = False
+					result['text'] = 'PossiblePassword'
+	if (full_text is True):
+		result['text'] = update.message.text
 	result['user_id'] = update.message.from_user.id
 	result['username'] = update.message.from_user.username
 	result['first_name'] = update.message.from_user.first_name
@@ -633,13 +648,13 @@ def password_check(update, password):
 
 @run_async
 def send(bot, update, args):
-	info_log(update)
+	info_log(update, True)
 	ddos_protection_args(bot, update, args, send_callback)
 
 
 @run_async
 def send_from(bot, update, args):
-	info_log(update)
+	info_log(update, True)
 	ddos_protection_args(bot, update, args, send_from_callback)
 
 
@@ -1432,7 +1447,7 @@ def text_result(text, bot, update):
 
 @run_async
 def text_filter(bot, update):
-	info_log(update)
+	info_log(update, True)
 	ddos_protection(bot, update, text_filter_callback)
 
 @run_async
