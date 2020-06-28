@@ -20,10 +20,10 @@ from time import sleep
 from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-api_key = config.get('main', 'api_key')
-proxy_url = config.has_option('proxy', 'url') and config.get('proxy', 'url') or None
-proxy_user = config.has_option('proxy', 'user') and config.get('proxy', 'user') or None
-proxy_pass = config.has_option('proxy', 'password') and config.get('proxy', 'password') or None
+api_key_common = config.get('main', 'api_key')
+proxy_url_common = config.has_option('proxy', 'url') and config.get('proxy', 'url') or None
+proxy_user_common = config.has_option('proxy', 'user') and config.get('proxy', 'user') or None
+proxy_pass_common = config.has_option('proxy', 'password') and config.get('proxy', 'password') or None
 
 def replace_unsafe(text):
 	text = text.replace("xrb_1", "xrb\_1").replace("xrb_3", "xrb\_3")
@@ -190,8 +190,8 @@ def mrai_text(rai):
 def bot_start():
 	# set bot
 	if (proxy_url is None):
-		bot = Bot(api_key)
+		bot = Bot(api_key_common)
 	else:
-		proxy = Request(proxy_url = proxy_url, urllib3_proxy_kwargs = {'username': proxy_user, 'password': proxy_pass })
-		bot = Bot(token=api_key, request = proxy)
+		proxy = Request(proxy_url = proxy_url_common, urllib3_proxy_kwargs = {'username': proxy_user_common, 'password': proxy_pass_common })
+		bot = Bot(token=api_key_common, request = proxy)
 	return bot
