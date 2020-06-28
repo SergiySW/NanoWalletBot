@@ -189,7 +189,7 @@ def mrai_text(rai):
 
 def bot_start():
 	# set bot
-	if (proxy_url is None):
+	if (proxy_url_common is None):
 		bot = Bot(api_key_common)
 	else:
 		proxy = Request(proxy_url = proxy_url_common, urllib3_proxy_kwargs = {'username': proxy_user_common, 'password': proxy_pass_common })
