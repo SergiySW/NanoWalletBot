@@ -164,6 +164,22 @@ def mysql_select_accounts_list_extra():
 	cnx.close()
 	return(accounts_list)
 
+def mysql_user_id_from_account(xrb_account):
+	cnx = mysql.connector.connect(**mysql_config)
+	cursor = cnx.cursor(buffered=True)
+	query = ("SELECT user_id FROM rai_bot WHERE account LIKE %s")
+	cursor.execute(query, (xrb_account,))
+	user_id = cursor.fetchone()
+	if (user_id is None):
+		query = ("SELECT user_id FROM rai_bot_extra WHERE account LIKE %s")
+		cursor.execute(query, (xrb_account,))
+		user_id = cursor.fetchone()
+	if (user_id is not None):
+		user_id = user_id[0]
+	cursor.close()
+	cnx.close()
+	return(user_id)
+
 
 def mysql_user_existance(user_id):
 	cnx = mysql.connector.connect(**mysql_config)

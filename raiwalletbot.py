@@ -781,7 +781,8 @@ def send_callback(bot, update, args, from_account = 0):
 					else:
 						frontier = from_account[2]
 					check_frontier = check_block(frontier)
-					if ((destination is not False) and (valid_password) and (check_frontier) and (m[1] == user_id)):
+					account_user_id = mysql_user_id_from_account (account)
+					if ((destination is not False) and (valid_password) and (check_frontier) and (account_user_id == user_id)):
 						# Sending
 						try:
 							try:
@@ -833,7 +834,7 @@ def send_callback(bot, update, args, from_account = 0):
 						logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
 					elif (not (destination.startswith('@'))):
 						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
-					elif (not (m[1] == user_id)):
+					elif (not (account_user_id == user_id)):
 						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 						logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 			except (ValueError):
@@ -866,12 +867,13 @@ def send_all_callback(bot, update):
 		extra_array.append(extra_account[3])
 	reply = 0
 	active = mysql_select_send_all(user_id)
-	if ((len(extra_accounts) > 0) and (active is False) and (m[1] == user_id)):
+	if ((len(extra_accounts) > 0) and (active is False)):
 		balances = accounts_balances(extra_array)
 		mysql_set_send_all(user_id)
 		for account, balance in balances.items():
 			max_send = balance - final_fee_amount
-			if (max_send >= min_send):
+			account_user_id = mysql_user_id_from_account (account)
+			if ((max_send >= min_send) and (account_user_id == user_id)):
 				if (reply == 0):
 					lang_keyboard(lang_id, bot, chat_id, lang_text('send_mass', lang_id))
 					reply = 1
@@ -897,11 +899,11 @@ def send_all_callback(bot, update):
 					logging.warning('Transaction FAILURE! Account {0}'.format(account))
 					new_balance = account_balance(account)
 					lang_keyboard(lang_id, bot, chat_id, lang_text('send_tx_error', lang_id).format(mrai_text(new_balance)))
+			elif (not (account_user_id == user_id)):
+				logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 		mysql_delete_send_all(user_id)
 	if (reply == 0):
 		lang_keyboard(lang_id, bot, chat_id, lang_text('send_all_min_error', lang_id).format(mrai_text(min_send)))
-		if (not (m[1] == user_id)):
-			logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 
 
 @run_async
@@ -1074,6 +1076,7 @@ def send_finish(bot, update):
 	lang_id = mysql_select_language(user_id)
 	m = mysql_select_user(user_id)
 	account = m[2]
+	frontier = m[3]
 	balance = int(m[4])
 	send_amount = int(m[6])
 	raw_send_amount = send_amount * (10 ** 24)
@@ -1082,6 +1085,7 @@ def send_finish(bot, update):
 	extra_account = mysql_select_user_extra(user_id, True)
 	if (len(extra_account) > 0):
 		account = extra_account[0][3]
+		frontier = extra_account[0][4]
 		balance = int(extra_account[0][5])
 		mysql_update_send_clean_extra(account)
 	# FEELESS
@@ -1094,9 +1098,9 @@ def send_finish(bot, update):
 		hide_keyboard(bot, chat_id, lang_text('send_working', lang_id))
 		# typing_illusion(bot, chat_id)  # typing illusion
 		# Check frontier existance
-		frontier = m[3]
 		check_frontier = check_block(frontier)
-		if (check_frontier):
+		account_user_id = mysql_user_id_from_account (account)
+		if (check_frontier and (account_user_id == user_id)):
 			try:
 				send_hash = rpc_send(wallet, account, destination, raw_send_amount)
 			except Exception as e:
@@ -1139,7 +1143,7 @@ def send_finish(bot, update):
 		elif (not (check_frontier)):
 			text_reply(update, lang_text('send_frontier', lang_id))
 			logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
-		elif (not (m[1] == user_id)):
+		elif (not (account_user_id == user_id)):
 			message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 			logging.warning('Send failure for user {0}. Reason: User ID mismatch'.format(user_id))
 	except (GeneratorExit, ValueError) as e:
