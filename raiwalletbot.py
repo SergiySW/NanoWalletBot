@@ -1579,7 +1579,10 @@ def seed_callback(bot, update, args):
 		seed_text = ''
 		for seed_part in seed_split:
 			seed_text += seed_part + '-'
-		seed_text = seed_text[:-1]
+		# Seed checksum
+		blake2b_checksum = hashlib.blake2b(digest_size=2)
+		blake2b_checksum.update(binascii.unhexlify(seed))
+		seed_text += blake2b_checksum.hexdigest().upper()
 		password_hash = mysql_check_password(user_id)
 		if ((len(args) > 0) and (password_hash is not False)):
 			password = args[0]
