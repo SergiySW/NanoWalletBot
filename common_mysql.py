@@ -17,7 +17,7 @@ from Cryptodome.Cipher import AES
 from six.moves import configparser
 config = configparser.ConfigParser()
 config.read('bot.cfg')
-mysql_server = config.has_option('mysql', 'mysql_server') and config.get('mysql', 'mysql_server') or None
+mysql_server = config.has_option('mysql', 'mysql_server') and config.get('mysql', 'mysql_server') or 'localhost'
 mysql_socket = config.has_option('mysql', 'mysql_socket') and config.get('mysql', 'mysql_socket') or None
 mysql_database = config.get('mysql', 'mysql_database')
 mysql_user = config.get('mysql', 'mysql_user')
@@ -41,10 +41,8 @@ mysql_config = {
 
 if (mysql_socket is not None):
 	mysql_config['unix_socket'] = mysql_socket
-elif (mysql_server is not None):
-	mysql_config['host'] = mysql_server
 else:
-	mysql_config['host'] = 'localhost'
+	mysql_config['host'] = mysql_server
 
 
 def mysql_insert(data):
