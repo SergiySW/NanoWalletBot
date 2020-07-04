@@ -142,7 +142,8 @@ while (stopped is False):
 	except ConnectionRefusedError:
 		logging.warning("Error connecting to websocket server")
 		print("Error connecting to websocket server")
+		time.sleep(0.5)
 	except Exception as e:
 		logging.exception("message")
-		time.sleep(60)
+		time.sleep(30)
 
