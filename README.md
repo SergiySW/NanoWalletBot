@@ -16,6 +16,8 @@ PyQRCode
 python-telegram-bot   
 six   
 websockets   
+**Optional for Nano IPC connection**
+[nano-ipc-py](https://github.com/guilhermelawless/nano-ipc-py)
 
 # Other software configurations
 nano_node config sample in config-node.toml   
