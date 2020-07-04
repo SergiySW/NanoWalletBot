@@ -22,33 +22,72 @@ wallet = config.get('main', 'wallet')
 password = config.get('main', 'password')
 reference_url = config.get('main', 'reference_url')
 
+rpc_socket_path = config.has_option('main', 'rpc_socket_path') and config.get('main', 'rpc_socket_path') or None
+rpc_socket_timeout = config.has_option('main', 'rpc_socket_timeout') and int(config.get('main', 'rpc_socket_timeout')) or 15
+if (rpc_socket_path is not None):
+	try:
+		import nano_ipc
+	except ModuleNotFoundError as e:
+		print("Error loading nano_ipc")
+		rpc_socket_path = None
+
 hash_url = 'https://nanocrawler.cc/explorer/block/'
 header = {'user-agent': 'RaiWalletBot/1.0'}
 
-def rpc(json, key):
+def rpc_http (json):
 	try:
 		r = requests.post(url, json=json).json()
-		if 'error' not in r:
-			return(r[key])
-		else:
-			print(r['error'])
-			return(r['error'])
+		return(r)
 	except requests.exceptions.ConnectionError as e:
 		sleep(7.5)
 		r = requests.post(url, json=json).json()
-		if 'error' not in r:
-			return(r[key])
-		else:
-			print(r['error'])
-			return(r['error'])
+		return(r)
 	except Exception as e:
 		sleep(0.5)
 		r = requests.post(url, json=json).json()
+		return(r)
+
+def rpc_ipc (json):
+	try:
+		client = nano_ipc.Client(rpc_socket_path, timeout=rpc_socket_timeout)
+	except nano_ipc.ConnecionFailure as e:
+		# Fallback to HTTP
+		return rpc_http (json)
+	else:
+		try:
+			response = client.request(json)
+			client.close()
+			return(response)
+		except nano_ipc.BadResponse as e:
+			client.close()
+			# print(e.response_raw)
+			print(e)
+			# Fallback to HTTP
+			return rpc_http (json)
+		except nano_ipc.IPCError as e:
+			sleep(7.5)
+			response = client.request(json)
+			client.close()
+			return(response)
+
+def rpc_data (json, force_http = False):
+	if (rpc_socket_path is not None and force_http is False):
+		return rpc_ipc (json)
+	else:
+		return rpc_http (json)
+
+def rpc(json, key, force_http = False):
+	try:
+		r = rpc_data (json, force_http)
 		if 'error' not in r:
 			return(r[key])
 		else:
+			print(r)
 			print(r['error'])
 			return(r['error'])
+	except (ValueError, KeyError) as e:
+		print(e)
+		return("RPC error")
 
 
 def rpc_send(wallet, source, destination, raw_amount):
@@ -95,8 +134,7 @@ def block_balance(hash):
 
 
 def accounts_balances(accounts):
-	req = requests.post(url, json={"action": "accounts_balances", "accounts": accounts})
-	r = req.json()
+	r = rpc_data ({"action": "accounts_balances", "accounts": accounts})
 	if 'error' not in r:
 		rpc_balances = r['balances']
 		balances = {}

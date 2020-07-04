@@ -27,7 +27,7 @@ from common_rpc import *
 def checker():
 	
 	# list frontiers
-	frontiers = rpc({"action":"frontiers","account":"xrb_1111111111111111111111111111111111111111111111111111hifc8npp","count":"1000000"}, 'frontiers')
+	frontiers = rpc({"action":"frontiers","account":"xrb_1111111111111111111111111111111111111111111111111111hifc8npp","count":"2000000"}, 'frontiers', True)
 	
 	#http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
 	#response = http.request('GET', frontiers_url, timeout=20.0)

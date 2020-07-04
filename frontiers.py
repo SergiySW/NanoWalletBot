@@ -73,7 +73,7 @@ def frontiers():
 	accounts_list_extra = mysql_select_accounts_list_extra()
 	accounts_list = accounts_list_orig + accounts_list_extra
 	# list from node
-	frontiers = rpc({"action":"wallet_frontiers","wallet":wallet}, 'frontiers')
+	frontiers = rpc({"action":"wallet_frontiers","wallet":wallet}, 'frontiers', True)
 	frontiers_old = json.loads(mysql_select_frontiers())
 	mysql_set_frontiers(json.dumps(frontiers))
 	
