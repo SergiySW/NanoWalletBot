@@ -15,6 +15,7 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Bot, ParseMode
+from telegram.error import BadRequest
 from telegram.utils.request import Request
 import logging
 import urllib3, certifi, socket, json
@@ -128,11 +129,17 @@ def receive_messages(bot, account, balance):
 			text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(0), item['hash'], hash_url, sender)
 			mysql_set_sendlist(account[0], text)
 			#print(text)
-			push(bot, account[0], text)
-			mysql_delete_sendlist(account[0])
+			try:
+				push(bot, account[0], text)
+				mysql_delete_sendlist(account[0])
+			except BadRequest as e:
+				logging.exception('Bad request account {0}'.format(account[0]))
 			time.sleep(0.25)
 			if (received_amount >= large_amount_warning):
-				push(bot, account[0], lang_text('frontiers_large_amount_warning', lang_id))
+				try:
+					push(bot, account[0], lang_text('frontiers_large_amount_warning', lang_id))
+				except BadRequest as e:
+					logging.exception('Bad request account {0}'.format(account[0]))
 				time.sleep(0.25)
 
 # send old data

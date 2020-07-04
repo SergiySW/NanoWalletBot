@@ -107,13 +107,19 @@ async def websockets_receive():
 								sender = find_sender (item, account_mysql, sender_account, balance, lang_text)
 								received_amount = int(math.floor(int(item['amount']) / (10 ** 24)))
 								text = lang_text('frontiers_receive', lang_id).format(mrai_text(received_amount), mrai_text(balance), mrai_text(0), item['hash'], hash_url, sender)
-								push(bot, account_mysql[0], text)
+								try:
+									push(bot, account_mysql[0], text)
+								except BadRequest as e:
+									logging.exception('Bad request account {0}'.format(account_mysql[0]))
 								logging.info('{0} Nano (XRB) received by {1}, hash: {2}'.format(mrai_text(received_amount), account_mysql[0], item['hash']))
 								#print(text)
 								# Large amount check
 								if (received_amount >= large_amount_warning):
 									time.sleep(0.1)
-									push(bot, account_mysql[0], lang_text('frontiers_large_amount_warning', lang_id))
+									try:
+										push(bot, account_mysql[0], lang_text('frontiers_large_amount_warning', lang_id))
+									except BadRequest as e:
+										logging.exception('Bad request account {0}'.format(account_mysql[0]))
 							elif (item['type'] == 'change'): # Change blocks
 								logging.warning('Change block {0} for account {1}'.format(item['hash'], item['account']))
 								if (balance != int(account_mysql[3])):
@@ -128,7 +134,10 @@ async def websockets_receive():
 								logging.error('Mismatch for previous block. Expected {0}, received {1}'.format(account_mysql[2], item['block']['previous']))
 								if (item['type'] == 'receive'):
 									time.sleep(0.1)
-									push(bot, account_mysql[0], 'Please check received block in explorer, you can receive notification for some older block')
+									try:
+										push(bot, account_mysql[0], 'Please check received block in explorer, you can receive notification for some older block')
+									except BadRequest as e:
+										logging.exception('Bad request account {0}'.format(account_mysql[0]))
 				else:
 					logging.warning('Unexpected WebSockets message: {0}'.format(json.dumps(item)))
 

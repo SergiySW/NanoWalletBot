@@ -58,6 +58,10 @@ def rpc_ipc (json):
 			response = client.request(json)
 			client.close()
 			return(response)
+		except FileNotFoundError as e:
+			client.close()
+			# Fallback to HTTP
+			return rpc_http (json)
 		except nano_ipc.BadResponse as e:
 			client.close()
 			# print(e.response_raw)
