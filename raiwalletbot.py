@@ -832,6 +832,8 @@ def send_callback(bot, update, args, from_account = 0):
 					elif (not (check_frontier)):
 						text_reply(update, lang_text('send_frontier', lang_id))
 						logging.info('Send failure for user {0}. Reason: Frontier not found'.format(user_id))
+					elif (destination is False):
+						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 					elif (not (destination.startswith('@'))):
 						message_markdown(bot, chat_id, lang_text('send_invalid', lang_id))
 					elif (not (account_user_id == user_id)):
