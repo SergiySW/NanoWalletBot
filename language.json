@@ -130,14 +130,15 @@
 		"frontiers_sender_users": " from one of our users {0}",
 		"frontiers_sender_by": " by account {1}{0}",
 		"frontiers_receive": "*{0} Nano* received{5}. Transaction hash: [{3}]({4}{3})\nYour current balance: *{1} Nano*",
-		"frontiers_large_amount_warning": "@NanoWalletBot is not designed to store a large amount of Nano currency.\nPlease use wallets where you have full control over your own private keys and seeds: https://nano.org/pay",
+		"frontiers_large_amount_warning": "@NanoWalletBot is not designed to store a large amount of Nano currency.\nPlease use wallets where you have full control over your own private keys and seeds instead: https://nano.org/pay, https://nanowallets.guide/",
 		"prices_above": "Nano prices at {0} reach *{1}* BTC",
 		"prices_below": "Nano prices at {0} drop below *{1}* BTC",
 		"prices_digits": "Command supports integers for satoshi and float for Bitcoin. Example:",
 		"prices_success": "Nano price monitoring enabled at level *{0}* BTC. Disable with /price\\_flush",
 		"prices_flushed": "Price monitoring was disabled",
 		"seed_creation": "Save your Seed for @NanoWalletBot! With Seed you can restore bot account via support even if you lose access to Telegram account (bot Seed is not Nano desktop wallet Seed). Do not share secret Seed to other users!\nYour Seed is:\n*{0}*",
-		"seed_protected": "Use command /seed YourPassword to see Seed"
+		"seed_protected": "Use command /seed YourPassword to see Seed",
+		"registration_disabled": "New user and addresses registration is disabled.\nPlease use other maintained wallets instead: https://nano.org/pay, https://nanowallets.guide/"
 	},
 	"ru": {
 		"menu": [["Аккаунт", "Отправить"], ["Цена", "Язык 🇬🇧 🇷🇺 🇮🇩"], ["Помощь"]],
@@ -227,13 +228,15 @@
 		"frontiers_sender_users": " от одного из наших пользоваталей {0}",
 		"frontiers_sender_by": " на аккаунт {1}{0}",
 		"frontiers_receive": "*{0} Nano* получено{5}. Хэш транзакции: [{3}]({4}{3})\nВаш баланс: *{1} Nano*",
+		"frontiers_large_amount_warning": "@NanoWalletBot не предназначен для хранения большого количества валюты Nano. Пожалуйста, используйте другие кошельки, где у Вас есть полный контроль за приватными ключами и Seed: https://nano.org/pay, https://nanowallets.guide/",
 		"prices_above": "Цена Nano на {0} достигла *{1}* BTC",
 		"prices_below": "Цена Nano на {0} опустилась до *{1}* BTC",
 		"prices_digits": "Команда поддерживает цену в целых числах для сатоши и дробных для Биткойна. Пример:",
 		"prices_success": "Слежение за ценой Nano на уровне *{0}* BTC. Удаление через /цена\\_удалить",
 		"prices_flushed": "Слежение за ценой отменено",
 		"seed_creation": "Обязательно сохраните Seed для @NanoWalletBot! С помощью Seed вы сможете восстановить аккаунт через техподдержку, даже если утерян доступ к Telegram (Seed бота - это не Seed десктопного кошелька Nano). Не делитесь секретным Seed с другими!\nВаш Seed:\n*{0}*",
-		"seed_protected": "Используйте команду /seed ВашПароль для просмотра Seed"
+		"seed_protected": "Используйте команду /seed ВашПароль для просмотра Seed",
+		"registration_disabled": "Регистрация новых пользователей и адресов отключена.\nПожалуста, используйте другие поддерживаемые кошельки в качестве замены: https://nano.org/pay, https://nanowallets.guide/"
 	},
 	"id": {
 		"menu": [["Akun", "Kirim"], ["Harga", "Bahasa 🇬🇧 🇷🇺 🇮🇩"], ["Bantuan"]],

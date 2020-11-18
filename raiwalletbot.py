@@ -54,6 +54,7 @@ ddos_protect_seconds = config.get('main', 'ddos_protect_seconds')
 admin_list = json.loads(config.get('main', 'admin_list'))
 extra_limit = int(config.get('main', 'extra_limit'))
 LIST_OF_FEELESS = json.loads(config.get('main', 'feeless_list'))
+enable_registration = json.loads(config.get('main', 'enable_registration').lower())
 salt = config.get('password', 'salt')
 pbkdf2_iterations = int(config.get('password', 'pbkdf2_iterations'))
 private_key = config.get('password', 'private_key')
@@ -296,6 +297,9 @@ def start_text(bot, update):
 				lang_id = mysql_select_language(user_id)
 		except Exception as e:
 			lang_id = mysql_select_language(user_id)
+	if (enable_registration is False):
+		text_reply(update, lang_text('registration_disabled', lang_id))
+		sleep(1)
 	text_reply(update, lang_text('start_introduce', lang_id))
 	sleep(1)
 	lang_keyboard(lang_id, bot, chat_id, lang_text('start_basic_commands', lang_id).format(mrai_text(fee_amount), mrai_text(min_send), incoming_fee_text, mrai_text(min_receive), feeless_hours))
@@ -549,45 +553,48 @@ def account_text(bot, update, list = False):
 				text_reply(update, lang_text('seed_protected', lang_id))
 	
 	except (TypeError):
-		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
-		qr_by_account(r)
-		if ('xrb_' in r or 'nano_' in r): # check for errors
-			insert_data = {
-			  'user_id': user_id,
-			  'account': r,
-			  'chat_id': chat_id,
-			  'username': username,
-			}
-			mysql_insert(insert_data)
-			text_reply(update, lang_text('account_created', lang_id))
-			sleep(1)
-			message_markdown(bot, chat_id, '*{0}*'.format(r))
-			sleep(1)
-			message_markdown(bot, chat_id, lang_text('account_explorer', lang_id).format(r, account_url))
-			sleep(1)
-			message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
-			sleep(1)
-			custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
-			if (welcome_amount > 0):
-				try:
-					welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
-					sleep(0.5) # workaround
-					new_balance = account_balance(welcome_account)
-					if (new_balance == 0): # workaround
-						sleep(2)
-						new_balance = account_balance(account)
-						if (new_balance == 0):
-							sleep(16)
+		if (enable_registration is True):
+			r = rpc({"action": "account_create", "wallet": wallet}, 'account')
+			qr_by_account(r)
+			if ('xrb_' in r or 'nano_' in r): # check for errors
+				insert_data = {
+				  'user_id': user_id,
+				  'account': r,
+				  'chat_id': chat_id,
+				  'username': username,
+				}
+				mysql_insert(insert_data)
+				text_reply(update, lang_text('account_created', lang_id))
+				sleep(1)
+				message_markdown(bot, chat_id, '*{0}*'.format(r))
+				sleep(1)
+				message_markdown(bot, chat_id, lang_text('account_explorer', lang_id).format(r, account_url))
+				sleep(1)
+				message_markdown(bot, chat_id, lang_text('account_balance_start', lang_id).format(faucet_url, r))
+				sleep(1)
+				custom_keyboard(bot, chat_id, lang_text('language_keyboard', 'common'), lang_text('language_selection', 'common'))
+				if (welcome_amount > 0):
+					try:
+						welcome = rpc_send(wallet, welcome_account, r, raw_welcome_amount)
+						sleep(0.5) # workaround
+						new_balance = account_balance(welcome_account)
+						if (new_balance == 0): # workaround
+							sleep(2)
 							new_balance = account_balance(account)
-					mysql_update_balance(welcome_account, new_balance)
-					mysql_update_frontier(welcome_account, welcome)
-				except Exception as e:
-					logging.exception("message")
-			logging.info('New user registered {0} {1}'.format(user_id, r))
-			sleep(2)
-			seed_callback(bot, update, [0])
+							if (new_balance == 0):
+								sleep(16)
+								new_balance = account_balance(account)
+						mysql_update_balance(welcome_account, new_balance)
+						mysql_update_frontier(welcome_account, welcome)
+					except Exception as e:
+						logging.exception("message")
+				logging.info('New user registered {0} {1}'.format(user_id, r))
+				sleep(2)
+				seed_callback(bot, update, [0])
+			else:
+				text_reply(update, lang_text('account_error', lang_id))
 		else:
-			text_reply(update, lang_text('account_error', lang_id))
+			text_reply(update, lang_text('registration_disabled', lang_id))
 
 
 #@restricted
@@ -602,7 +609,9 @@ def account_add_callback(bot, update):
 	chat_id = update.message.chat_id
 	lang_id = mysql_select_language(user_id)
 	extra_accounts = mysql_select_user_extra(user_id)
-	if (len(extra_accounts) >= extra_limit):
+	if (enable_registration is False):
+		text_reply(update, lang_text('registration_disabled', lang_id))
+	elif (len(extra_accounts) >= extra_limit):
 		text_reply(update, lang_text('account_extra_limit', lang_id).format(extra_limit))
 	else:
 		r = rpc({"action": "account_create", "wallet": wallet}, 'account')
